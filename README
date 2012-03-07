@@ -1,0 +1,95 @@
+
+OSMCoastline
+============
+
+OSMCoastline extracts the coastline from an OSM planet file and assembles all
+the pieces into polygons for use in map renderers etc.
+
+This is a preliminary version that needs more work.
+
+
+PREREQUISITES
+-------------
+
+Osmium
+    http://github.com/joto/osmium
+    http://wiki.openstreetmap.org/wiki/Osmium
+
+boost (several libraries)
+    http://www.boost.org/
+    Debian/Ubuntu: libboost-dev
+
+zlib (for PBF support)
+    http://www.zlib.net/
+    Debian/Ubuntu: zlib1g-dev
+
+GDAL (for OGR support)
+    http://gdal.org/
+    Debian/Ubuntu: libgdal1-dev
+    (must be built with GEOS support which is the true for Debian/Ubuntu
+    packages)
+
+GEOS (for assembling multipolygons etc.)
+    http://trac.osgeo.org/geos/
+    Debian/Ubuntu: libgeos-dev
+
+
+BUILDING
+--------
+
+You'll need all the prerequisites including Osmium installed.
+
+Run "make" to build the "osmcoastline" program.
+
+Run "make clean" to clean up.
+
+
+TESTING
+-------
+
+Run the script "runtest.sh". It will read the supplied "testdata.osm" and
+create output in the testdata directory.
+
+You can use the supplied "coastline.qgs" QGIS project file to open the
+output with QGIS.
+
+
+RUNNING
+-------
+
+Run "osmcoastline PLANET-FILE OUTPUT-DIRECTORY", for example "osmcoastline
+planet.osm.pbf coastline". This will create the given OUTPUT-DIRECTORY
+and write several shapefiles into it.
+
+
+OUTPUT
+------
+
+Currently four output shapefiles are created:
+
+* error_lines
+  Lines that have errors (for instance not closed rings or self-intersections).
+
+* error_points
+  Problematic points such as intersections.
+
+* polygons
+  Finished assembled land polygons.
+
+* rings
+  Coastline rings as linestrings.
+
+Currently all output is in WGS84.
+
+
+LICENSE
+-------
+
+Osmium is available under the GNU GPL version 3 or later.
+
+
+AUTHORS
+-------
+
+Jochen Topf <jochen@topf.org>
+
