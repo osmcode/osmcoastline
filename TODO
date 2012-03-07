@@ -1,0 +1,19 @@
+
+OSMCoastline TODO
+=================
+
+* (optionally) close open rings by finding open ends that are close
+* (optionally) check for overlapping polygons
+* make different outputs and optional features available through command line options
+* set sensible return codes depending on errors found etc.
+    Something like:
+        0 - everything ok
+        1 - found small (fixable) errors only
+        2 - possibly bad output from larger errors
+        3 - fatal errors (can't write output etc.)
+        4 - command line arguments wrong etc.
+* write out statistics somehow?
+* add transformation to mercator (and maybe other projections)
+* split large polygons
+    - probably depending on projection used
+
