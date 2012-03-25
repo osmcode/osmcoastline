@@ -210,8 +210,8 @@ public:
 void output_rings(coastline_rings_list_t coastline_rings, const Output& output) {
     for (coastline_rings_list_t::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
         CoastlineRing& cp = **it;
-        if (cp.is_closed()) {
-            output.layer_rings()->add(cp.ogr_polygon(), cp.min_way_id(), cp.nways(), cp.npoints(), output.layer_error_points());
+        if (cp.is_closed() && cp.npoints() > 3) {
+            output.layer_rings()->add(cp.ogr_polygon(), cp.min_way_id(), cp.nways(), cp.npoints(), cp.length(), output.layer_error_points());
         } else {
             OGRLineString* l = cp.ogr_linestring();
             if (output.layer_error_lines()) {
