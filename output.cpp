@@ -30,9 +30,11 @@
 const char* Output::options_with_index[] = { NULL };
 const char* Output::options_without_index[] = { "SPATIAL_INDEX=no", NULL };
 
-Output::Output(const std::string& outdb, bool with_index) :
+Output::Output(const std::string& outdb, int epsg, bool with_index) :
     m_with_index(with_index),
     m_srs_wgs84(),
+    m_srs_out(),
+    m_transform(NULL),
     m_layer_error_points(NULL),
     m_layer_error_lines(NULL),
     m_layer_rings(NULL),
@@ -41,6 +43,15 @@ Output::Output(const std::string& outdb, bool with_index) :
     OGRRegisterAll();
 
     m_srs_wgs84.SetWellKnownGeogCS("WGS84");
+    m_srs_out.importFromEPSG(epsg);
+
+    if (epsg != 4326) {
+        m_transform = OGRCreateCoordinateTransformation(&m_srs_wgs84, &m_srs_out);
+        if (!m_transform) {
+            std::cerr << "Can't create coordinate transformation.\n";
+            exit(return_code_fatal);  
+        }
+    }
 
     const char* driver_name = "SQLite";
     OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name);
@@ -78,18 +89,18 @@ const char** Output::layer_options() const {
 }
 
 void Output::create_layer_error_points() {
-    m_layer_error_points = new LayerErrorPoints(m_data_source, &m_srs_wgs84, layer_options());
+    m_layer_error_points = new LayerErrorPoints(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 
 void Output::create_layer_error_lines() {
-    m_layer_error_lines = new LayerErrorLines(m_data_source, &m_srs_wgs84, layer_options());
+    m_layer_error_lines = new LayerErrorLines(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 
 void Output::create_layer_rings() {
-    m_layer_rings = new LayerRings(m_data_source, &m_srs_wgs84, layer_options());
+    m_layer_rings = new LayerRings(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 
 void Output::create_layer_polygons() {
-    m_layer_polygons = new LayerPolygons(m_data_source, &m_srs_wgs84, layer_options());
+    m_layer_polygons = new LayerPolygons(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 

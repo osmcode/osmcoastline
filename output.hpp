@@ -30,6 +30,7 @@ class LayerRings;
 class LayerPolygons;
 
 class OGRDataSource;
+class OGRCoordinateTransformation;
 
 /**
  * The Output class encapsulates the OGR output for the OSMCoastline program.
@@ -42,7 +43,10 @@ class Output {
     bool m_with_index;
 
     OGRSpatialReference m_srs_wgs84;
+    OGRSpatialReference m_srs_out;
     OGRDataSource* m_data_source;
+
+    OGRCoordinateTransformation* m_transform;
 
     LayerErrorPoints* m_layer_error_points;
     LayerErrorLines*  m_layer_error_lines;
@@ -53,7 +57,7 @@ class Output {
 
 public:
 
-    Output(const std::string& outdb, bool with_index=false);
+    Output(const std::string& outdb, int epsg, bool with_index=false);
 
     ~Output();
 

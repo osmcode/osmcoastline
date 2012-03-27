@@ -28,53 +28,76 @@ class OGRSpatialReference;
 class OGRPoint;
 class OGRLineString;
 class OGRPolygon;
+class OGRCoordinateTransformation;
 
-class LayerErrorPoints {
+class Layer {
+
+    OGRCoordinateTransformation* m_transform;
+
+protected:
+
+    Layer(OGRCoordinateTransformation* transform) :
+        m_transform(transform) {
+    }
+
+    void transform_if_needed(OGRGeometry* geometry) {
+        if (m_transform && (geometry->getSpatialReference() == NULL || geometry->getSpatialReference()->IsSame(m_transform->GetSourceCS()))) {
+            if (geometry->transform(m_transform) != OGRERR_NONE) {
+                // XXX we should do something more clever here
+                std::cerr << "Coordinate transformation failed\n";
+                exit(return_code_fatal);
+            }
+        }
+    }
+
+};
+
+class LayerErrorPoints : Layer {
 
     OGRLayer* m_layer;
 
 public:
 
-    LayerErrorPoints(OGRDataSource* data_source, OGRSpatialReference* srs, const char** options);
+    LayerErrorPoints(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
     ~LayerErrorPoints();
     OGRErr commit();
     void add(OGRPoint* point, int id, const char* error);
 
 };
 
-class LayerErrorLines {
+class LayerErrorLines : Layer {
 
     OGRLayer* m_layer;
 
 public:
 
-    LayerErrorLines(OGRDataSource* data_source, OGRSpatialReference* srs, const char** options);
+    LayerErrorLines(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
     ~LayerErrorLines();
     OGRErr commit();
     void add(OGRLineString* linestring, int id, bool is_simple);
 
 };
 
-class LayerRings {
+class LayerRings : Layer {
 
     OGRLayer* m_layer;
 
 public:
 
-    LayerRings(OGRDataSource* data_source, OGRSpatialReference* srs, const char** options);
+    LayerRings(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
     ~LayerRings();
     OGRErr commit();
     void add(OGRPolygon* polygon, int id, int nways, int npoints, LayerErrorPoints* layer_error_points);
 
 };
 
-class LayerPolygons {
+class LayerPolygons : Layer {
 
     OGRLayer* m_layer;
 
 public:
 
-    LayerPolygons(OGRDataSource* data_source, OGRSpatialReference* srs, const char** options);
+    LayerPolygons(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
     ~LayerPolygons();
     OGRErr commit();
     void add(OGRPolygon* polygon, bool clockwise);

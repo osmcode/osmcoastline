@@ -40,6 +40,7 @@ struct Options {
     std::string osmfile;
     std::string outdb;
     std::string raw_output;
+    int epsg;
     bool debug;
     bool create_index;
 
@@ -47,6 +48,7 @@ struct Options {
         osmfile(),
         outdb(),
         raw_output(),
+        epsg(4326),
         debug(false),
         create_index(false)
     {
@@ -56,11 +58,12 @@ struct Options {
             {"create-index", no_argument, 0, 'I'},
             {"output",       required_argument, 0, 'o'},
             {"raw-output",   required_argument, 0, 'r'},
+            {"srs",          required_argument, 0, 's'},
             {0, 0, 0, 0}
         };
 
         while (1) {
-            int c = getopt_long(argc, argv, "dhIo:r:", long_options, 0);
+            int c = getopt_long(argc, argv, "dhIo:r:s:", long_options, 0);
             if (c == -1)
                 break;
 
@@ -81,6 +84,9 @@ struct Options {
                 case 'r':
                     raw_output = optarg;
                     break;
+                case 's':
+                    epsg = find_epsg(optarg);
+                    break;
                 default:
                     exit(return_code_cmdline);
             }
@@ -97,6 +103,21 @@ struct Options {
         }
 
         osmfile = argv[optind];
+    }
+
+    int find_epsg(const char* text) {
+        if (!strcasecmp(text, "WGS84") || !strcmp(text, "4326")) {
+            return 4326;
+        }
+        if (!strcmp(text, "3857")) {
+            return 3857;
+        }
+        if (!strcmp(text, "3785") || !strcmp(text, "900913")) {
+            std::cerr << "Please use code 3857 for the 'Google Mercator' projection!\n";
+            exit(return_code_cmdline);
+        }
+        std::cerr << "Unknown SRS '" << text << "'. Currently only 4326 (WGS84) and 3857 ('Google Mercator') are supported.\n";
+        exit(return_code_cmdline);
     }
 
     void print_help() {
@@ -463,16 +484,20 @@ int main(int argc, char *argv[]) {
         raw_output = outfile->create_output_file();
     }
 
-    coastline_rings_list_t coastline_rings;
+    if (options.debug) {
+        std::cerr << "Using SRS " << options.epsg << " for output\n";
+    }
 
     Output* output = NULL;
     if (!options.outdb.empty()) { 
-        output = new Output(options.outdb, options.create_index);
+        output = new Output(options.outdb, options.epsg, options.create_index);
         output->create_layer_error_points();
         output->create_layer_error_lines();
         output->create_layer_rings();
         output->create_layer_polygons();
     }
+
+    coastline_rings_list_t coastline_rings;
 
     std::cerr << "-------------------------------------------------------------------------------\n";
     std::cerr << "Reading ways (1st pass through input file)...\n";
