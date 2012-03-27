@@ -210,11 +210,26 @@ public:
 void output_rings(coastline_rings_list_t coastline_rings, const Output& output) {
     for (coastline_rings_list_t::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
         CoastlineRing& cp = **it;
-        if (cp.is_closed() && cp.npoints() > 3) {
-            output.layer_rings()->add(cp.ogr_polygon(), cp.min_way_id(), cp.nways(), cp.npoints(), cp.length(), output.layer_error_points());
+        if (cp.is_closed()) {
+            if (cp.npoints() > 3) {
+                output.layer_rings()->add(cp.ogr_polygon(), cp.min_way_id(), cp.nways(), cp.npoints(), output.layer_error_points());
+            } else if (cp.npoints() == 1) {
+                if (output.layer_error_points()) {
+                    output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "single_point_in_ring");
+                }
+            } else { // cp.npoints() == 2 or 3
+                if (output.layer_error_lines()) {
+                    OGRLineString* l = cp.ogr_linestring();
+                    output.layer_error_lines()->add(l, cp.min_way_id(), l->IsSimple());
+                }
+                if (output.layer_error_points()) {
+                    output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "not_a_ring");
+                    output.layer_error_points()->add(cp.ogr_last_point(), cp.last_node_id(), "not_a_ring");
+                }
+            }
         } else {
-            OGRLineString* l = cp.ogr_linestring();
             if (output.layer_error_lines()) {
+                OGRLineString* l = cp.ogr_linestring();
                 output.layer_error_lines()->add(l, cp.min_way_id(), l->IsSimple());
             }
             if (output.layer_error_points()) {
