@@ -248,7 +248,7 @@ void output_polygons(coastline_rings_list_t coastline_rings, const Output& outpu
 
     for (coastline_rings_list_t::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
         CoastlineRing& cp = **it;
-        if (cp.is_closed()) {
+        if (cp.is_closed() && cp.npoints() > 3) {
             all_polygons.push_back(cp.ogr_polygon());
         }
     }
