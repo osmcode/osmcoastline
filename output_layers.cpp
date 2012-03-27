@@ -26,6 +26,7 @@
 #include <ogrsf_frmts.h>
 #include <geos_c.h>
 
+#include "osmcoastline.hpp"
 #include "output_layers.hpp"
 
 /***************************************************************/
@@ -34,21 +35,21 @@ LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, OGRSpatialReferen
     m_layer = data_source->CreateLayer("error_points", srs, wkbPoint, const_cast<char**>(options));
     if (m_layer == NULL) {
         std::cerr << "Creating layer 'error_points' failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_id("id", OFTInteger);
     field_id.SetWidth(10);
     if (m_layer->CreateField(&field_id) != OGRERR_NONE ) {
         std::cerr << "Creating field 'id' on 'error_points' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_error("error", OFTString);
     field_error.SetWidth(16);
     if (m_layer->CreateField(&field_error) != OGRERR_NONE ) {
         std::cerr << "Creating field 'error' on 'error_points' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     m_layer->StartTransaction();
@@ -71,7 +72,7 @@ void LayerErrorPoints::add(OGRPoint* point, int id, const char* error) {
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
         std::cerr << "Failed to create feature on layer 'error_points'.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFeature::DestroyFeature(feature);
@@ -83,21 +84,21 @@ LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, OGRSpatialReference
     m_layer = data_source->CreateLayer("error_lines", srs, wkbLineString, const_cast<char**>(options));
     if (m_layer == NULL) {
         std::cerr << "Creating layer 'error_lines' failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_id("id", OFTInteger);
     field_id.SetWidth(10);
     if (m_layer->CreateField(&field_id) != OGRERR_NONE ) {
         std::cerr << "Creating field 'id' on 'error_lines' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_simple("simple", OFTInteger);
     field_simple.SetWidth(1);
     if (m_layer->CreateField(&field_simple) != OGRERR_NONE ) {
         std::cerr << "Creating field 'simple' on 'error_lines' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     m_layer->StartTransaction();
@@ -120,7 +121,7 @@ void LayerErrorLines::add(OGRLineString* linestring, int id, bool is_simple) {
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
         std::cerr << "Failed to create feature on layer 'error_lines'.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFeature::DestroyFeature(feature);
@@ -132,42 +133,42 @@ LayerRings::LayerRings(OGRDataSource* data_source, OGRSpatialReference* srs, con
     m_layer = data_source->CreateLayer("rings", srs, wkbPolygon, const_cast<char**>(options));
     if (m_layer == NULL) {
         std::cerr << "Creating layer 'rings' failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_id("id", OFTInteger);
     field_id.SetWidth(10);
     if (m_layer->CreateField(&field_id) != OGRERR_NONE ) {
         std::cerr << "Creating field 'id' on 'rings' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_nways("nways", OFTInteger);
     field_nways.SetWidth(6);
     if (m_layer->CreateField(&field_nways) != OGRERR_NONE ) {
         std::cerr << "Creating field 'nways' on 'rings' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_npoints("npoints", OFTInteger);
     field_npoints.SetWidth(8);
     if (m_layer->CreateField(&field_npoints) != OGRERR_NONE ) {
         std::cerr << "Creating field 'npoints' on 'rings' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_land("land", OFTInteger);
     field_land.SetWidth(1);
     if (m_layer->CreateField(&field_land) != OGRERR_NONE ) {
         std::cerr << "Creating field 'land' on 'rings' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_valid("valid", OFTInteger);
     field_valid.SetWidth(1);
     if (m_layer->CreateField(&field_valid) != OGRERR_NONE ) {
         std::cerr << "Creating field 'valid' on 'rings' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     m_layer->StartTransaction();
@@ -232,7 +233,7 @@ void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, LayerE
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
         std::cerr << "Failed to create feature in layer 'rings'.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFeature::DestroyFeature(feature);
@@ -244,14 +245,14 @@ LayerPolygons::LayerPolygons(OGRDataSource* data_source, OGRSpatialReference* sr
     m_layer = data_source->CreateLayer("polygons", srs, wkbPolygon, const_cast<char**>(options));
     if (m_layer == NULL) {
         std::cerr << "Creating layer 'polygons' failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFieldDefn field_clockwise("clockwise", OFTInteger);
     field_clockwise.SetWidth(1);
     if (m_layer->CreateField(&field_clockwise) != OGRERR_NONE ) {
         std::cerr << "Creating field 'clockwise' on 'polygons' layer failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     m_layer->StartTransaction();
@@ -273,7 +274,7 @@ void LayerPolygons::add(OGRPolygon* polygon, bool clockwise) {
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
         std::cerr << "Failed to create feature in layer 'polygons'.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     OGRFeature::DestroyFeature(feature);

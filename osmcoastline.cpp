@@ -28,6 +28,7 @@
 #include <osmium.hpp>
 #include <osmium/geometry/point.hpp>
 
+#include "osmcoastline.hpp"
 #include "coastline_ring.hpp"
 #include "output.hpp"
 #include "output_layers.hpp"
@@ -70,7 +71,7 @@ struct Options {
                     break;
                 case 'h':
                     print_help();
-                    exit(0);
+                    exit(return_code_ok);
                 case 'I':
                     create_index = true;
                     break;
@@ -81,13 +82,13 @@ struct Options {
                     raw_output = optarg;
                     break;
                 default:
-                    exit(1);
+                    exit(return_code_cmdline);
             }
         }
 
         if (optind != argc - 1) {
             std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE" << std::endl;
-            exit(1);
+            exit(return_code_cmdline);
         }
 
         osmfile = argv[optind];
@@ -129,6 +130,9 @@ class CoastlineHandlerPass1 : public Osmium::Handler::Base {
     // from a single ring.
     int m_count_polygons_from_single_way;
 
+    unsigned int m_warnings;
+    unsigned int m_errors;
+
 public:
 
     CoastlineHandlerPass1(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp) :
@@ -136,7 +140,9 @@ public:
         m_coastline_rings(clp),
         m_start_nodes(),
         m_end_nodes(),
-        m_count_polygons_from_single_way(0)
+        m_count_polygons_from_single_way(0),
+        m_warnings(0),
+        m_errors(0)
     {
     }
 
@@ -247,6 +253,13 @@ public:
         throw Osmium::Input::StopReading();
     }
 
+    unsigned int errors() const {
+        return m_errors;
+    }
+
+    unsigned int warnings() const {
+        return m_warnings;
+    }
 };
 
 /* ================================================== */
@@ -261,6 +274,8 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
     coastline_rings_list_t& m_coastline_rings;
     posmap_t m_posmap;
     const Output& m_output;
+    unsigned int m_warnings;
+    unsigned int m_errors;
 
 public:
 
@@ -268,7 +283,9 @@ public:
         m_raw_output(raw_output),
         m_coastline_rings(clp),
         m_posmap(),
-        m_output(output)
+        m_output(output),
+        m_warnings(0),
+        m_errors(0)
     {
         for (coastline_rings_list_t::const_iterator it = m_coastline_rings.begin(); it != m_coastline_rings.end(); ++it) {
             (*it)->setup_positions(m_posmap);
@@ -289,6 +306,7 @@ public:
                     m_output.layer_error_points()->add(point.create_ogr_geometry(), node->id(), "tagged_node");
                 } catch (Osmium::Exception::IllegalGeometry) {
                     std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
+                    m_errors++;
                 }
             }
             raw_out = true;
@@ -315,11 +333,20 @@ public:
         throw Osmium::Input::StopReading();
     }
 
+    unsigned int errors() const {
+        return m_errors;
+    }
+
+    unsigned int warnings() const {
+        return m_warnings;
+    }
 };
 
 /* ================================================== */
 
-void output_rings(coastline_rings_list_t coastline_rings, const Output& output) {
+unsigned int output_rings(coastline_rings_list_t coastline_rings, const Output& output) {
+    unsigned int warnings = 0;
+
     for (coastline_rings_list_t::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
         CoastlineRing& cp = **it;
         if (cp.is_closed()) {
@@ -328,28 +355,35 @@ void output_rings(coastline_rings_list_t coastline_rings, const Output& output) 
             } else if (cp.npoints() == 1) {
                 if (output.layer_error_points()) {
                     output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "single_point_in_ring");
+                    warnings++;
                 }
             } else { // cp.npoints() == 2 or 3
                 if (output.layer_error_lines()) {
                     OGRLineString* l = cp.ogr_linestring();
                     output.layer_error_lines()->add(l, cp.min_way_id(), l->IsSimple());
+                    warnings++;
                 }
                 if (output.layer_error_points()) {
                     output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "not_a_ring");
                     output.layer_error_points()->add(cp.ogr_last_point(), cp.last_node_id(), "not_a_ring");
+                    warnings++;
                 }
             }
         } else {
             if (output.layer_error_lines()) {
                 OGRLineString* l = cp.ogr_linestring();
                 output.layer_error_lines()->add(l, cp.min_way_id(), l->IsSimple());
+                warnings++;
             }
             if (output.layer_error_points()) {
                 output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "end_point");
                 output.layer_error_points()->add(cp.ogr_last_point(), cp.last_node_id(), "end_point");
+                warnings++;
             }
         }
     }
+
+    return warnings;
 }
 
 /* ================================================== */
@@ -399,21 +433,27 @@ void print_memory_usage() {
 /* ================================================== */
 
 int main(int argc, char *argv[]) {
+    unsigned int warnings = 0;
+    unsigned int errors = 0;
+
     Options options(argc, argv);
 
     Osmium::init(options.debug);
 
+    if (options.debug) {
+        std::cerr << "Reading from file '" << options.osmfile << "'.\n";
+    }
     Osmium::OSMFile infile(options.osmfile);
 
     Osmium::OSMFile* outfile = NULL;
     Osmium::Output::Base* raw_output = NULL;
     if (options.raw_output.empty()) {
         if (options.debug) {
-            std::cerr << "Not writing raw output\n";
+            std::cerr << "Not writing raw output.\n";
         }
     } else {
         if (options.debug) {
-            std::cerr << "Writing raw output to " << options.raw_output << "\n";
+            std::cerr << "Writing raw output to file '" << options.raw_output << "'.\n";
         }
         outfile = new Osmium::OSMFile(options.raw_output);
         raw_output = outfile->create_output_file();
@@ -435,6 +475,9 @@ int main(int argc, char *argv[]) {
     std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
     print_memory_usage();
 
+    warnings += handler_pass1.warnings();
+    errors += handler_pass1.errors();
+
     std::cerr << "-------------------------------------------------------------------------------\n";
     std::cerr << "Reading nodes (2nd pass through input file)...\n";
     t = time(NULL);
@@ -443,11 +486,14 @@ int main(int argc, char *argv[]) {
     std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
     print_memory_usage();
 
+    warnings += handler_pass2.warnings();
+    errors += handler_pass2.errors();
+
     std::cerr << "-------------------------------------------------------------------------------\n";
     std::cerr << "Create and output polygons...\n";
     t = time(NULL);
     if (output.layer_rings()) {
-        output_rings(coastline_rings, output);
+        warnings += output_rings(coastline_rings, output);
     }
     if (output.layer_polygons()) {
         output_polygons(coastline_rings, output);
@@ -459,5 +505,19 @@ int main(int argc, char *argv[]) {
 
     delete raw_output;
     delete outfile;
+
+    if (warnings) {
+        std::cerr << "There were " << warnings << " warnings.\n";
+    }
+    if (errors) {
+        std::cerr << "There were " << errors << " errors.\n";
+    }
+    if (errors) {
+        exit(return_code_error);
+    } else if (warnings) {
+        exit(return_code_warning);
+    } else {
+        exit(return_code_ok);
+    }
 }
 

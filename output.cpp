@@ -23,6 +23,7 @@
 
 #include <ogrsf_frmts.h>
 
+#include "osmcoastline.hpp"
 #include "output.hpp"
 #include "output_layers.hpp"
 
@@ -45,14 +46,14 @@ Output::Output(const std::string& outdb, bool with_index) :
     OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name);
     if (driver == NULL) {
         std::cerr << driver_name << " driver not available.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 
     const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", NULL };
     m_data_source = driver->CreateDataSource(outdb.c_str(), const_cast<char**>(options));
     if (m_data_source == NULL) {
         std::cerr << "Creation of output file failed.\n";
-        exit(1);
+        exit(return_code_fatal);
     }
 }
 

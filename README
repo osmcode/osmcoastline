@@ -82,6 +82,16 @@ Currently four output shapefiles are created:
 Currently all output is in WGS84.
 
 
+RETURN CODES
+------------
+
+0 - OK
+1 - Warning (some geometries with errors were detected and probably fixed)
+2 - Error (some geometry errors were detected that could not be fixed)
+3 - Fatal error (output file could not be opened etc.)
+4 - Error parsing command line arguments
+
+
 LICENSE
 -------
 

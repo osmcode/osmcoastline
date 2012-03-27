@@ -31,13 +31,13 @@ PROGRAMS = osmcoastline
 
 all: $(PROGRAMS)
 
-osmcoastline.o: osmcoastline.cpp coastline_ring.hpp output.hpp output_layers.hpp
+osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp output.hpp output_layers.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) $(CXXFLAGS_OGR) -o $@ $<
 
-output.o: output.cpp output.hpp
+output.o: output.cpp output.hpp osmcoastline.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
-output_layers.o: output_layers.cpp output_layers.hpp
+output_layers.o: output_layers.cpp output_layers.hpp osmcoastline.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
 coastline_ring.o: coastline_ring.cpp coastline_ring.hpp
