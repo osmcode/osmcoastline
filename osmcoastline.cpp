@@ -35,13 +35,27 @@
 
 /* ================================================== */
 
+/**
+ * This class encapsulates the command line parsing.
+ */
 struct Options {
 
+    /// Input OSM file name.
     std::string osmfile;
+
+    /// Output Spatialite database file name.
     std::string outdb;
+
+    /// Output OSM "raw data" file name.
     std::string raw_output;
+
+    /// EPSG code of output SRS.
     int epsg;
+
+    /// Show debug output?
     bool debug;
+
+    /// Add spatial index to Spatialite database tables?
     bool create_index;
 
     Options(int argc, char* argv[]) :
@@ -85,7 +99,7 @@ struct Options {
                     raw_output = optarg;
                     break;
                 case 's':
-                    epsg = find_epsg(optarg);
+                    epsg = get_epsg(optarg);
                     break;
                 default:
                     exit(return_code_cmdline);
@@ -105,7 +119,7 @@ struct Options {
         osmfile = argv[optind];
     }
 
-    int find_epsg(const char* text) {
+    int get_epsg(const char* text) {
         if (!strcasecmp(text, "WGS84") || !strcmp(text, "4326")) {
             return 4326;
         }
@@ -123,11 +137,12 @@ struct Options {
     void print_help() {
         std::cout << "osmcoastline [OPTIONS] OSMFILE\n"
                   << "Options:\n"
-                  << "  -h, --help                       - This help message\n"
-                  << "  -d, --debug                      - Enable debugging output\n"
-                  << "  -o, --output=DBFILE              - Spatialite database file for output\n"
-                  << "  -r, --raw-output=OSMFILE         - Raw OSM output file\n"
-                  << "  -I, --create-index               - Create spatial indexes in output database\n"
+                  << "  -d, --debug              - Enable debugging output\n"
+                  << "  -h, --help               - This help message\n"
+                  << "  -I, --create-index       - Create spatial indexes in output database\n"
+                  << "  -o, --output=DBFILE      - Spatialite database file for output\n"
+                  << "  -r, --raw-output=OSMFILE - Write raw OSM output file\n"
+                  << "  -s, --srs=EPSGCODE       - Set output SRS (4326 for WGS84 (default) or 3857)\n"
         ;
     }
 
@@ -484,12 +499,17 @@ int main(int argc, char *argv[]) {
         raw_output = outfile->create_output_file();
     }
 
-    if (options.debug) {
-        std::cerr << "Using SRS " << options.epsg << " for output.\n";
-    }
-
     Output* output = NULL;
     if (!options.outdb.empty()) { 
+        if (options.debug) {
+            std::cerr << "Using SRS " << options.epsg << " for output.\n";
+            if (options.create_index) {
+                std::cerr << "Will create geometry index.\n";
+            } else {
+                std::cerr << "Will NOT create geometry index.\n";
+            }
+        }
+
         output = new Output(options.outdb, options.epsg, options.create_index);
         output->create_layer_error_points();
         output->create_layer_error_lines();
