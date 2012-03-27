@@ -485,7 +485,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (options.debug) {
-        std::cerr << "Using SRS " << options.epsg << " for output\n";
+        std::cerr << "Using SRS " << options.epsg << " for output.\n";
     }
 
     Output* output = NULL;

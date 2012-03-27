@@ -30,18 +30,33 @@ class OGRLineString;
 class OGRPolygon;
 class OGRCoordinateTransformation;
 
+/**
+ * Parent class for all output layers.
+ */
 class Layer {
 
+    /// Coordinate transformation, NULL if output is WGS84.
     OGRCoordinateTransformation* m_transform;
 
 protected:
+
+    /// OGRLayer implementing this output layer.
+    OGRLayer* m_layer;
 
     Layer(OGRCoordinateTransformation* transform) :
         m_transform(transform) {
     }
 
+    /**
+     * Transform coordinates to output SRS if they are not already transformed.
+     */
     void transform_if_needed(OGRGeometry* geometry) {
-        if (m_transform && (geometry->getSpatialReference() == NULL || geometry->getSpatialReference()->IsSame(m_transform->GetSourceCS()))) {
+        if (!m_transform) { // Output SRS is WGS84, no transformation needed.
+            return;
+        }
+
+        // Transform if no SRS is set on input geometry or it is set to WGS84.
+        if (geometry->getSpatialReference() == NULL || geometry->getSpatialReference()->IsSame(m_transform->GetSourceCS())) {
             if (geometry->transform(m_transform) != OGRERR_NONE) {
                 // XXX we should do something more clever here
                 std::cerr << "Coordinate transformation failed\n";
@@ -50,56 +65,62 @@ protected:
         }
     }
 
+public:
+
+    /// Commit transaction on this layer.
+    OGRErr commit();
+
 };
 
-class LayerErrorPoints : Layer {
-
-    OGRLayer* m_layer;
+/**
+ * Layer for any errors in one point.
+ */
+class LayerErrorPoints : public Layer {
 
 public:
 
     LayerErrorPoints(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
-    ~LayerErrorPoints();
-    OGRErr commit();
     void add(OGRPoint* point, int id, const char* error);
 
 };
 
-class LayerErrorLines : Layer {
-
-    OGRLayer* m_layer;
+/**
+ * Layer for any errors in a linestring.
+ */
+class LayerErrorLines : public Layer {
 
 public:
 
     LayerErrorLines(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
-    ~LayerErrorLines();
-    OGRErr commit();
     void add(OGRLineString* linestring, int id, bool is_simple);
 
 };
 
-class LayerRings : Layer {
-
-    OGRLayer* m_layer;
+/**
+ * Layer for polygon rings.
+ * Will contain polygons without holes, ie. with just an outer ring.
+ * Polygon outer rings will be oriented according to usual GIS custom with
+ * points going clockwise around the ring, ie "land" is on the right hand side of
+ * the border. This is the other way around from how it looks in OSM.
+ */
+class LayerRings : public Layer {
 
 public:
 
     LayerRings(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
-    ~LayerRings();
-    OGRErr commit();
     void add(OGRPolygon* polygon, int id, int nways, int npoints, LayerErrorPoints* layer_error_points);
 
 };
 
-class LayerPolygons : Layer {
-
-    OGRLayer* m_layer;
+/**
+ * Layer for completed polygons.
+ * Polygons can contain inner rings for large water areas such as the Caspian Sea.
+ */
+class LayerPolygons : public Layer {
 
 public:
 
     LayerPolygons(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
-    ~LayerPolygons();
-    OGRErr commit();
     void add(OGRPolygon* polygon, bool clockwise);
 
 };

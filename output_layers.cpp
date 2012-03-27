@@ -31,6 +31,12 @@
 
 /***************************************************************/
 
+OGRErr Layer::commit() {
+    return m_layer->CommitTransaction();
+}
+
+/***************************************************************/
+
 LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options) :
     Layer(transform)
 {
@@ -55,14 +61,6 @@ LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, OGRCoordinateTran
     }
 
     m_layer->StartTransaction();
-}
-
-LayerErrorPoints::~LayerErrorPoints() {
-    m_layer->CommitTransaction();
-}
-
-OGRErr LayerErrorPoints::commit() {
-    return m_layer->CommitTransaction();
 }
 
 void LayerErrorPoints::add(OGRPoint* point, int id, const char* error) {
@@ -108,14 +106,6 @@ LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, OGRCoordinateTransf
     }
 
     m_layer->StartTransaction();
-}
-
-LayerErrorLines::~LayerErrorLines() {
-    m_layer->CommitTransaction();
-}
-
-OGRErr LayerErrorLines::commit() {
-    return m_layer->CommitTransaction();
 }
 
 void LayerErrorLines::add(OGRLineString* linestring, int id, bool is_simple) {
@@ -182,14 +172,6 @@ LayerRings::LayerRings(OGRDataSource* data_source, OGRCoordinateTransformation* 
     }
 
     m_layer->StartTransaction();
-}
-
-LayerRings::~LayerRings() {
-    m_layer->CommitTransaction();
-}
-
-OGRErr LayerRings::commit() {
-    return m_layer->CommitTransaction();
 }
 
 void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, LayerErrorPoints* layer_error_points) {
@@ -271,14 +253,6 @@ LayerPolygons::LayerPolygons(OGRDataSource* data_source, OGRCoordinateTransforma
     }
 
     m_layer->StartTransaction();
-}
-
-LayerPolygons::~LayerPolygons() {
-    m_layer->CommitTransaction();
-}
-
-OGRErr LayerPolygons::commit() {
-    return m_layer->CommitTransaction();
 }
 
 void LayerPolygons::add(OGRPolygon* polygon, bool clockwise) {
