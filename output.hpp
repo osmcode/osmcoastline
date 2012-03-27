@@ -36,6 +36,11 @@ class OGRDataSource;
  */
 class Output {
 
+    static const char* options_without_index[];
+    static const char* options_with_index[];
+
+    bool m_with_index;
+
     OGRSpatialReference m_srs_wgs84;
     OGRDataSource* m_data_source;
 
@@ -44,9 +49,11 @@ class Output {
     LayerRings*       m_layer_rings;
     LayerPolygons*    m_layer_polygons;
 
+    const char** layer_options() const;
+
 public:
 
-    Output(const std::string& outdir);
+    Output(const std::string& outdb, bool with_index=false);
 
     ~Output();
 

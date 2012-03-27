@@ -26,7 +26,11 @@
 #include "output.hpp"
 #include "output_layers.hpp"
 
-Output::Output(const std::string& dirname) :
+const char* Output::options_with_index[] = { NULL };
+const char* Output::options_without_index[] = { "SPATIAL_INDEX=no", NULL };
+
+Output::Output(const std::string& outdb, bool with_index) :
+    m_with_index(with_index),
     m_srs_wgs84(),
     m_layer_error_points(NULL),
     m_layer_error_lines(NULL),
@@ -37,15 +41,15 @@ Output::Output(const std::string& dirname) :
 
     m_srs_wgs84.SetWellKnownGeogCS("WGS84");
 
-    const char* driver_name = "ESRI Shapefile";
+    const char* driver_name = "SQLite";
     OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name);
     if (driver == NULL) {
         std::cerr << driver_name << " driver not available.\n";
         exit(1);
     }
 
-    const char* options[] = { NULL };
-    m_data_source = driver->CreateDataSource(dirname.c_str(), const_cast<char**>(options));
+    const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", NULL };
+    m_data_source = driver->CreateDataSource(outdb.c_str(), const_cast<char**>(options));
     if (m_data_source == NULL) {
         std::cerr << "Creation of output file failed.\n";
         exit(1);
@@ -53,22 +57,38 @@ Output::Output(const std::string& dirname) :
 }
 
 Output::~Output() {
+    if (m_layer_polygons) {
+        m_layer_polygons->commit();
+    }
+    if (m_layer_rings) {
+        m_layer_rings->commit();
+    }
+    if (m_layer_error_lines) {
+        m_layer_error_lines->commit();
+    }
+    if (m_layer_error_points) {
+        m_layer_error_points->commit();
+    }
     OGRDataSource::DestroyDataSource(m_data_source);
 }
 
+const char** Output::layer_options() const {
+    return m_with_index ? options_with_index : options_without_index;
+}
+
 void Output::create_layer_error_points() {
-    m_layer_error_points = new LayerErrorPoints(m_data_source, &m_srs_wgs84);
+    m_layer_error_points = new LayerErrorPoints(m_data_source, &m_srs_wgs84, layer_options());
 }
 
 void Output::create_layer_error_lines() {
-    m_layer_error_lines = new LayerErrorLines(m_data_source, &m_srs_wgs84);
+    m_layer_error_lines = new LayerErrorLines(m_data_source, &m_srs_wgs84, layer_options());
 }
 
 void Output::create_layer_rings() {
-    m_layer_rings = new LayerRings(m_data_source, &m_srs_wgs84);
+    m_layer_rings = new LayerRings(m_data_source, &m_srs_wgs84, layer_options());
 }
 
 void Output::create_layer_polygons() {
-    m_layer_polygons = new LayerPolygons(m_data_source, &m_srs_wgs84);
+    m_layer_polygons = new LayerPolygons(m_data_source, &m_srs_wgs84, layer_options());
 }
 

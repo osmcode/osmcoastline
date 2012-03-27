@@ -35,7 +35,9 @@ class LayerErrorPoints {
 
 public:
 
-    LayerErrorPoints(OGRDataSource* data_source, OGRSpatialReference* srs);
+    LayerErrorPoints(OGRDataSource* data_source, OGRSpatialReference* srs, const char** options);
+    ~LayerErrorPoints();
+    OGRErr commit();
     void add(OGRPoint* point, int id, const char* error);
 
 };
@@ -46,7 +48,9 @@ class LayerErrorLines {
 
 public:
 
-    LayerErrorLines(OGRDataSource* data_source, OGRSpatialReference* srs);
+    LayerErrorLines(OGRDataSource* data_source, OGRSpatialReference* srs, const char** options);
+    ~LayerErrorLines();
+    OGRErr commit();
     void add(OGRLineString* linestring, int id, bool is_simple);
 
 };
@@ -57,7 +61,9 @@ class LayerRings {
 
 public:
 
-    LayerRings(OGRDataSource* data_source, OGRSpatialReference* srs);
+    LayerRings(OGRDataSource* data_source, OGRSpatialReference* srs, const char** options);
+    ~LayerRings();
+    OGRErr commit();
     void add(OGRPolygon* polygon, int id, int nways, int npoints, LayerErrorPoints* layer_error_points);
 
 };
@@ -68,7 +74,9 @@ class LayerPolygons {
 
 public:
 
-    LayerPolygons(OGRDataSource* data_source, OGRSpatialReference* srs);
+    LayerPolygons(OGRDataSource* data_source, OGRSpatialReference* srs, const char** options);
+    ~LayerPolygons();
+    OGRErr commit();
     void add(OGRPolygon* polygon, bool clockwise);
 
 };
