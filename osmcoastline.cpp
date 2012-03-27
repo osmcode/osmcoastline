@@ -91,6 +91,11 @@ struct Options {
             exit(return_code_cmdline);
         }
 
+        if (outdb.empty() && raw_output.empty()) {
+            std::cerr << "You have to give one or both of the --output or --raw-output options.\n";
+            exit(return_code_cmdline);
+        }
+
         osmfile = argv[optind];
     }
 
@@ -273,13 +278,13 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
     Osmium::Output::Base* m_raw_output;
     coastline_rings_list_t& m_coastline_rings;
     posmap_t m_posmap;
-    const Output& m_output;
+    const Output* m_output;
     unsigned int m_warnings;
     unsigned int m_errors;
 
 public:
 
-    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp, const Output& output) :
+    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp, const Output* output) :
         m_raw_output(raw_output),
         m_coastline_rings(clp),
         m_posmap(),
@@ -296,22 +301,21 @@ public:
     }
 
     void node(const shared_ptr<Osmium::OSM::Node const>& node) {
-        bool raw_out = false;
 
-        if (m_output.layer_error_points()) {
+        if (m_output && m_output->layer_error_points()) {
             const char* natural = node->tags().get_tag_by_key("natural");
             if (natural && !strcmp(natural, "coastline")) {
                 try {
                     Osmium::Geometry::Point point(*node);
-                    m_output.layer_error_points()->add(point.create_ogr_geometry(), node->id(), "tagged_node");
+                    m_output->layer_error_points()->add(point.create_ogr_geometry(), node->id(), "tagged_node");
                 } catch (Osmium::Exception::IllegalGeometry) {
                     std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
                     m_errors++;
                 }
             }
-            raw_out = true;
         }
 
+        bool raw_out = false;
         std::pair<posmap_t::iterator, posmap_t::iterator> ret = m_posmap.equal_range(node->id());
         for (posmap_t::iterator it=ret.first; it != ret.second; ++it) {
             *(it->second) = node->position();
@@ -461,11 +465,14 @@ int main(int argc, char *argv[]) {
 
     coastline_rings_list_t coastline_rings;
 
-    Output output(options.outdb, options.create_index);
-    output.create_layer_error_points();
-    output.create_layer_error_lines();
-    output.create_layer_rings();
-    output.create_layer_polygons();
+    Output* output = NULL;
+    if (!options.outdb.empty()) { 
+        output = new Output(options.outdb, options.create_index);
+        output->create_layer_error_points();
+        output->create_layer_error_lines();
+        output->create_layer_rings();
+        output->create_layer_polygons();
+    }
 
     std::cerr << "-------------------------------------------------------------------------------\n";
     std::cerr << "Reading ways (1st pass through input file)...\n";
@@ -489,20 +496,23 @@ int main(int argc, char *argv[]) {
     warnings += handler_pass2.warnings();
     errors += handler_pass2.errors();
 
-    std::cerr << "-------------------------------------------------------------------------------\n";
-    std::cerr << "Create and output polygons...\n";
-    t = time(NULL);
-    if (output.layer_rings()) {
-        warnings += output_rings(coastline_rings, output);
+    if (output) {
+        std::cerr << "-------------------------------------------------------------------------------\n";
+        std::cerr << "Create and output polygons...\n";
+        t = time(NULL);
+        if (output->layer_rings()) {
+            warnings += output_rings(coastline_rings, *output);
+        }
+        if (output->layer_polygons()) {
+            output_polygons(coastline_rings, *output);
+        }
+        std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
+        print_memory_usage();
     }
-    if (output.layer_polygons()) {
-        output_polygons(coastline_rings, output);
-    }
-    std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
-    print_memory_usage();
 
     std::cerr << "-------------------------------------------------------------------------------\n";
 
+    delete output;
     delete raw_output;
     delete outfile;
 
@@ -513,11 +523,11 @@ int main(int argc, char *argv[]) {
         std::cerr << "There were " << errors << " errors.\n";
     }
     if (errors) {
-        exit(return_code_error);
+        return return_code_error;
     } else if (warnings) {
-        exit(return_code_warning);
+        return return_code_warning;
     } else {
-        exit(return_code_ok);
+        return return_code_ok;
     }
 }
 
