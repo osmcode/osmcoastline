@@ -23,6 +23,7 @@
 #include <fstream>
 #include <list>
 #include <time.h>
+#include <getopt.h>
 
 #include <osmium.hpp>
 #include <osmium/geometry/point.hpp>
@@ -286,20 +287,83 @@ void print_memory_usage() {
 
 /* ================================================== */
 
-int main(int argc, char *argv[]) {
-    Osmium::init(true);
+struct Options {
 
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " OSMFILE OUTDIR" << std::endl;
-        exit(1);
+    std::string osmfile;
+    std::string outdb;
+    bool debug;
+    bool create_index;
+
+    Options(int argc, char* argv[]) :
+        osmfile(""),
+        outdb(""),
+        debug(false),
+        create_index(false)
+    {
+        static struct option long_options[] = {
+            {"debug",        no_argument, 0, 'd'},
+            {"help",         no_argument, 0, 'h'},
+            {"create-index", no_argument, 0, 'I'},
+            {"output",       required_argument, 0, 'o'},
+            {0, 0, 0, 0}
+        };
+
+        while (1) {
+            int c = getopt_long(argc, argv, "dhIo:", long_options, 0);
+            if (c == -1)
+                break;
+
+            switch (c) {
+                case 'd':
+                    debug = true;
+                    std::cerr << "Enabled debug option\n";
+                    break;
+                case 'h':
+                    print_help();
+                    exit(0);
+                case 'I':
+                    create_index = true;
+                    break;
+                case 'o':
+                    outdb = optarg;
+                    break;
+                default:
+                    exit(1);
+            }
+        }
+
+        if (optind != argc - 1) {
+            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE" << std::endl;
+            exit(1);
+        }
+
+        osmfile = argv[optind];
     }
 
-    Osmium::OSMFile infile(argv[1]);
-    std::string outdir(argv[2]);
+    void print_help() {
+        std::cout << "osmcoastline [OPTIONS] OSMFILE\n"
+                  << "Options:\n"
+                  << "  -h, --help                       - This help message\n"
+                  << "  -d, --debug                      - Enable debugging output\n"
+                  << "  -o, --output=DBFILE              - Spatialite database file for output\n"
+                  << "  -I, --create-index               - Create spatial indexes in output database\n"
+        ;
+    }
+
+};
+
+/* ================================================== */
+
+int main(int argc, char *argv[]) {
+    Options options(argc, argv);
+
+    Osmium::init(options.debug);
+
+    Osmium::OSMFile infile(options.osmfile);
 
     coastline_rings_list_t coastline_rings;
 
-    Output output(outdir);
+    Output output(options.outdb, options.create_index);
     output.create_layer_error_points();
     output.create_layer_error_lines();
     output.create_layer_rings();
