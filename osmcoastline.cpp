@@ -32,6 +32,82 @@
 #include "output.hpp"
 #include "output_layers.hpp"
 
+/* ================================================== */
+
+struct Options {
+
+    std::string osmfile;
+    std::string outdb;
+    std::string raw_output;
+    bool debug;
+    bool create_index;
+
+    Options(int argc, char* argv[]) :
+        osmfile(),
+        outdb(),
+        raw_output(),
+        debug(false),
+        create_index(false)
+    {
+        static struct option long_options[] = {
+            {"debug",        no_argument, 0, 'd'},
+            {"help",         no_argument, 0, 'h'},
+            {"create-index", no_argument, 0, 'I'},
+            {"output",       required_argument, 0, 'o'},
+            {"raw-output",   required_argument, 0, 'r'},
+            {0, 0, 0, 0}
+        };
+
+        while (1) {
+            int c = getopt_long(argc, argv, "dhIo:r:", long_options, 0);
+            if (c == -1)
+                break;
+
+            switch (c) {
+                case 'd':
+                    debug = true;
+                    std::cerr << "Enabled debug option\n";
+                    break;
+                case 'h':
+                    print_help();
+                    exit(0);
+                case 'I':
+                    create_index = true;
+                    break;
+                case 'o':
+                    outdb = optarg;
+                    break;
+                case 'r':
+                    raw_output = optarg;
+                    break;
+                default:
+                    exit(1);
+            }
+        }
+
+        if (optind != argc - 1) {
+            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE" << std::endl;
+            exit(1);
+        }
+
+        osmfile = argv[optind];
+    }
+
+    void print_help() {
+        std::cout << "osmcoastline [OPTIONS] OSMFILE\n"
+                  << "Options:\n"
+                  << "  -h, --help                       - This help message\n"
+                  << "  -d, --debug                      - Enable debugging output\n"
+                  << "  -o, --output=DBFILE              - Spatialite database file for output\n"
+                  << "  -r, --raw-output=OSMFILE         - Raw OSM output file\n"
+                  << "  -I, --create-index               - Create spatial indexes in output database\n"
+        ;
+    }
+
+};
+
+/* ================================================== */
+
 typedef std::list< shared_ptr<CoastlineRing> > coastline_rings_list_t;
 typedef std::map<osm_object_id_t, coastline_rings_list_t::iterator> idmap_t;
 
@@ -42,6 +118,7 @@ typedef std::map<osm_object_id_t, coastline_rings_list_t::iterator> idmap_t;
  */
 class CoastlineHandlerPass1 : public Osmium::Handler::Base {
 
+    Osmium::Output::Base* m_raw_output;
     coastline_rings_list_t& m_coastline_rings;
 
     // Mapping from node IDs to CoastlineRings.
@@ -54,7 +131,8 @@ class CoastlineHandlerPass1 : public Osmium::Handler::Base {
 
 public:
 
-    CoastlineHandlerPass1(coastline_rings_list_t& clp) :
+    CoastlineHandlerPass1(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp) :
+        m_raw_output(raw_output),
         m_coastline_rings(clp),
         m_start_nodes(),
         m_end_nodes(),
@@ -62,11 +140,22 @@ public:
     {
     }
 
+    void init(Osmium::OSM::Meta& meta) {
+        if (m_raw_output) {
+            m_raw_output->init(meta);
+            m_raw_output->before_ways();
+        }
+    }
+
     void way(const shared_ptr<Osmium::OSM::Way>& way) {
         // We are only interested in ways tagged with natural=coastline.
         const char* natural = way->tags().get_tag_by_key("natural");
         if (!natural || strcmp(natural, "coastline")) {
             return;
+        }
+
+        if (m_raw_output) {
+            m_raw_output->way(way);
         }
 
         // If the way is already closed we just create a CoastlineRing
@@ -150,6 +239,10 @@ public:
             << m_count_polygons_from_single_way << " from a single way and "
             << m_coastline_rings.size() - m_count_polygons_from_single_way << " from multiple ways).\n";
 
+        if (m_raw_output) {
+            m_raw_output->after_ways();
+        }
+
         // We only need to read ways in this pass.
         throw Osmium::Input::StopReading();
     }
@@ -164,13 +257,15 @@ public:
  */
 class CoastlineHandlerPass2 : public Osmium::Handler::Base {
 
+    Osmium::Output::Base* m_raw_output;
     coastline_rings_list_t& m_coastline_rings;
     posmap_t m_posmap;
     const Output& m_output;
 
 public:
 
-    CoastlineHandlerPass2(coastline_rings_list_t& clp, const Output& output) :
+    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp, const Output& output) :
+        m_raw_output(raw_output),
         m_coastline_rings(clp),
         m_posmap(),
         m_output(output)
@@ -178,9 +273,14 @@ public:
         for (coastline_rings_list_t::const_iterator it = m_coastline_rings.begin(); it != m_coastline_rings.end(); ++it) {
             (*it)->setup_positions(m_posmap);
         }
+        if (m_raw_output) {
+            m_raw_output->before_nodes();
+        }
     }
 
     void node(const shared_ptr<Osmium::OSM::Node const>& node) {
+        bool raw_out = false;
+
         if (m_output.layer_error_points()) {
             const char* natural = node->tags().get_tag_by_key("natural");
             if (natural && !strcmp(natural, "coastline")) {
@@ -191,15 +291,26 @@ public:
                     std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
                 }
             }
+            raw_out = true;
         }
 
         std::pair<posmap_t::iterator, posmap_t::iterator> ret = m_posmap.equal_range(node->id());
         for (posmap_t::iterator it=ret.first; it != ret.second; ++it) {
             *(it->second) = node->position();
+            raw_out = true;
+        }
+
+        if (m_raw_output && raw_out) {
+            m_raw_output->node(node);
         }
     }
 
     void after_nodes() const {
+        if (m_raw_output) {
+            m_raw_output->after_nodes();
+            m_raw_output->final();
+        }
+
         // We only need to read nodes in this pass.
         throw Osmium::Input::StopReading();
     }
@@ -287,79 +398,26 @@ void print_memory_usage() {
 
 /* ================================================== */
 
-struct Options {
-
-    std::string osmfile;
-    std::string outdb;
-    bool debug;
-    bool create_index;
-
-    Options(int argc, char* argv[]) :
-        osmfile(""),
-        outdb(""),
-        debug(false),
-        create_index(false)
-    {
-        static struct option long_options[] = {
-            {"debug",        no_argument, 0, 'd'},
-            {"help",         no_argument, 0, 'h'},
-            {"create-index", no_argument, 0, 'I'},
-            {"output",       required_argument, 0, 'o'},
-            {0, 0, 0, 0}
-        };
-
-        while (1) {
-            int c = getopt_long(argc, argv, "dhIo:", long_options, 0);
-            if (c == -1)
-                break;
-
-            switch (c) {
-                case 'd':
-                    debug = true;
-                    std::cerr << "Enabled debug option\n";
-                    break;
-                case 'h':
-                    print_help();
-                    exit(0);
-                case 'I':
-                    create_index = true;
-                    break;
-                case 'o':
-                    outdb = optarg;
-                    break;
-                default:
-                    exit(1);
-            }
-        }
-
-        if (optind != argc - 1) {
-            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE" << std::endl;
-            exit(1);
-        }
-
-        osmfile = argv[optind];
-    }
-
-    void print_help() {
-        std::cout << "osmcoastline [OPTIONS] OSMFILE\n"
-                  << "Options:\n"
-                  << "  -h, --help                       - This help message\n"
-                  << "  -d, --debug                      - Enable debugging output\n"
-                  << "  -o, --output=DBFILE              - Spatialite database file for output\n"
-                  << "  -I, --create-index               - Create spatial indexes in output database\n"
-        ;
-    }
-
-};
-
-/* ================================================== */
-
 int main(int argc, char *argv[]) {
     Options options(argc, argv);
 
     Osmium::init(options.debug);
 
     Osmium::OSMFile infile(options.osmfile);
+
+    Osmium::OSMFile* outfile = NULL;
+    Osmium::Output::Base* raw_output = NULL;
+    if (options.raw_output.empty()) {
+        if (options.debug) {
+            std::cerr << "Not writing raw output\n";
+        }
+    } else {
+        if (options.debug) {
+            std::cerr << "Writing raw output to " << options.raw_output << "\n";
+        }
+        outfile = new Osmium::OSMFile(options.raw_output);
+        raw_output = outfile->create_output_file();
+    }
 
     coastline_rings_list_t coastline_rings;
 
@@ -372,7 +430,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "-------------------------------------------------------------------------------\n";
     std::cerr << "Reading ways (1st pass through input file)...\n";
     time_t t = time(NULL);
-    CoastlineHandlerPass1 handler_pass1(coastline_rings);
+    CoastlineHandlerPass1 handler_pass1(options, raw_output, coastline_rings);
     infile.read(handler_pass1);
     std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
     print_memory_usage();
@@ -380,7 +438,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "-------------------------------------------------------------------------------\n";
     std::cerr << "Reading nodes (2nd pass through input file)...\n";
     t = time(NULL);
-    CoastlineHandlerPass2 handler_pass2(coastline_rings, output);
+    CoastlineHandlerPass2 handler_pass2(options, raw_output, coastline_rings, output);
     infile.read(handler_pass2);
     std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
     print_memory_usage();
@@ -399,5 +457,7 @@ int main(int argc, char *argv[]) {
 
     std::cerr << "-------------------------------------------------------------------------------\n";
 
+    delete raw_output;
+    delete outfile;
 }
 
