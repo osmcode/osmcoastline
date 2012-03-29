@@ -454,7 +454,17 @@ unsigned int fix_coastline_direction(OGRMultiPolygon* multipolygon, OutputDataba
 void output_split_polygons(OGRMultiPolygon* multipolygon, OutputDatabase& output, const Options& options) {
     for (int i=0; i < multipolygon->getNumGeometries(); ++i) {
         OGRPolygon* p = static_cast<OGRPolygon*>(multipolygon->getGeometryRef(i));
-        split(p, output, options);
+        if (p->IsValid()) {
+            split(p, output, options);
+        } else {
+            OGRPolygon* pb = dynamic_cast<OGRPolygon*>(p->Buffer(0));
+            if (pb) {
+                std::cerr << "not valid, but buffer ok\n";
+                split(pb, output, options);
+            } else {
+                std::cerr << "not valid, and buffer not polygon\n";
+            }
+        }
     }
 }
 
