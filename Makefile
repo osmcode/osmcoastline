@@ -31,7 +31,7 @@ PROGRAMS = osmcoastline
 
 all: $(PROGRAMS)
 
-osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp output_database.hpp output_layers.hpp
+osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp output_database.hpp output_layers.hpp options.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) $(CXXFLAGS_OGR) -o $@ $<
 
 output_database.o: output_database.cpp output_database.hpp output_layers.hpp osmcoastline.hpp
