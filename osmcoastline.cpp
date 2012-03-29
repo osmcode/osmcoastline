@@ -355,10 +355,12 @@ public:
     }
 
     void node(const shared_ptr<Osmium::OSM::Node const>& node) {
+        bool raw_out = false;
 
         if (m_output && m_output->layer_error_points()) {
             const char* natural = node->tags().get_tag_by_key("natural");
             if (natural && !strcmp(natural, "coastline")) {
+                raw_out = true;
                 try {
                     Osmium::Geometry::Point point(*node);
                     m_output->layer_error_points()->add(point.create_ogr_geometry(), node->id(), "tagged_node");
@@ -369,7 +371,6 @@ public:
             }
         }
 
-        bool raw_out = false;
         std::pair<posmap_t::iterator, posmap_t::iterator> ret = m_posmap.equal_range(node->id());
         for (posmap_t::iterator it=ret.first; it != ret.second; ++it) {
             *(it->second) = node->position();

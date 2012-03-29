@@ -48,24 +48,29 @@ TESTING
 -------
 
 Run the script "runtest.sh". It will read the supplied "testdata.osm" and
-create output in the testdata directory.
+create output in the testdata.db spatialite database.
 
-You can use the supplied "coastline.qgs" QGIS project file to open the
+You can use the supplied "coastline_sqlite.qgs" QGIS project file to open the
 output with QGIS.
 
 
 RUNNING
 -------
 
-Run "osmcoastline PLANET-FILE OUTPUT-DIRECTORY", for example "osmcoastline
-planet.osm.pbf coastline". This will create the given OUTPUT-DIRECTORY
-and write several shapefiles into it.
+Run:
+  osmcoastline -o DBFILE PLANET-FILE
+
+For example:
+  osmcoastline -o coastline.db planet.osm.pbf
+
+This will create DBFILE spatialite database and write several tables with the
+output into it.
 
 
 OUTPUT
 ------
 
-Currently four output shapefiles are created:
+The output is a spatialite database with the following tables:
 
 * error_lines
   Lines that have errors (for instance not closed rings or self-intersections).
@@ -79,7 +84,31 @@ Currently four output shapefiles are created:
 * rings
   Coastline rings as linestrings.
 
-Currently all output is in WGS84.
+By default all output is in WGS84. You can use the option -s/--srs=3857 to
+create output in "Google mercator". (Other projections are curently not
+supported.)
+
+
+STEPS
+-----
+
+OSMCoastline runs in several steps, each can optionally create some output.
+In most cases you will only be interested in the end result but preliminary
+results are supplied for debugging or other special uses.
+
+Step 1: Filter out all nodes and ways tagged natural=coastline and all nodes
+        needed by those ways. The result of this step can be written out as
+        an OSM file with the -r/--raw-output option.
+
+Step 2: Assemble all coastline ways into rings.
+
+Step 3: Assemble polygons from the rings, possibly including holes for
+        water areas.
+
+Step 4: Split up large polygons into smaller ones.
+
+The errors encountered in each step are written to the error_points and
+error_lines tables.
 
 
 RETURN CODES

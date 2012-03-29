@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rm -fr testdata
-#valgrind --leak-check=full --show-reachable=yes ./osmcoastline testdata.osm testdata
-./osmcoastline testdata.osm testdata
+rm -f testdata.db
+#valgrind --leak-check=full --show-reachable=yes
+./osmcoastline -o testdata.db testdata.osm
 
