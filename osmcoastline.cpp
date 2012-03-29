@@ -30,7 +30,7 @@
 
 #include "osmcoastline.hpp"
 #include "coastline_ring.hpp"
-#include "output.hpp"
+#include "output_database.hpp"
 #include "output_layers.hpp"
 
 /* ================================================== */
@@ -332,13 +332,13 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
     Osmium::Output::Base* m_raw_output;
     coastline_rings_list_t& m_coastline_rings;
     posmap_t m_posmap;
-    const Output* m_output;
+    const OutputDatabase * m_output;
     unsigned int m_warnings;
     unsigned int m_errors;
 
 public:
 
-    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp, const Output* output) :
+    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp, const OutputDatabase* output) :
         m_raw_output(raw_output),
         m_coastline_rings(clp),
         m_posmap(),
@@ -402,7 +402,7 @@ public:
 
 /* ================================================== */
 
-unsigned int output_rings(coastline_rings_list_t coastline_rings, const Output& output) {
+unsigned int output_rings(coastline_rings_list_t coastline_rings, const OutputDatabase& output) {
     unsigned int warnings = 0;
 
     for (coastline_rings_list_t::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
@@ -472,7 +472,7 @@ OGRMultiPolygon* create_polygons(coastline_rings_list_t coastline_rings) {
 /**
  * Write all polygons in the given multipolygon as polygons to the output database.
  */
-void output_polygons(OGRMultiPolygon* multipolygon, const Output& output) {
+void output_polygons(OGRMultiPolygon* multipolygon, const OutputDatabase& output) {
     for (int i=0; i < multipolygon->getNumGeometries(); ++i) {
         OGRPolygon* p = static_cast<OGRPolygon*>(multipolygon->getGeometryRef(i));
         output.layer_polygons()->add(p, p->getExteriorRing()->isClockwise());
@@ -508,7 +508,7 @@ OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y
     return polygon;
 }
 
-void split(OGRGeometry* g, const Output& output, const Options& options) {
+void split(OGRGeometry* g, const OutputDatabase& output, const Options& options) {
     static double expand = 0.0001;
     OGRPolygon* p = static_cast<OGRPolygon*>(g);
 
@@ -596,7 +596,7 @@ unsigned int fix_coastline_direction(OGRMultiPolygon* multipolygon, LayerErrorLi
 
 /* ================================================== */
 
-void output_split_polygons(OGRMultiPolygon* multipolygon, const Output& output, const Options& options) {
+void output_split_polygons(OGRMultiPolygon* multipolygon, const OutputDatabase& output, const Options& options) {
     for (int i=0; i < multipolygon->getNumGeometries(); ++i) {
         OGRPolygon* p = static_cast<OGRPolygon*>(multipolygon->getGeometryRef(i));
         split(p, output, options);
@@ -651,7 +651,7 @@ int main(int argc, char *argv[]) {
         raw_output = outfile->create_output_file();
     }
 
-    Output* output = NULL;
+    OutputDatabase* output = NULL;
     if (!options.outdb.empty()) { 
         if (options.debug) {
             std::cerr << "Using SRS " << options.epsg << " for output.\n";
@@ -662,7 +662,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        output = new Output(options.outdb, options.epsg, options.create_index);
+        output = new OutputDatabase(options.outdb, options.epsg, options.create_index);
         output->create_layer_error_points();
         output->create_layer_error_lines();
         output->create_layer_rings();

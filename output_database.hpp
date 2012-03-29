@@ -1,5 +1,5 @@
-#ifndef OUTPUT_HPP
-#define OUTPUT_HPP
+#ifndef OUTPUT_DATABASE_HPP
+#define OUTPUT_DATABASE_HPP
 
 /*
 
@@ -33,9 +33,9 @@ class OGRDataSource;
 class OGRCoordinateTransformation;
 
 /**
- * The Output class encapsulates the OGR output for the OSMCoastline program.
+ * The OutputDatabase class does the output to a sqlite database (via OGR).
  */
-class Output {
+class OutputDatabase {
 
     static const char* options_without_index[];
     static const char* options_with_index[];
@@ -57,9 +57,9 @@ class Output {
 
 public:
 
-    Output(const std::string& outdb, int epsg, bool with_index=false);
+    OutputDatabase(const std::string& outdb, int epsg, bool with_index=false);
 
-    ~Output();
+    ~OutputDatabase();
 
     void create_layer_error_points();
     void create_layer_error_lines();
@@ -73,4 +73,4 @@ public:
 
 };
 
-#endif // OUTPUT_HPP
+#endif // OUTPUT_DATABASE_HPP

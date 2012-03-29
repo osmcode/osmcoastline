@@ -24,13 +24,13 @@
 #include <ogrsf_frmts.h>
 
 #include "osmcoastline.hpp"
-#include "output.hpp"
+#include "output_database.hpp"
 #include "output_layers.hpp"
 
-const char* Output::options_with_index[] = { NULL };
-const char* Output::options_without_index[] = { "SPATIAL_INDEX=no", NULL };
+const char* OutputDatabase::options_with_index[] = { NULL };
+const char* OutputDatabase::options_without_index[] = { "SPATIAL_INDEX=no", NULL };
 
-Output::Output(const std::string& outdb, int epsg, bool with_index) :
+OutputDatabase::OutputDatabase(const std::string& outdb, int epsg, bool with_index) :
     m_with_index(with_index),
     m_srs_wgs84(),
     m_srs_out(),
@@ -68,7 +68,7 @@ Output::Output(const std::string& outdb, int epsg, bool with_index) :
     }
 }
 
-Output::~Output() {
+OutputDatabase::~OutputDatabase() {
     if (m_layer_polygons) {
         m_layer_polygons->commit();
     }
@@ -84,23 +84,23 @@ Output::~Output() {
     OGRDataSource::DestroyDataSource(m_data_source);
 }
 
-const char** Output::layer_options() const {
+const char** OutputDatabase::layer_options() const {
     return m_with_index ? options_with_index : options_without_index;
 }
 
-void Output::create_layer_error_points() {
+void OutputDatabase::create_layer_error_points() {
     m_layer_error_points = new LayerErrorPoints(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 
-void Output::create_layer_error_lines() {
+void OutputDatabase::create_layer_error_lines() {
     m_layer_error_lines = new LayerErrorLines(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 
-void Output::create_layer_rings() {
+void OutputDatabase::create_layer_rings() {
     m_layer_rings = new LayerRings(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 
-void Output::create_layer_polygons() {
+void OutputDatabase::create_layer_polygons() {
     m_layer_polygons = new LayerPolygons(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 

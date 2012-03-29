@@ -31,10 +31,10 @@ PROGRAMS = osmcoastline
 
 all: $(PROGRAMS)
 
-osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp output.hpp output_layers.hpp
+osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp output_database.hpp output_layers.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) $(CXXFLAGS_OGR) -o $@ $<
 
-output.o: output.cpp output.hpp output_layers.hpp osmcoastline.hpp
+output_database.o: output_database.cpp output_database.hpp output_layers.hpp osmcoastline.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
 output_layers.o: output_layers.cpp output_layers.hpp osmcoastline.hpp
@@ -43,7 +43,7 @@ output_layers.o: output_layers.cpp output_layers.hpp osmcoastline.hpp
 coastline_ring.o: coastline_ring.cpp coastline_ring.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
-osmcoastline: osmcoastline.o coastline_ring.o output.o output_layers.o
+osmcoastline: osmcoastline.o coastline_ring.o output_database.o output_layers.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PROTOBUF) $(LIB_OGR) $(LIB_GEOS) $(LIB_XML2)
 
 clean:
