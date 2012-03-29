@@ -59,6 +59,9 @@ class OutputDatabase {
 
     const char** layer_options() const;
 
+    /// Execute arbitrary SQL command on database
+    void exec(const char* sql);
+
 public:
 
     OutputDatabase(const std::string& outdb, int epsg, bool with_index=false);
@@ -77,6 +80,8 @@ public:
 
     void add_error(OGRPoint* point, const char* error, osm_object_id_t id);
     void add_error(OGRLineString* linestring, const char* error, osm_object_id_t id=0);
+
+    void set_meta(int runtime, int memory_usage);
 
 };
 

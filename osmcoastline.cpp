@@ -628,6 +628,7 @@ void print_memory_usage() {
 /* ================================================== */
 
 int main(int argc, char *argv[]) {
+    time_t start_time = time(NULL);
     unsigned int warnings = 0;
     unsigned int errors = 0;
 
@@ -713,6 +714,8 @@ int main(int argc, char *argv[]) {
     }
 
     std::cerr << "-------------------------------------------------------------------------------\n";
+
+    output->set_meta(time(NULL) - start_time, 0);
 
     delete output;
     delete raw_output;

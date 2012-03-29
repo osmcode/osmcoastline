@@ -20,6 +20,7 @@
 */
 
 #include <iostream>
+#include <sstream>
 
 #include <ogrsf_frmts.h>
 
@@ -72,6 +73,18 @@ OutputDatabase::OutputDatabase(const std::string& outdb, int epsg, bool with_ind
     m_layer_error_lines = new LayerErrorLines(m_data_source, m_transform, &m_srs_out, layer_options());
     m_layer_rings = new LayerRings(m_data_source, m_transform, &m_srs_out, layer_options());
     m_layer_polygons = new LayerPolygons(m_data_source, m_transform, &m_srs_out, layer_options());
+
+    exec("CREATE TABLE meta (timestamp TEXT, runtime INTEGER, memory_usage INTEGER)");
+}
+
+void OutputDatabase::set_meta(int runtime, int memory_usage) {
+    std::ostringstream sql;
+    sql << "INSERT INTO meta (timestamp, runtime, memory_usage) VALUES (datetime('now'), "
+        << runtime
+        << ", "
+        << memory_usage
+        << ")";
+    exec(sql.str().c_str());
 }
 
 OutputDatabase::~OutputDatabase() {
@@ -93,5 +106,9 @@ void OutputDatabase::add_error(OGRLineString* linestring, const char* error, osm
 
 const char** OutputDatabase::layer_options() const {
     return m_with_index ? options_with_index : options_without_index;
+}
+
+void OutputDatabase::exec(const char* sql) {
+    m_data_source->ReleaseResultSet(m_data_source->ExecuteSQL(sql, NULL, NULL));
 }
 
