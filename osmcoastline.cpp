@@ -348,13 +348,13 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
     Osmium::Output::Base* m_raw_output;
     coastline_rings_list_t& m_coastline_rings;
     posmap_t m_posmap;
-    const OutputDatabase * m_output;
+    OutputDatabase* m_output;
     unsigned int m_warnings;
     unsigned int m_errors;
 
 public:
 
-    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp, const OutputDatabase* output) :
+    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp, OutputDatabase* output) :
         m_raw_output(raw_output),
         m_coastline_rings(clp),
         m_posmap(),
@@ -379,7 +379,7 @@ public:
                 raw_out = true;
                 try {
                     Osmium::Geometry::Point point(*node);
-                    m_output->layer_error_points()->add(point.create_ogr_geometry(), node->id(), "tagged_node");
+                    m_output->add_error(point.create_ogr_geometry(), "tagged_node", node->id());
                 } catch (Osmium::Exception::IllegalGeometry) {
                     std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
                     m_errors++;
@@ -419,7 +419,7 @@ public:
 
 /* ================================================== */
 
-unsigned int output_rings(coastline_rings_list_t coastline_rings, const OutputDatabase& output) {
+unsigned int output_rings(coastline_rings_list_t coastline_rings, OutputDatabase& output) {
     unsigned int warnings = 0;
 
     for (coastline_rings_list_t::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
@@ -428,20 +428,18 @@ unsigned int output_rings(coastline_rings_list_t coastline_rings, const OutputDa
             if (cp.npoints() > 3) {
                 output.layer_rings()->add(cp.ogr_polygon(), cp.min_way_id(), cp.nways(), cp.npoints(), output.layer_error_points());
             } else if (cp.npoints() == 1) {
-                output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "single_point_in_ring");
+                output.add_error(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
                 warnings++;
             } else { // cp.npoints() == 2 or 3
-                OGRLineString* l = cp.ogr_linestring();
-                output.layer_error_lines()->add(l, cp.min_way_id(), l->IsSimple());
-                output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "not_a_ring");
-                output.layer_error_points()->add(cp.ogr_last_point(), cp.last_node_id(), "not_a_ring");
+                output.add_error(cp.ogr_linestring(), "not_a_ring", cp.min_way_id());
+                output.add_error(cp.ogr_first_point(), "not_a_ring", cp.first_node_id());
+                output.add_error(cp.ogr_last_point(), "not_a_ring", cp.last_node_id());
                 warnings++;
             }
         } else {
-            OGRLineString* l = cp.ogr_linestring();
-            output.layer_error_lines()->add(l, cp.min_way_id(), l->IsSimple());
-            output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "end_point");
-            output.layer_error_points()->add(cp.ogr_last_point(), cp.last_node_id(), "end_point");
+            output.add_error(cp.ogr_linestring(), "not_closed", cp.min_way_id());
+            output.add_error(cp.ogr_first_point(), "end_point", cp.first_node_id());
+            output.add_error(cp.ogr_last_point(), "end_point", cp.last_node_id());
             warnings++;
         }
     }
@@ -477,7 +475,7 @@ OGRMultiPolygon* create_polygons(coastline_rings_list_t coastline_rings) {
 /**
  * Write all polygons in the given multipolygon as polygons to the output database.
  */
-void output_polygons(OGRMultiPolygon* multipolygon, const OutputDatabase& output) {
+void output_polygons(OGRMultiPolygon* multipolygon, OutputDatabase& output) {
     for (int i=0; i < multipolygon->getNumGeometries(); ++i) {
         OGRPolygon* p = static_cast<OGRPolygon*>(multipolygon->getGeometryRef(i));
         output.layer_polygons()->add(p, p->getExteriorRing()->isClockwise());
@@ -513,7 +511,7 @@ OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y
     return polygon;
 }
 
-void split(OGRGeometry* g, const OutputDatabase& output, const Options& options) {
+void split(OGRGeometry* g, OutputDatabase& output, const Options& options) {
     static double expand = 0.0001;
     OGRPolygon* p = static_cast<OGRPolygon*>(g);
 
@@ -583,7 +581,7 @@ void split(OGRGeometry* g, const OutputDatabase& output, const Options& options)
 
 /* ================================================== */
 
-unsigned int fix_coastline_direction(OGRMultiPolygon* multipolygon, LayerErrorLines* error_lines) {
+unsigned int fix_coastline_direction(OGRMultiPolygon* multipolygon, OutputDatabase& output) {
     unsigned int warnings = 0;
 
     for (int i=0; i < multipolygon->getNumGeometries(); ++i) {
@@ -591,7 +589,7 @@ unsigned int fix_coastline_direction(OGRMultiPolygon* multipolygon, LayerErrorLi
         if (!p->getExteriorRing()->isClockwise()) {
             p->getExteriorRing()->reverseWindingOrder();
             OGRLineString* l = static_cast<OGRLineString*>(p->getExteriorRing()->clone());
-            error_lines->add(l, 0, l->IsSimple()); // XXX never simple (because its closed?)
+            output.add_error(l, "direction");
             warnings++;
         }
     }
@@ -601,7 +599,7 @@ unsigned int fix_coastline_direction(OGRMultiPolygon* multipolygon, LayerErrorLi
 
 /* ================================================== */
 
-void output_split_polygons(OGRMultiPolygon* multipolygon, const OutputDatabase& output, const Options& options) {
+void output_split_polygons(OGRMultiPolygon* multipolygon, OutputDatabase& output, const Options& options) {
     for (int i=0; i < multipolygon->getNumGeometries(); ++i) {
         OGRPolygon* p = static_cast<OGRPolygon*>(multipolygon->getGeometryRef(i));
         split(p, output, options);
@@ -703,7 +701,7 @@ int main(int argc, char *argv[]) {
         }
         if (options.output_polygons) {
             OGRMultiPolygon* mp = create_polygons(coastline_rings);
-            warnings += fix_coastline_direction(mp, output->layer_error_lines());
+            warnings += fix_coastline_direction(mp, *output);
             if (options.split_large_polygons) {
                 output_split_polygons(mp, *output, options);
             } else {

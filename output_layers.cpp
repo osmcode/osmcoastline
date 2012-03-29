@@ -26,6 +26,8 @@
 #include <ogrsf_frmts.h>
 #include <geos_c.h>
 
+#include <osmium/osm/types.hpp>
+
 #include "osmcoastline.hpp"
 #include "output_layers.hpp"
 
@@ -63,7 +65,7 @@ LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, OGRCoordinateTran
     m_layer->StartTransaction();
 }
 
-void LayerErrorPoints::add(OGRPoint* point, int id, const char* error) {
+void LayerErrorPoints::add(OGRPoint* point, const char* error, osm_object_id_t id) {
     transform_if_needed(point);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
@@ -98,24 +100,24 @@ LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, OGRCoordinateTransf
         exit(return_code_fatal);
     }
 
-    OGRFieldDefn field_simple("simple", OFTInteger);
-    field_simple.SetWidth(1);
-    if (m_layer->CreateField(&field_simple) != OGRERR_NONE ) {
-        std::cerr << "Creating field 'simple' on 'error_lines' layer failed.\n";
+    OGRFieldDefn field_error("error", OFTString);
+    field_error.SetWidth(16);
+    if (m_layer->CreateField(&field_error) != OGRERR_NONE ) {
+        std::cerr << "Creating field 'error' on 'error_lines' layer failed.\n";
         exit(return_code_fatal);
     }
 
     m_layer->StartTransaction();
 }
 
-void LayerErrorLines::add(OGRLineString* linestring, int id, bool is_simple) {
+void LayerErrorLines::add(OGRLineString* linestring, const char* error, osm_object_id_t id) {
     transform_if_needed(linestring);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
     feature->SetGeometryDirectly(linestring);
     feature->SetField("id", id);
-    feature->SetField("simple", is_simple ? 1 : 0);
+    feature->SetField("error", error);
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
         std::cerr << "Failed to create feature on layer 'error_lines'.\n";
@@ -221,7 +223,7 @@ void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, LayerE
         point->setX(x);
         point->setY(y);
 
-        layer_error_points->add(point, id, reason.c_str());
+        layer_error_points->add(point, reason.c_str(), id);
 
         feature->SetField("valid", 0);
     }

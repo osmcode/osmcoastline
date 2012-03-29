@@ -34,6 +34,7 @@ OutputDatabase::OutputDatabase(const std::string& outdb, int epsg, bool with_ind
     m_with_index(with_index),
     m_srs_wgs84(),
     m_srs_out(),
+    m_data_source(NULL),
     m_transform(NULL),
     m_layer_error_points(NULL),
     m_layer_error_lines(NULL),
@@ -79,6 +80,15 @@ OutputDatabase::~OutputDatabase() {
     m_layer_error_lines->commit();
     m_layer_error_points->commit();
     OGRDataSource::DestroyDataSource(m_data_source);
+    delete m_transform;
+}
+
+void OutputDatabase::add_error(OGRPoint* point, const char* error, osm_object_id_t id) {
+    m_layer_error_points->add(point, error, id);
+}
+
+void OutputDatabase::add_error(OGRLineString* linestring, const char* error, osm_object_id_t id) {
+    m_layer_error_lines->add(linestring, error, id);
 }
 
 const char** OutputDatabase::layer_options() const {

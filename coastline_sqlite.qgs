@@ -65,10 +65,11 @@
             <transparencyLevelInt>255</transparencyLevelInt>
             <provider encoding="System">spatialite</provider>
             <vectorjoins/>
-            <renderer-v2 attr="simple" symbollevels="0" type="categorizedSymbol">
+            <renderer-v2 attr="error" symbollevels="0" type="categorizedSymbol">
                 <categories>
-                    <category symbol="0" value="1" label="simple"/>
-                    <category symbol="1" value="0" label="not simple"/>
+                    <category symbol="0" value="not_a_ring" label="not_a_ring"/>
+                    <category symbol="1" value="not_closed" label="not_closed"/>
+                    <category symbol="2" value="direction" label="direction"/>
                 </categories>
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
@@ -90,7 +91,7 @@
                     <symbol outputUnit="MM" alpha="1" type="line" name="1">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="square"/>
-                            <prop k="color" v="255,170,0,255"/>
+                            <prop k="color" v="170,85,127,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
@@ -99,8 +100,24 @@
                             <prop k="width" v="0.5"/>
                         </layer>
                         <layer pass="0" class="LineDecoration" locked="0">
-                            <prop k="color" v="255,170,0,255"/>
+                            <prop k="color" v="170,85,127,255"/>
                             <prop k="width" v="0.26"/>
+                        </layer>
+                    </symbol>
+                    <symbol outputUnit="MM" alpha="1" type="line" name="2">
+                        <layer pass="0" class="SimpleLine" locked="0">
+                            <prop k="capstyle" v="square"/>
+                            <prop k="color" v="255,255,0,255"/>
+                            <prop k="customdash" v="5;2"/>
+                            <prop k="joinstyle" v="bevel"/>
+                            <prop k="offset" v="0"/>
+                            <prop k="penstyle" v="solid"/>
+                            <prop k="use_custom_dash" v="0"/>
+                            <prop k="width" v="1"/>
+                        </layer>
+                        <layer pass="0" class="LineDecoration" locked="0">
+                            <prop k="color" v="255,85,0,255"/>
+                            <prop k="width" v="0.52"/>
                         </layer>
                     </symbol>
                 </symbols>
@@ -150,12 +167,12 @@
             </labelattributes>
             <edittypes>
                 <edittype type="0" name="OGC_FID"/>
+                <edittype type="0" name="error"/>
                 <edittype type="0" name="id"/>
-                <edittype type="0" name="simple"/>
             </edittypes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
-            <annotationform></annotationform>
+            <annotationform>.</annotationform>
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Point" type="vector" hasScaleBasedVisibilityFlag="0">
@@ -284,9 +301,9 @@
                 <edittype type="0" name="error"/>
                 <edittype type="0" name="id"/>
             </edittypes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
-            <annotationform></annotationform>
+            <annotationform>.</annotationform>
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0">
@@ -308,26 +325,12 @@
             <transparencyLevelInt>255</transparencyLevelInt>
             <provider encoding="System">spatialite</provider>
             <vectorjoins/>
-            <renderer-v2 attr="clockwise" symbollevels="0" type="categorizedSymbol">
-                <categories>
-                    <category symbol="0" value="0" label="0"/>
-                    <category symbol="1" value="1" label="1"/>
-                </categories>
+            <renderer-v2 symbollevels="0" type="singleSymbol">
                 <symbols>
-                    <symbol outputUnit="MM" alpha="1" type="fill" name="0">
+                    <symbol outputUnit="MM" alpha="0.4980392156862745" type="fill" name="0">
                         <layer pass="0" class="SimpleFill" locked="0">
-                            <prop k="color" v="170,255,255,255"/>
-                            <prop k="color_border" v="0,0,0,255"/>
-                            <prop k="offset" v="0,0"/>
-                            <prop k="style" v="solid"/>
-                            <prop k="style_border" v="no"/>
-                            <prop k="width_border" v="0.26"/>
-                        </layer>
-                    </symbol>
-                    <symbol outputUnit="MM" alpha="1" type="fill" name="1">
-                        <layer pass="0" class="SimpleFill" locked="0">
-                            <prop k="color" v="170,255,127,255"/>
-                            <prop k="color_border" v="0,0,0,255"/>
+                            <prop k="color" v="100,100,100,127"/>
+                            <prop k="color_border" v="0,0,0,127"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="style" v="solid"/>
                             <prop k="style_border" v="no"/>
@@ -335,22 +338,6 @@
                         </layer>
                     </symbol>
                 </symbols>
-                <source-symbol>
-                    <symbol outputUnit="MM" alpha="1" type="fill" name="0">
-                        <layer pass="0" class="SimpleFill" locked="0">
-                            <prop k="color" v="156,130,193,255"/>
-                            <prop k="color_border" v="0,0,0,255"/>
-                            <prop k="offset" v="0,0"/>
-                            <prop k="style" v="solid"/>
-                            <prop k="style_border" v="solid"/>
-                            <prop k="width_border" v="0.26"/>
-                        </layer>
-                    </symbol>
-                </source-symbol>
-                <colorramp type="gradient" name="[source]">
-                    <prop k="color1" v="0,0,255,255"/>
-                    <prop k="color2" v="175,175,175,255"/>
-                </colorramp>
                 <rotation field=""/>
                 <sizescale field=""/>
             </renderer-v2>
@@ -381,9 +368,9 @@
                 <edittype type="0" name="OGC_FID"/>
                 <edittype type="0" name="clockwise"/>
             </edittypes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
-            <annotationform></annotationform>
+            <annotationform>.</annotationform>
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0">
@@ -482,9 +469,9 @@
                 <edittype type="0" name="nways"/>
                 <edittype type="0" name="valid"/>
             </edittypes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
-            <annotationform></annotationform>
+            <annotationform>.</annotationform>
             <attributeactions/>
         </maplayer>
     </projectlayers>

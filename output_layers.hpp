@@ -80,7 +80,7 @@ class LayerErrorPoints : public Layer {
 public:
 
     LayerErrorPoints(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
-    void add(OGRPoint* point, int id, const char* error);
+    void add(OGRPoint* point, const char* error, osm_object_id_t id);
 
 };
 
@@ -92,7 +92,7 @@ class LayerErrorLines : public Layer {
 public:
 
     LayerErrorLines(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
-    void add(OGRLineString* linestring, int id, bool is_simple);
+    void add(OGRLineString* linestring, const char* error, osm_object_id_t id);
 
 };
 

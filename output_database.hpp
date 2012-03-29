@@ -22,6 +22,7 @@
 
 */
 
+#include <osmium/osm/types.hpp>
 #include <ogr_spatialref.h>
 
 class LayerErrorPoints;
@@ -73,6 +74,9 @@ public:
     LayerErrorLines*  layer_error_lines()  const { return m_layer_error_lines; }
     LayerRings*       layer_rings()        const { return m_layer_rings; }
     LayerPolygons*    layer_polygons()     const { return m_layer_polygons; }
+
+    void add_error(OGRPoint* point, const char* error, osm_object_id_t id);
+    void add_error(OGRLineString* linestring, const char* error, osm_object_id_t id=0);
 
 };
 
