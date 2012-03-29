@@ -52,6 +52,12 @@ struct Options {
     /// EPSG code of output SRS.
     int epsg;
 
+    /// Should large polygons be split?
+    bool split_large_polygons;
+
+    /// Maximum number of points in polygons
+    int max_points_in_polygons;
+
     /// Show debug output?
     bool debug;
 
@@ -63,6 +69,8 @@ struct Options {
         outdb(),
         raw_output(),
         epsg(4326),
+        split_large_polygons(false),
+        max_points_in_polygons(1000),
         debug(false),
         create_index(false)
     {
@@ -72,12 +80,13 @@ struct Options {
             {"create-index", no_argument, 0, 'I'},
             {"output",       required_argument, 0, 'o'},
             {"raw-output",   required_argument, 0, 'r'},
+            {"split",        optional_argument, 0, 'S'},
             {"srs",          required_argument, 0, 's'},
             {0, 0, 0, 0}
         };
 
         while (1) {
-            int c = getopt_long(argc, argv, "dhIo:r:s:", long_options, 0);
+            int c = getopt_long(argc, argv, "dhIo:r:s:S:", long_options, 0);
             if (c == -1)
                 break;
 
@@ -100,6 +109,12 @@ struct Options {
                     break;
                 case 's':
                     epsg = get_epsg(optarg);
+                    break;
+                case 'S':
+                    split_large_polygons = true;
+                    if (optarg) {
+                        max_points_in_polygons = atoi(optarg);
+                    }
                     break;
                 default:
                     exit(return_code_cmdline);
@@ -143,6 +158,9 @@ struct Options {
                   << "  -o, --output=DBFILE      - Spatialite database file for output\n"
                   << "  -r, --raw-output=OSMFILE - Write raw OSM output file\n"
                   << "  -s, --srs=EPSGCODE       - Set output SRS (4326 for WGS84 (default) or 3857)\n"
+                  << "  -S, --split[=N]          - Split polygons with more than N (default 1000) points\n"
+                  << "\n"
+                  << "At least -o and/or -r is needed.\n"
         ;
     }
 
@@ -428,13 +446,16 @@ unsigned int output_rings(coastline_rings_list_t coastline_rings, const Output& 
 
 /* ================================================== */
 
-void output_polygons(coastline_rings_list_t coastline_rings, const Output& output) {
+/**
+ * This function assembles all the coastline rings into one huge multipolygon.
+ */
+OGRMultiPolygon* create_polygons(coastline_rings_list_t coastline_rings) {
     std::vector<OGRGeometry*> all_polygons;
     all_polygons.reserve(coastline_rings.size());
 
     for (coastline_rings_list_t::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
         CoastlineRing& cp = **it;
-        if (cp.is_closed() && cp.npoints() > 3) {
+        if (cp.is_closed() && cp.npoints() > 3) { // XXX what's with rings that don't match here?
             all_polygons.push_back(cp.ogr_polygon());
         }
     }
@@ -445,9 +466,140 @@ void output_polygons(coastline_rings_list_t coastline_rings, const Output& outpu
 
     assert(mega_multipolygon->getGeometryType() == wkbMultiPolygon);
 
-    for (int i=0; i < static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries(); ++i) {
-        OGRPolygon* p = static_cast<OGRPolygon*>(static_cast<OGRMultiPolygon*>(mega_multipolygon)->getGeometryRef(i));
+    return static_cast<OGRMultiPolygon*>(mega_multipolygon);
+}
+
+/**
+ * Write all polygons in the given multipolygon as polygons to the output database.
+ */
+void output_polygons(OGRMultiPolygon* multipolygon, const Output& output) {
+    for (int i=0; i < multipolygon->getNumGeometries(); ++i) {
+        OGRPolygon* p = static_cast<OGRPolygon*>(multipolygon->getGeometryRef(i));
         output.layer_polygons()->add(p, p->getExteriorRing()->isClockwise());
+    }
+}
+
+OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand) {
+    x1 -= expand;
+    x2 += expand;
+    y1 -= expand;
+    y2 += expand;
+
+    if (x1 < -180) { x1 = -180; }
+    if (x1 >  180) { x1 =  180; }
+    if (x2 < -180) { x2 = -180; }
+    if (x2 >  180) { x2 =  180; }
+
+    if (y1 <  -90) { y1 =  -90; }
+    if (y1 >   90) { y2 =   90; }
+    if (y2 <  -90) { y2 =  -90; }
+    if (y2 >   90) { y2 =   90; }
+
+    OGRLinearRing* ring = new OGRLinearRing();
+    ring->addPoint(x1, y1);
+    ring->addPoint(x1, y2);
+    ring->addPoint(x2, y2);
+    ring->addPoint(x2, y1);
+    ring->closeRings();
+
+    OGRPolygon* polygon = new OGRPolygon();
+    polygon->addRingDirectly(ring);
+
+    return polygon;
+}
+
+void split(OGRGeometry* g, const Output& output, const Options& options) {
+    static double expand = 0.0001;
+    OGRPolygon* p = static_cast<OGRPolygon*>(g);
+
+    if (p->getExteriorRing()->getNumPoints() <= options.max_points_in_polygons) {
+        output.layer_polygons()->add(p, 0); // XXX p->getExteriorRing()->isClockwise());
+    } else {
+        OGREnvelope envelope;
+        p->getEnvelope(&envelope);
+
+        OGRPolygon* b1;
+        OGRPolygon* b2;
+
+        if (envelope.MaxX - envelope.MinX < envelope.MaxY-envelope.MinY) {
+            // split vertically
+            double MidY = (envelope.MaxY+envelope.MinY) / 2;
+
+            b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, MidY, expand);
+            b2 = create_rectangular_polygon(envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, expand);
+        } else {
+            // split horizontally
+            double MidX = (envelope.MaxX+envelope.MinX) / 2;
+
+            b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, MidX, envelope.MaxY, expand);
+            b2 = create_rectangular_polygon(MidX, envelope.MinY, envelope.MaxX, envelope.MaxY, expand);
+        }
+
+        OGRGeometry* g1 = p->Intersection(b1);
+        OGRGeometry* g2 = p->Intersection(b2);
+
+        if (g1 && (g1->getGeometryType() == wkbPolygon || g1->getGeometryType() == wkbMultiPolygon) &&
+            g2 && (g2->getGeometryType() == wkbPolygon || g2->getGeometryType() == wkbMultiPolygon)) {
+            if (g1->getGeometryType() == wkbPolygon) {
+                split(g1, output, options);
+            } else {
+                OGRMultiPolygon* mp = static_cast<OGRMultiPolygon*>(g1);
+                for (int i=0; i < mp->getNumGeometries(); ++i) {
+                    OGRPolygon* gp = static_cast<OGRPolygon*>(mp->getGeometryRef(i));
+                    split(gp, output, options);
+                }
+            }
+            if (g2->getGeometryType() == wkbPolygon) {
+                split(g2, output, options);
+            } else {
+                OGRMultiPolygon* mp = static_cast<OGRMultiPolygon*>(g2);
+                for (int i=0; i < mp->getNumGeometries(); ++i) {
+                    OGRPolygon* gp = static_cast<OGRPolygon*>(mp->getGeometryRef(i));
+                    split(gp, output, options);
+                }
+            }
+        } else {
+            std::cerr << "g1=" << g1 << " g2=" << g2 << "\n";
+            if (g1 != 0) {
+                std::cerr << "g1 type=" << g1->getGeometryName() << "\n";
+            }
+            if (g2 != 0) {
+                std::cerr << "g2 type=" << g2->getGeometryName() << "\n";
+            }
+            output.layer_polygons()->add(p, 1);
+            delete g2;
+            delete g1;
+        }
+
+        delete b2;
+        delete b1;
+    }
+}
+
+/* ================================================== */
+
+unsigned int fix_coastline_direction(OGRMultiPolygon* multipolygon, LayerErrorLines* error_lines) {
+    unsigned int warnings = 0;
+
+    for (int i=0; i < multipolygon->getNumGeometries(); ++i) {
+        OGRPolygon* p = static_cast<OGRPolygon*>(multipolygon->getGeometryRef(i));
+        if (!p->getExteriorRing()->isClockwise()) {
+            p->getExteriorRing()->reverseWindingOrder();
+            OGRLineString* l = static_cast<OGRLineString*>(p->getExteriorRing()->clone());
+            error_lines->add(l, 0, l->IsSimple()); // XXX never simple (because its closed?)
+            warnings++;
+        }
+    }
+
+    return warnings;
+}
+
+/* ================================================== */
+
+void output_split_polygons(OGRMultiPolygon* multipolygon, const Output& output, const Options& options) {
+    for (int i=0; i < multipolygon->getNumGeometries(); ++i) {
+        OGRPolygon* p = static_cast<OGRPolygon*>(multipolygon->getGeometryRef(i));
+        split(p, output, options);
     }
 }
 
@@ -549,7 +701,13 @@ int main(int argc, char *argv[]) {
             warnings += output_rings(coastline_rings, *output);
         }
         if (output->layer_polygons()) {
-            output_polygons(coastline_rings, *output);
+            OGRMultiPolygon* mp = create_polygons(coastline_rings);
+            warnings += fix_coastline_direction(mp, output->layer_error_lines());
+            if (options.split_large_polygons) {
+                output_split_polygons(mp, *output, options);
+            } else {
+                output_polygons(mp, *output);
+            }
         }
         std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
         print_memory_usage();
