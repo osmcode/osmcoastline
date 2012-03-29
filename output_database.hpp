@@ -33,7 +33,9 @@ class OGRDataSource;
 class OGRCoordinateTransformation;
 
 /**
- * The OutputDatabase class does the output to a sqlite database (via OGR).
+ * Handle output to an sqlite database (via OGR).
+ * Several tables/layers are created using the right SRS for the different
+ * kinds of data.
  */
 class OutputDatabase {
 
@@ -46,6 +48,7 @@ class OutputDatabase {
     OGRSpatialReference m_srs_out;
     OGRDataSource* m_data_source;
 
+    // If the output SRS is not WGS84, this contains the transformation object. Otherwise NULL.
     OGRCoordinateTransformation* m_transform;
 
     LayerErrorPoints* m_layer_error_points;

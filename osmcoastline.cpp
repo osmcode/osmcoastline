@@ -52,6 +52,12 @@ struct Options {
     /// EPSG code of output SRS.
     int epsg;
 
+    /// Should the rings output table be populated?
+    bool output_rings;
+
+    /// Should the polygons output table be populated?
+    bool output_polygons;
+
     /// Should large polygons be split?
     bool split_large_polygons;
 
@@ -69,24 +75,28 @@ struct Options {
         outdb(),
         raw_output(),
         epsg(4326),
+        output_rings(false),
+        output_polygons(true),
         split_large_polygons(false),
         max_points_in_polygons(1000),
         debug(false),
         create_index(false)
     {
         static struct option long_options[] = {
-            {"debug",        no_argument, 0, 'd'},
-            {"help",         no_argument, 0, 'h'},
-            {"create-index", no_argument, 0, 'I'},
-            {"output",       required_argument, 0, 'o'},
-            {"raw-output",   required_argument, 0, 'r'},
-            {"split",        optional_argument, 0, 'S'},
-            {"srs",          required_argument, 0, 's'},
+            {"debug",           no_argument, 0, 'd'},
+            {"help",            no_argument, 0, 'h'},
+            {"create-index",    no_argument, 0, 'I'},
+            {"output",          required_argument, 0, 'o'},
+            {"output-rings",    no_argument, 0, 'R'},
+            {"output-polygons", required_argument, 0, 'P'},
+            {"raw-output",      required_argument, 0, 'r'},
+            {"split",           optional_argument, 0, 'S'},
+            {"srs",             required_argument, 0, 's'},
             {0, 0, 0, 0}
         };
 
         while (1) {
-            int c = getopt_long(argc, argv, "dhIo:r:s:S:", long_options, 0);
+            int c = getopt_long(argc, argv, "dhIo:r:Rs:S:P:", long_options, 0);
             if (c == -1)
                 break;
 
@@ -104,8 +114,14 @@ struct Options {
                 case 'o':
                     outdb = optarg;
                     break;
+                case 'P':
+                    output_polygons = false;
+                    break;
                 case 'r':
                     raw_output = optarg;
+                    break;
+                case 'R':
+                    output_rings = true;
                     break;
                 case 's':
                     epsg = get_epsg(optarg);
@@ -357,7 +373,7 @@ public:
     void node(const shared_ptr<Osmium::OSM::Node const>& node) {
         bool raw_out = false;
 
-        if (m_output && m_output->layer_error_points()) {
+        if (m_output) {
             const char* natural = node->tags().get_tag_by_key("natural");
             if (natural && !strcmp(natural, "coastline")) {
                 raw_out = true;
@@ -412,33 +428,21 @@ unsigned int output_rings(coastline_rings_list_t coastline_rings, const OutputDa
             if (cp.npoints() > 3) {
                 output.layer_rings()->add(cp.ogr_polygon(), cp.min_way_id(), cp.nways(), cp.npoints(), output.layer_error_points());
             } else if (cp.npoints() == 1) {
-                if (output.layer_error_points()) {
-                    output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "single_point_in_ring");
-                    warnings++;
-                }
+                output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "single_point_in_ring");
+                warnings++;
             } else { // cp.npoints() == 2 or 3
-                if (output.layer_error_lines()) {
-                    OGRLineString* l = cp.ogr_linestring();
-                    output.layer_error_lines()->add(l, cp.min_way_id(), l->IsSimple());
-                    warnings++;
-                }
-                if (output.layer_error_points()) {
-                    output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "not_a_ring");
-                    output.layer_error_points()->add(cp.ogr_last_point(), cp.last_node_id(), "not_a_ring");
-                    warnings++;
-                }
-            }
-        } else {
-            if (output.layer_error_lines()) {
                 OGRLineString* l = cp.ogr_linestring();
                 output.layer_error_lines()->add(l, cp.min_way_id(), l->IsSimple());
+                output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "not_a_ring");
+                output.layer_error_points()->add(cp.ogr_last_point(), cp.last_node_id(), "not_a_ring");
                 warnings++;
             }
-            if (output.layer_error_points()) {
-                output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "end_point");
-                output.layer_error_points()->add(cp.ogr_last_point(), cp.last_node_id(), "end_point");
-                warnings++;
-            }
+        } else {
+            OGRLineString* l = cp.ogr_linestring();
+            output.layer_error_lines()->add(l, cp.min_way_id(), l->IsSimple());
+            output.layer_error_points()->add(cp.ogr_first_point(), cp.first_node_id(), "end_point");
+            output.layer_error_points()->add(cp.ogr_last_point(), cp.last_node_id(), "end_point");
+            warnings++;
         }
     }
 
@@ -664,10 +668,6 @@ int main(int argc, char *argv[]) {
         }
 
         output = new OutputDatabase(options.outdb, options.epsg, options.create_index);
-        output->create_layer_error_points();
-        output->create_layer_error_lines();
-        output->create_layer_rings();
-        output->create_layer_polygons();
     }
 
     coastline_rings_list_t coastline_rings;
@@ -698,10 +698,10 @@ int main(int argc, char *argv[]) {
         std::cerr << "-------------------------------------------------------------------------------\n";
         std::cerr << "Create and output polygons...\n";
         t = time(NULL);
-        if (output->layer_rings()) {
+        if (options.output_rings) {
             warnings += output_rings(coastline_rings, *output);
         }
-        if (output->layer_polygons()) {
+        if (options.output_polygons) {
             OGRMultiPolygon* mp = create_polygons(coastline_rings);
             warnings += fix_coastline_direction(mp, output->layer_error_lines());
             if (options.split_large_polygons) {

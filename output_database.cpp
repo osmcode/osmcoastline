@@ -66,41 +66,22 @@ OutputDatabase::OutputDatabase(const std::string& outdb, int epsg, bool with_ind
         std::cerr << "Creation of output file failed.\n";
         exit(return_code_fatal);
     }
+
+    m_layer_error_points = new LayerErrorPoints(m_data_source, m_transform, &m_srs_out, layer_options());
+    m_layer_error_lines = new LayerErrorLines(m_data_source, m_transform, &m_srs_out, layer_options());
+    m_layer_rings = new LayerRings(m_data_source, m_transform, &m_srs_out, layer_options());
+    m_layer_polygons = new LayerPolygons(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 
 OutputDatabase::~OutputDatabase() {
-    if (m_layer_polygons) {
-        m_layer_polygons->commit();
-    }
-    if (m_layer_rings) {
-        m_layer_rings->commit();
-    }
-    if (m_layer_error_lines) {
-        m_layer_error_lines->commit();
-    }
-    if (m_layer_error_points) {
-        m_layer_error_points->commit();
-    }
+    m_layer_polygons->commit();
+    m_layer_rings->commit();
+    m_layer_error_lines->commit();
+    m_layer_error_points->commit();
     OGRDataSource::DestroyDataSource(m_data_source);
 }
 
 const char** OutputDatabase::layer_options() const {
     return m_with_index ? options_with_index : options_without_index;
-}
-
-void OutputDatabase::create_layer_error_points() {
-    m_layer_error_points = new LayerErrorPoints(m_data_source, m_transform, &m_srs_out, layer_options());
-}
-
-void OutputDatabase::create_layer_error_lines() {
-    m_layer_error_lines = new LayerErrorLines(m_data_source, m_transform, &m_srs_out, layer_options());
-}
-
-void OutputDatabase::create_layer_rings() {
-    m_layer_rings = new LayerRings(m_data_source, m_transform, &m_srs_out, layer_options());
-}
-
-void OutputDatabase::create_layer_polygons() {
-    m_layer_polygons = new LayerPolygons(m_data_source, m_transform, &m_srs_out, layer_options());
 }
 
