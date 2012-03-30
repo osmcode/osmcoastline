@@ -98,3 +98,9 @@ void CoastlineRingCollection::add_partial_ring(const shared_ptr<Osmium::OSM::Way
     }
 }
 
+void CoastlineRingCollection::setup_positions(posmap_t& posmap) {
+    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
+        (*it)->setup_positions(posmap);
+    }
+}
+

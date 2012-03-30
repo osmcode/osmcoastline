@@ -139,9 +139,7 @@ public:
         m_warnings(0),
         m_errors(0)
     {
-        for (CoastlineRingCollection::const_iterator it = m_coastline_rings.begin(); it != m_coastline_rings.end(); ++it) {
-            (*it)->setup_positions(m_posmap);
-        }
+        m_coastline_rings.setup_positions(m_posmap);
         if (m_raw_output) {
             m_raw_output->before_nodes();
         }

@@ -74,6 +74,8 @@ public:
         return m_start_nodes.size() + m_end_nodes.size();
     }
 
+    void setup_positions(posmap_t& posmap);
+
 };
 
 #endif // COASTLINE_RING_COLLECTION_HPP
