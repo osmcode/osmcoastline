@@ -30,14 +30,12 @@
 
 #include "osmcoastline.hpp"
 #include "coastline_ring.hpp"
+#include "coastline_ring_collection.hpp"
 #include "output_database.hpp"
 #include "output_layers.hpp"
 #include "options.hpp"
 
 /* ================================================== */
-
-typedef std::list< shared_ptr<CoastlineRing> > coastline_rings_list_t;
-typedef std::map<osm_object_id_t, coastline_rings_list_t::iterator> idmap_t;
 
 /**
  * Osmium handler for the first pass over the input file in which
@@ -47,11 +45,7 @@ typedef std::map<osm_object_id_t, coastline_rings_list_t::iterator> idmap_t;
 class CoastlineHandlerPass1 : public Osmium::Handler::Base {
 
     Osmium::Output::Base* m_raw_output;
-    coastline_rings_list_t& m_coastline_rings;
-
-    // Mapping from node IDs to CoastlineRings.
-    idmap_t m_start_nodes;
-    idmap_t m_end_nodes;
+    CoastlineRingCollection& m_coastline_rings;
 
     // For statistics we keep track of how many coastline polygons were created
     // from a single ring.
@@ -62,11 +56,9 @@ class CoastlineHandlerPass1 : public Osmium::Handler::Base {
 
 public:
 
-    CoastlineHandlerPass1(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp) :
+    CoastlineHandlerPass1(const Options& options, Osmium::Output::Base* raw_output, CoastlineRingCollection& coastline_rings) :
         m_raw_output(raw_output),
-        m_coastline_rings(clp),
-        m_start_nodes(),
-        m_end_nodes(),
+        m_coastline_rings(coastline_rings),
         m_count_polygons_from_single_way(0),
         m_warnings(0),
         m_errors(0)
@@ -91,83 +83,16 @@ public:
             m_raw_output->way(way);
         }
 
-        // If the way is already closed we just create a CoastlineRing
-        // for it and add it to the list.
         if (way->is_closed()) {
             m_count_polygons_from_single_way++;
-            m_coastline_rings.push_back(make_shared<CoastlineRing>(way));
-            return;
-        }
-
-        // If the way is not closed handling is a bit more complicated.
-        // We'll check if there is an existing CoastlineRing where our
-        // way would "fit" and add it to that ring.
-        idmap_t::iterator mprev = m_end_nodes.find(way->get_first_node_id());
-        idmap_t::iterator mnext = m_start_nodes.find(way->get_last_node_id());
-
-        // There is no CoastlineRing yet where this way could fit,
-        // create one.
-        if (mprev == m_end_nodes.end() &&
-            mnext == m_start_nodes.end()) {
-            shared_ptr<CoastlineRing> cp = make_shared<CoastlineRing>(way);
-            coastline_rings_list_t::iterator added = m_coastline_rings.insert(m_coastline_rings.end(), cp);
-            m_start_nodes[way->get_first_node_id()] = added;
-            m_end_nodes[way->get_last_node_id()] = added;
-            return;
-        }
-
-        // We found a CoastlineRing where we can add the way at the end.
-        if (mprev != m_end_nodes.end()) {
-            coastline_rings_list_t::iterator prev = mprev->second;
-            (*prev)->add_at_end(way);
-            m_end_nodes.erase(mprev);
-
-            if ((*prev)->is_closed()) {
-                idmap_t::iterator x = m_start_nodes.find((*prev)->first_node_id());
-                m_start_nodes.erase(x);
-                return;
-            }
-
-            // We also found a CoastlineRing where we could have added the
-            // way at the front. This means that the way together with the
-            // ring at front and the ring at back are now a complete ring.
-            if (mnext != m_start_nodes.end()) {
-                coastline_rings_list_t::iterator next = mnext->second;
-                (*prev)->join(**next);
-                m_start_nodes.erase(mnext);
-                if ((*prev)->is_closed()) {
-                    idmap_t::iterator x = m_start_nodes.find((*prev)->first_node_id());
-                    if (x != m_start_nodes.end()) {
-                        m_start_nodes.erase(x);
-                    }
-                    x = m_end_nodes.find((*prev)->last_node_id());
-                    if (x != m_end_nodes.end()) {
-                        m_end_nodes.erase(x);
-                    }
-                }
-                m_coastline_rings.erase(next);
-            }
-
-            m_end_nodes[(*prev)->last_node_id()] = prev;
-            return;
-        }
-
-        // We found a CoastlineRing where we can add the way at the front.
-        if (mnext != m_start_nodes.end()) {
-            coastline_rings_list_t::iterator next = mnext->second;
-            (*next)->add_at_front(way);
-            m_start_nodes.erase(mnext);
-            if ((*next)->is_closed()) {
-                idmap_t::iterator x = m_end_nodes.find((*next)->last_node_id());
-                m_end_nodes.erase(x);
-                return;
-            }
-            m_start_nodes[(*next)->first_node_id()] = next;
+            m_coastline_rings.add_complete_ring(way);
+        } else {
+            m_coastline_rings.add_partial_ring(way);
         }
     }
 
     void after_ways() const {
-        std::cerr << "There are " << m_start_nodes.size() + m_end_nodes.size() << " nodes where the coastline is not closed.\n";
+        std::cerr << "There are " << m_coastline_rings.number_of_unconnected_nodes() << " nodes where the coastline is not closed.\n";
         std::cerr << "There are " << m_coastline_rings.size() << " coastline rings ("
             << m_count_polygons_from_single_way << " from a single way and "
             << m_coastline_rings.size() - m_count_polygons_from_single_way << " from multiple ways).\n";
@@ -198,7 +123,7 @@ public:
 class CoastlineHandlerPass2 : public Osmium::Handler::Base {
 
     Osmium::Output::Base* m_raw_output;
-    coastline_rings_list_t& m_coastline_rings;
+    CoastlineRingCollection& m_coastline_rings;
     posmap_t m_posmap;
     OutputDatabase* m_output;
     unsigned int m_warnings;
@@ -206,15 +131,15 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
 
 public:
 
-    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, coastline_rings_list_t& clp, OutputDatabase* output) :
+    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, CoastlineRingCollection& coastline_rings, OutputDatabase* output) :
         m_raw_output(raw_output),
-        m_coastline_rings(clp),
+        m_coastline_rings(coastline_rings),
         m_posmap(),
         m_output(output),
         m_warnings(0),
         m_errors(0)
     {
-        for (coastline_rings_list_t::const_iterator it = m_coastline_rings.begin(); it != m_coastline_rings.end(); ++it) {
+        for (CoastlineRingCollection::const_iterator it = m_coastline_rings.begin(); it != m_coastline_rings.end(); ++it) {
             (*it)->setup_positions(m_posmap);
         }
         if (m_raw_output) {
@@ -271,10 +196,10 @@ public:
 
 /* ================================================== */
 
-unsigned int output_rings(coastline_rings_list_t coastline_rings, OutputDatabase& output) {
+unsigned int output_rings(CoastlineRingCollection coastline_rings, OutputDatabase& output) {
     unsigned int warnings = 0;
 
-    for (coastline_rings_list_t::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
+    for (CoastlineRingCollection::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
         CoastlineRing& cp = **it;
         if (cp.is_closed()) {
             if (cp.npoints() > 3) {
@@ -304,11 +229,11 @@ unsigned int output_rings(coastline_rings_list_t coastline_rings, OutputDatabase
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-OGRMultiPolygon* create_polygons(coastline_rings_list_t coastline_rings) {
+OGRMultiPolygon* create_polygons(CoastlineRingCollection coastline_rings) {
     std::vector<OGRGeometry*> all_polygons;
     all_polygons.reserve(coastline_rings.size());
 
-    for (coastline_rings_list_t::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
+    for (CoastlineRingCollection::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
         CoastlineRing& cp = **it;
         if (cp.is_closed() && cp.npoints() > 3) { // XXX what's with rings that don't match here?
             all_polygons.push_back(cp.ogr_polygon());
@@ -531,7 +456,7 @@ int main(int argc, char *argv[]) {
         output = new OutputDatabase(options.outdb, options.epsg, options.create_index);
     }
 
-    coastline_rings_list_t coastline_rings;
+    CoastlineRingCollection coastline_rings;
 
     std::cerr << "-------------------------------------------------------------------------------\n";
     std::cerr << "Reading ways (1st pass through input file)...\n";
