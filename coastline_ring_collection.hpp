@@ -23,6 +23,7 @@
 */
 
 #include <list>
+#include <vector>
 #include <boost/tr1/memory.hpp>
 #include <boost/make_shared.hpp>
 
@@ -32,6 +33,8 @@ using boost::make_shared;
 #include <osmium/osm/way.hpp>
 
 #include "coastline_ring.hpp"
+
+class OGRPolygon;
 
 typedef std::list< shared_ptr<CoastlineRing> > coastline_rings_list_t;
 typedef std::map<osm_object_id_t, coastline_rings_list_t::iterator> idmap_t;
@@ -75,6 +78,8 @@ public:
     }
 
     void setup_positions(posmap_t& posmap);
+
+    void add_polygons_to_vector(std::vector<OGRGeometry*>& vector);
 
 };
 

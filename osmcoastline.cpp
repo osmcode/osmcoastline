@@ -229,14 +229,7 @@ unsigned int output_rings(CoastlineRingCollection coastline_rings, OutputDatabas
  */
 OGRMultiPolygon* create_polygons(CoastlineRingCollection coastline_rings) {
     std::vector<OGRGeometry*> all_polygons;
-    all_polygons.reserve(coastline_rings.size());
-
-    for (CoastlineRingCollection::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
-        CoastlineRing& cp = **it;
-        if (cp.is_closed() && cp.npoints() > 3) { // XXX what's with rings that don't match here?
-            all_polygons.push_back(cp.ogr_polygon());
-        }
-    }
+    coastline_rings.add_polygons_to_vector(all_polygons);
 
     int is_valid;
     const char* options[] = { "METHOD=ONLY_CCW", NULL };
