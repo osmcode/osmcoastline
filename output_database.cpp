@@ -104,6 +104,10 @@ void OutputDatabase::add_error(OGRLineString* linestring, const char* error, osm
     m_layer_error_lines->add(linestring, error, id);
 }
 
+void OutputDatabase::add_ring(OGRPolygon* polygon, int id, int nways, int npoints) {
+    layer_rings()->add(polygon, id, nways, npoints, layer_error_points());
+}
+
 const char** OutputDatabase::layer_options() const {
     return m_with_index ? options_with_index : options_without_index;
 }

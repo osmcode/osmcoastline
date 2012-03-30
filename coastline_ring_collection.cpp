@@ -20,6 +20,7 @@
 */
 
 #include "coastline_ring_collection.hpp"
+#include "output_database.hpp"
 
 CoastlineRingCollection::CoastlineRingCollection() :
     m_list(),
@@ -113,5 +114,33 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
             vector.push_back(cp.ogr_polygon());
         }
     }
+}
+
+unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
+    unsigned int warnings = 0;
+
+    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
+        CoastlineRing& cp = **it;
+        if (cp.is_closed()) {
+            if (cp.npoints() > 3) {
+                output.add_ring(cp.ogr_polygon(), cp.min_way_id(), cp.nways(), cp.npoints());
+            } else if (cp.npoints() == 1) {
+                output.add_error(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
+                warnings++;
+            } else { // cp.npoints() == 2 or 3
+                output.add_error(cp.ogr_linestring(), "not_a_ring", cp.min_way_id());
+                output.add_error(cp.ogr_first_point(), "not_a_ring", cp.first_node_id());
+                output.add_error(cp.ogr_last_point(), "not_a_ring", cp.last_node_id());
+                warnings++;
+            }
+        } else {
+            output.add_error(cp.ogr_linestring(), "not_closed", cp.min_way_id());
+            output.add_error(cp.ogr_first_point(), "end_point", cp.first_node_id());
+            output.add_error(cp.ogr_last_point(), "end_point", cp.last_node_id());
+            warnings++;
+        }
+    }
+
+    return warnings;
 }
 

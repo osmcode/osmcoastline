@@ -194,36 +194,6 @@ public:
 
 /* ================================================== */
 
-unsigned int output_rings(CoastlineRingCollection coastline_rings, OutputDatabase& output) {
-    unsigned int warnings = 0;
-
-    for (CoastlineRingCollection::const_iterator it = coastline_rings.begin(); it != coastline_rings.end(); ++it) {
-        CoastlineRing& cp = **it;
-        if (cp.is_closed()) {
-            if (cp.npoints() > 3) {
-                output.layer_rings()->add(cp.ogr_polygon(), cp.min_way_id(), cp.nways(), cp.npoints(), output.layer_error_points());
-            } else if (cp.npoints() == 1) {
-                output.add_error(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
-                warnings++;
-            } else { // cp.npoints() == 2 or 3
-                output.add_error(cp.ogr_linestring(), "not_a_ring", cp.min_way_id());
-                output.add_error(cp.ogr_first_point(), "not_a_ring", cp.first_node_id());
-                output.add_error(cp.ogr_last_point(), "not_a_ring", cp.last_node_id());
-                warnings++;
-            }
-        } else {
-            output.add_error(cp.ogr_linestring(), "not_closed", cp.min_way_id());
-            output.add_error(cp.ogr_first_point(), "end_point", cp.first_node_id());
-            output.add_error(cp.ogr_last_point(), "end_point", cp.last_node_id());
-            warnings++;
-        }
-    }
-
-    return warnings;
-}
-
-/* ================================================== */
-
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
@@ -476,7 +446,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "Create and output polygons...\n";
         t = time(NULL);
         if (options.output_rings) {
-            warnings += output_rings(coastline_rings, *output);
+            warnings += coastline_rings.output_rings(*output);
         }
         if (options.output_polygons) {
             OGRMultiPolygon* mp = create_polygons(coastline_rings);
