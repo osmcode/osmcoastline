@@ -56,7 +56,7 @@ class CoastlineHandlerPass1 : public Osmium::Handler::Base {
 
 public:
 
-    CoastlineHandlerPass1(const Options& options, Osmium::Output::Base* raw_output, CoastlineRingCollection& coastline_rings) :
+    CoastlineHandlerPass1(Osmium::Output::Base* raw_output, CoastlineRingCollection& coastline_rings) :
         m_raw_output(raw_output),
         m_coastline_rings(coastline_rings),
         m_count_polygons_from_single_way(0),
@@ -131,7 +131,7 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
 
 public:
 
-    CoastlineHandlerPass2(const Options& options, Osmium::Output::Base* raw_output, CoastlineRingCollection& coastline_rings, OutputDatabase* output) :
+    CoastlineHandlerPass2(Osmium::Output::Base* raw_output, CoastlineRingCollection& coastline_rings, OutputDatabase* output) :
         m_raw_output(raw_output),
         m_coastline_rings(coastline_rings),
         m_posmap(),
@@ -422,7 +422,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "-------------------------------------------------------------------------------\n";
     std::cerr << "Reading ways (1st pass through input file)...\n";
     time_t t = time(NULL);
-    CoastlineHandlerPass1 handler_pass1(options, raw_output, coastline_rings);
+    CoastlineHandlerPass1 handler_pass1(raw_output, coastline_rings);
     infile.read(handler_pass1);
     std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
     print_memory_usage();
@@ -433,7 +433,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "-------------------------------------------------------------------------------\n";
     std::cerr << "Reading nodes (2nd pass through input file)...\n";
     t = time(NULL);
-    CoastlineHandlerPass2 handler_pass2(options, raw_output, coastline_rings, output);
+    CoastlineHandlerPass2 handler_pass2(raw_output, coastline_rings, output);
     infile.read(handler_pass2);
     std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
     print_memory_usage();
