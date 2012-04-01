@@ -30,6 +30,22 @@ void CoastlineRing::setup_positions(posmap_t& posmap) {
     }
 }
 
+void CoastlineRing::add_at_front(const shared_ptr<Osmium::OSM::Way>& way) {
+    assert(first_node_id() == way->get_last_node_id());
+    m_way_node_list.insert(m_way_node_list.begin(), way->nodes().begin(), way->nodes().end()-1);
+
+    update_ring_id(way->id());
+    m_nways++;
+}
+
+void CoastlineRing::add_at_end(const shared_ptr<Osmium::OSM::Way>& way) {
+    assert(last_node_id() == way->get_first_node_id());
+    m_way_node_list.insert(m_way_node_list.end(), way->nodes().begin()+1, way->nodes().end());
+
+    update_ring_id(way->id());
+    m_nways++;
+}
+
 void CoastlineRing::join(const CoastlineRing& other) {
     assert(last_node_id() == other.first_node_id());
     m_way_node_list.insert(m_way_node_list.end(), other.m_way_node_list.begin()+1, other.m_way_node_list.end());
@@ -47,22 +63,6 @@ void CoastlineRing::join_over_gap(const CoastlineRing& other) {
 
     update_ring_id(other.ring_id());
     m_nways += other.m_nways;
-}
-
-void CoastlineRing::add_at_end(const shared_ptr<Osmium::OSM::Way>& way) {
-    assert(last_node_id() == way->get_first_node_id());
-    m_way_node_list.insert(m_way_node_list.end(), way->nodes().begin()+1, way->nodes().end());
-
-    update_ring_id(way->id());
-    m_nways++;
-}
-
-void CoastlineRing::add_at_front(const shared_ptr<Osmium::OSM::Way>& way) {
-    assert(first_node_id() == way->get_last_node_id());
-    m_way_node_list.insert(m_way_node_list.begin(), way->nodes().begin(), way->nodes().end()-1);
-
-    update_ring_id(way->id());
-    m_nways++;
 }
 
 void CoastlineRing::close_ring() {

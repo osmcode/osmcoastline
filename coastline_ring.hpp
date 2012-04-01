@@ -122,20 +122,30 @@ public:
      */
     void setup_positions(posmap_t& posmap);
 
-    /**
-     * Join the other ring to this one. The other ring can be destroyed
-     * afterwards.
-     */
-    void join(const CoastlineRing& other);
-
-    void join_over_gap(const CoastlineRing& other);
+    /// Add a new way to the front of this ring.
+    void add_at_front(const shared_ptr<Osmium::OSM::Way>& way);
 
     /// Add a new way to the end of this ring.
     void add_at_end(const shared_ptr<Osmium::OSM::Way>& way);
 
-    /// Add a new way to the front of this ring.
-    void add_at_front(const shared_ptr<Osmium::OSM::Way>& way);
+    /**
+     * Join the other ring to this one. The first node ID of the
+     * other ring must be the same as the last node ID of this
+     * ring.
+     * The other ring can be destroyed afterwards.
+     */
+    void join(const CoastlineRing& other);
 
+    /**
+     * Join the other ring to this one, possibly over a gap.
+     * The other ring can be destroyed afterwards.
+     */
+    void join_over_gap(const CoastlineRing& other);
+
+    /**
+     * Close ring by adding the first node to the end. If the
+     * ring is already closed it is not changed.
+     */
     void close_ring();
 
     /**
