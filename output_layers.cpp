@@ -159,6 +159,13 @@ LayerRings::LayerRings(OGRDataSource* data_source, OGRCoordinateTransformation* 
         exit(return_code_fatal);
     }
 
+    OGRFieldDefn field_fixed("fixed", OFTInteger);
+    field_fixed.SetWidth(1);
+    if (m_layer->CreateField(&field_fixed) != OGRERR_NONE ) {
+        std::cerr << "Creating field 'fixed' on 'rings' layer failed.\n";
+        exit(return_code_fatal);
+    }
+
     OGRFieldDefn field_land("land", OFTInteger);
     field_land.SetWidth(1);
     if (m_layer->CreateField(&field_land) != OGRERR_NONE ) {
@@ -176,7 +183,7 @@ LayerRings::LayerRings(OGRDataSource* data_source, OGRCoordinateTransformation* 
     m_layer->StartTransaction();
 }
 
-void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, LayerErrorPoints* layer_error_points) {
+void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed, LayerErrorPoints* layer_error_points) {
     transform_if_needed(polygon);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
@@ -185,6 +192,7 @@ void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, LayerE
     feature->SetField("id", id);
     feature->SetField("nways", nways);
     feature->SetField("npoints", npoints);
+    feature->SetField("fixed", fixed ? 0 : 1);
 
     if (polygon->getExteriorRing()->isClockwise()) {
         feature->SetField("land", 1);

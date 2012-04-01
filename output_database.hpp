@@ -80,7 +80,7 @@ public:
 
     void add_error(OGRPoint* point, const char* error, osm_object_id_t id);
     void add_error(OGRLineString* linestring, const char* error, osm_object_id_t id=0);
-    void add_ring(OGRPolygon* polygon, int id, int nways, int npoints);
+    void add_ring(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed);
 
     void set_meta(int runtime, int memory_usage);
 

@@ -68,6 +68,9 @@ class CoastlineRing {
      */
     unsigned int m_nways;
 
+    /// Ring was fixed because of missing/wrong OSM data.
+    bool m_fixed;
+
 public:
 
     /**
@@ -76,7 +79,8 @@ public:
     CoastlineRing(const shared_ptr<Osmium::OSM::Way>& way) :
         m_way_node_list(way->is_closed() ? way->node_count() : 1000),
         m_ring_id(way->id()),
-        m_nways(1)
+        m_nways(1),
+        m_fixed(false)
     {
         m_way_node_list.insert(m_way_node_list.begin(), way->nodes().begin(), way->nodes().end());
     }
@@ -114,6 +118,9 @@ public:
 
     /// Returns true if the ring is closed.
     bool is_closed() const { return first_node_id() == last_node_id(); }
+
+    /// Was this ring fixed because of missing/wrong OSM data?
+    bool is_fixed() const { return m_fixed; }
 
     /**
      * When there are two different nodes with the same position

@@ -121,7 +121,7 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
         CoastlineRing& cp = **it;
         if (cp.is_closed()) {
             if (cp.npoints() > 3) {
-                output.add_ring(cp.ogr_polygon(), cp.ring_id(), cp.nways(), cp.npoints());
+                output.add_ring(cp.ogr_polygon(), cp.ring_id(), cp.nways(), cp.npoints(), cp.is_fixed());
             } else if (cp.npoints() == 1) {
                 output.add_error(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
                 warnings++;

@@ -108,7 +108,7 @@ class LayerRings : public Layer {
 public:
 
     LayerRings(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
-    void add(OGRPolygon* polygon, int id, int nways, int npoints, LayerErrorPoints* layer_error_points);
+    void add(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed, LayerErrorPoints* layer_error_points);
 
 };
 

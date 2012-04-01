@@ -63,12 +63,14 @@ void CoastlineRing::join_over_gap(const CoastlineRing& other) {
 
     update_ring_id(other.ring_id());
     m_nways += other.m_nways;
+    m_fixed = true;
 }
 
 void CoastlineRing::close_ring() {
     if (first_position() != last_position()) {
         m_way_node_list.add(m_way_node_list.front());
     }
+    m_fixed = true;
 }
 
 OGRPolygon* CoastlineRing::ogr_polygon() const {
@@ -91,6 +93,8 @@ OGRPoint* CoastlineRing::ogr_last_point() const {
     return new OGRPoint(wn.lon(), wn.lat());
 }
 
+// Pythagoras doesn't work on a round earth but that is ok here, we only need a
+// rough measure anyway
 double CoastlineRing::distance_to_start_position(Osmium::OSM::Position pos) const {
     Osmium::OSM::Position p = m_way_node_list.front().position();
     return (pos.lon() - p.lon()) * (pos.lon() - p.lon()) + (pos.lat() - p.lat()) * (pos.lat() - p.lat());
