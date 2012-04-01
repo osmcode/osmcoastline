@@ -43,7 +43,7 @@ output_layers.o: output_layers.cpp output_layers.hpp osmcoastline.hpp
 coastline_ring.o: coastline_ring.cpp coastline_ring.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
-coastline_ring_collection.o: coastline_ring_collection.cpp coastline_ring_collection.hpp output_database.hpp
+coastline_ring_collection.o: coastline_ring_collection.cpp coastline_ring_collection.hpp output_database.hpp coastline_ring.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
 osmcoastline: osmcoastline.o coastline_ring.o coastline_ring_collection.o output_database.o output_layers.o

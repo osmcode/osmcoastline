@@ -123,18 +123,18 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
         CoastlineRing& cp = **it;
         if (cp.is_closed()) {
             if (cp.npoints() > 3) {
-                output.add_ring(cp.ogr_polygon(), cp.min_way_id(), cp.nways(), cp.npoints());
+                output.add_ring(cp.ogr_polygon(), cp.ring_id(), cp.nways(), cp.npoints());
             } else if (cp.npoints() == 1) {
                 output.add_error(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
                 warnings++;
             } else { // cp.npoints() == 2 or 3
-                output.add_error(cp.ogr_linestring(), "not_a_ring", cp.min_way_id());
+                output.add_error(cp.ogr_linestring(), "not_a_ring", cp.ring_id());
                 output.add_error(cp.ogr_first_point(), "not_a_ring", cp.first_node_id());
                 output.add_error(cp.ogr_last_point(), "not_a_ring", cp.last_node_id());
                 warnings++;
             }
         } else {
-            output.add_error(cp.ogr_linestring(), "not_closed", cp.min_way_id());
+            output.add_error(cp.ogr_linestring(), "not_closed", cp.ring_id());
             output.add_error(cp.ogr_first_point(), "end_point", cp.first_node_id());
             output.add_error(cp.ogr_last_point(), "end_point", cp.last_node_id());
             warnings++;

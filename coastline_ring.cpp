@@ -28,9 +28,7 @@ void CoastlineRing::join(const CoastlineRing& other) {
     assert(last_node_id() == other.first_node_id());
     m_way_node_list.insert(m_way_node_list.end(), other.m_way_node_list.begin()+1, other.m_way_node_list.end());
 
-    if (other.min_way_id() < m_min_way_id) {
-        m_min_way_id = other.min_way_id();
-    }
+    update_ring_id(other.ring_id());
     m_nways += other.m_nways;
 }
 
@@ -41,9 +39,7 @@ void CoastlineRing::join_over_gap(const CoastlineRing& other) {
 
     m_way_node_list.insert(m_way_node_list.end(), other.m_way_node_list.begin()+1, other.m_way_node_list.end());
 
-    if (other.min_way_id() < m_min_way_id) {
-        m_min_way_id = other.min_way_id();
-    }
+    update_ring_id(other.ring_id());
     m_nways += other.m_nways;
 }
 
@@ -51,9 +47,7 @@ void CoastlineRing::add_at_end(const shared_ptr<Osmium::OSM::Way>& way) {
     assert(last_node_id() == way->get_first_node_id());
     m_way_node_list.insert(m_way_node_list.end(), way->nodes().begin()+1, way->nodes().end());
 
-    if (way->id() < m_min_way_id) {
-        m_min_way_id = way->id();
-    }
+    update_ring_id(way->id());
     m_nways++;
 }
 
@@ -61,9 +55,7 @@ void CoastlineRing::add_at_front(const shared_ptr<Osmium::OSM::Way>& way) {
     assert(first_node_id() == way->get_last_node_id());
     m_way_node_list.insert(m_way_node_list.begin(), way->nodes().begin(), way->nodes().end()-1);
 
-    if (way->id() < m_min_way_id) {
-        m_min_way_id = way->id();
-    }
+    update_ring_id(way->id());
     m_nways++;
 }
 
@@ -113,7 +105,7 @@ double CoastlineRing::distance_to_start_position(Osmium::OSM::Position pos) cons
 }
 
 std::ostream& operator<<(std::ostream& out, CoastlineRing& cp) {
-    out << "CoastlineRing(id=" << cp.min_way_id() << ", nways=" << cp.nways() << ", npoints=" << cp.npoints() << ", first_node_id=" << cp.first_node_id() << ", last_node_id=" << cp.last_node_id();
+    out << "CoastlineRing(id=" << cp.ring_id() << ", nways=" << cp.nways() << ", npoints=" << cp.npoints() << ", first_node_id=" << cp.first_node_id() << ", last_node_id=" << cp.last_node_id();
     if (cp.is_closed()) {
         out << " [CLOSED]";
     }

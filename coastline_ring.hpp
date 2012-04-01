@@ -56,21 +56,58 @@ class CoastlineRing {
 
     Osmium::OSM::WayNodeList m_way_node_list;
 
-    /// Minimum ID of all the ways making up the ring.
-    osm_object_id_t m_min_way_id;
+    /**
+     * Smallest ID of all the ways making up the ring. Can be used as somewhat
+     * stable unique ID for the ring.
+     */
+    osm_object_id_t m_ring_id;
 
-    /// The number of ways making up this ring.
+    /**
+     * The number of ways making up this ring. This is not actually needed for
+     * anything, but kept to create statistics.
+     */
     unsigned int m_nways;
 
 public:
 
+    /**
+     * Create CoastlineRing from a way.
+     */
     CoastlineRing(const shared_ptr<Osmium::OSM::Way>& way) :
         m_way_node_list(way->is_closed() ? way->node_count() : 1000),
-        m_min_way_id(way->id()),
+        m_ring_id(way->id()),
         m_nways(1)
     {
         m_way_node_list.insert(m_way_node_list.begin(), way->nodes().begin(), way->nodes().end());
     }
+
+    /// ID of first node in the ring.
+    osm_object_id_t first_node_id() const { return m_way_node_list.front().ref(); }
+
+    /// ID of last node in the ring.
+    osm_object_id_t last_node_id() const { return m_way_node_list.back().ref(); }
+
+    /// Return ID of this ring (defined as smallest ID of the ways making up the ring).
+    osm_object_id_t ring_id() const { return m_ring_id; }
+
+    /**
+     * Set ring ID. The ring will only get the new ID if it is smaller than the
+     * old one.
+     */
+    void update_ring_id(osm_object_id_t new_id) {
+        if (new_id < m_ring_id) {
+            m_ring_id = new_id;
+        }
+    }
+
+    /// Returns the number of ways making up this ring.
+    unsigned int nways() const { return m_nways; }
+
+    /// Returns the number of points in this ring.
+    unsigned int npoints() const { return m_way_node_list.size(); }
+
+    /// Returns true if the ring is closed.
+    bool is_closed() const { return first_node_id() == last_node_id(); }
 
     /**
      * Join the other ring to this one. The other ring can be destroyed
@@ -87,19 +124,6 @@ public:
     void add_at_front(const shared_ptr<Osmium::OSM::Way>& way);
 
     void close_ring();
-
-    osm_object_id_t first_node_id() const { return m_way_node_list.front().ref(); }
-    osm_object_id_t last_node_id()  const { return m_way_node_list.back().ref(); }
-    osm_object_id_t min_way_id()    const { return m_min_way_id; }
-
-    /// Returns the number of ways making up this ring.
-    unsigned int nways() const { return m_nways; }
-
-    /// Returns the number of points in this ring.
-    unsigned int npoints() const { return m_way_node_list.size(); }
-
-    /// Returns true if the ring is closed.
-    bool is_closed() const { return first_node_id() == last_node_id(); }
 
     /**
      * Add pointers to the node positions to the given posmap. The
