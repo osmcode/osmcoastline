@@ -70,10 +70,9 @@ public:
 
         if (way->is_closed()) {
             m_count_polygons_from_single_way++;
-            m_coastline_rings.add_complete_ring(way);
-        } else {
-            m_coastline_rings.add_partial_ring(way);
         }
+
+        m_coastline_rings.add_way(way);
     }
 
     void after_ways() const {

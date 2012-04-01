@@ -40,6 +40,10 @@ class OutputDatabase;
 typedef std::list< shared_ptr<CoastlineRing> > coastline_rings_list_t;
 typedef std::map<osm_object_id_t, coastline_rings_list_t::iterator> idmap_t;
 
+/**
+ * A collection of CoastlineRing objects. Keeps a list of all start and end
+ * nodes so it can efficiently join CoastlineRings.
+ */
 class CoastlineRingCollection {
 
     coastline_rings_list_t m_list;
@@ -48,31 +52,28 @@ class CoastlineRingCollection {
     idmap_t m_start_nodes;
     idmap_t m_end_nodes;
 
+    void add_partial_ring(const shared_ptr<Osmium::OSM::Way>& way);
+
 public:
 
     typedef coastline_rings_list_t::const_iterator const_iterator;
 
     CoastlineRingCollection();
 
-    ~CoastlineRingCollection();
+    /// Return the number of CoastlineRings in the collection.
+    size_t size() const { return m_list.size(); }
 
-    size_t size() const {
-        return m_list.size();
+    /**
+     * Add way to collection. A new CoastlineRing will be created for the way
+     * or it will be joined to an existing CoastlineRing.
+     */
+    void add_way(const shared_ptr<Osmium::OSM::Way>& way) {
+        if (way->is_closed()) {
+            m_list.push_back(make_shared<CoastlineRing>(way));
+        } else {
+            add_partial_ring(way);
+        }
     }
-
-    const_iterator begin() const {
-        return m_list.begin();
-    }
-
-    const_iterator end() const {
-        return m_list.end();
-    }
-
-    void add_complete_ring(const shared_ptr<Osmium::OSM::Way>& way) {
-        m_list.push_back(make_shared<CoastlineRing>(way));
-    }
-
-    void add_partial_ring(const shared_ptr<Osmium::OSM::Way>& way);
 
     int number_of_unconnected_nodes() const {
         return m_start_nodes.size() + m_end_nodes.size();

@@ -28,22 +28,22 @@ CoastlineRingCollection::CoastlineRingCollection() :
     m_end_nodes() {
 }
 
-CoastlineRingCollection::~CoastlineRingCollection() {
-}
-
-// If the way is not closed handling is a bit more complicated.
-// We'll check if there is an existing CoastlineRing where our
-// way would "fit" and add it to that ring.
+/**
+ * If a way is not closed adding it to the coastline collection is a bit
+ * complicated.
+ * We'll check if there is an existing CoastlineRing that our way connects
+ * to and add it to that ring. If there is none, we'll create a new
+ * CoastlineRing for it and add that to the collection.
+ */
 void CoastlineRingCollection::add_partial_ring(const shared_ptr<Osmium::OSM::Way>& way) {
     idmap_t::iterator mprev = m_end_nodes.find(way->get_first_node_id());
     idmap_t::iterator mnext = m_start_nodes.find(way->get_last_node_id());
 
-    // There is no CoastlineRing yet where this way could fit,
-    // create one.
+    // There is no CoastlineRing yet where this way could fit. So we
+    // create one and add it to the collection.
     if (mprev == m_end_nodes.end() &&
         mnext == m_start_nodes.end()) {
-        shared_ptr<CoastlineRing> cp = make_shared<CoastlineRing>(way);
-        coastline_rings_list_t::iterator added = m_list.insert(m_list.end(), cp);
+        coastline_rings_list_t::iterator added = m_list.insert(m_list.end(), make_shared<CoastlineRing>(way));
         m_start_nodes[way->get_first_node_id()] = added;
         m_end_nodes[way->get_last_node_id()] = added;
         return;
@@ -56,8 +56,7 @@ void CoastlineRingCollection::add_partial_ring(const shared_ptr<Osmium::OSM::Way
         m_end_nodes.erase(mprev);
 
         if ((*prev)->is_closed()) {
-            idmap_t::iterator x = m_start_nodes.find((*prev)->first_node_id());
-            m_start_nodes.erase(x);
+            m_start_nodes.erase(m_start_nodes.find((*prev)->first_node_id()));
             return;
         }
 
@@ -91,8 +90,7 @@ void CoastlineRingCollection::add_partial_ring(const shared_ptr<Osmium::OSM::Way
         (*next)->add_at_front(way);
         m_start_nodes.erase(mnext);
         if ((*next)->is_closed()) {
-            idmap_t::iterator x = m_end_nodes.find((*next)->last_node_id());
-            m_end_nodes.erase(x);
+            m_end_nodes.erase(m_end_nodes.find((*next)->last_node_id()));
             return;
         }
         m_start_nodes[(*next)->first_node_id()] = next;
