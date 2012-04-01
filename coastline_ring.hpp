@@ -87,6 +87,12 @@ public:
     /// ID of last node in the ring.
     osm_object_id_t last_node_id() const { return m_way_node_list.back().ref(); }
 
+    /// Position of the first node in the ring.
+    Osmium::OSM::Position first_position() const { return m_way_node_list.front().position(); }
+
+    /// Position of the last node in the ring.
+    Osmium::OSM::Position last_position() const { return m_way_node_list.back().position(); }
+
     /// Return ID of this ring (defined as smallest ID of the ways making up the ring).
     osm_object_id_t ring_id() const { return m_ring_id; }
 
@@ -110,6 +116,13 @@ public:
     bool is_closed() const { return first_node_id() == last_node_id(); }
 
     /**
+     * Add pointers to the node positions to the given posmap. The
+     * posmap can than later be used to directly put the positions
+     * into the right place.
+     */
+    void setup_positions(posmap_t& posmap);
+
+    /**
      * Join the other ring to this one. The other ring can be destroyed
      * afterwards.
      */
@@ -124,13 +137,6 @@ public:
     void add_at_front(const shared_ptr<Osmium::OSM::Way>& way);
 
     void close_ring();
-
-    /**
-     * Add pointers to the node positions to the given posmap. The
-     * posmap can than later be used to directly put the positions
-     * into the right place.
-     */
-    void setup_positions(posmap_t& posmap);
 
     /**
      * Create OGRPolygon for this ring. The ring is reversed in the
@@ -149,25 +155,19 @@ public:
     OGRLineString* ogr_linestring() const;
 
     /**
-     * Create OGRPoint for this first point in this ring. (Because
-     * of the ring reversal this is actually the last point of the
-     * last way used to create the CoastlineRing.)
+     * Create OGRPoint for the first point in this ring.
      *
      * Caller takes ownership of created object.
      */
     OGRPoint* ogr_first_point() const;
 
     /**
-     * Create OGRPoint for this last point in this ring. (Because
-     * of the ring reversal this is actually the last point of the
-     * last way used to create the CoastlineRing.)
+     * Create OGRPoint for the last point in this ring.
      *
      * Caller takes ownership of created object.
      */
     OGRPoint* ogr_last_point() const;
 
-    Osmium::OSM::Position start_position() const;
-    Osmium::OSM::Position end_position() const;
     double distance_to_start_position(Osmium::OSM::Position pos) const;
 
     friend std::ostream& operator<<(std::ostream& out, const CoastlineRing& cp);

@@ -205,7 +205,7 @@ void CoastlineRingCollection::close_rings() {
     // create vector with all possible combinations of connections between rings
     for (idmap_t::iterator eit = m_end_nodes.begin(); eit != m_end_nodes.end(); ++eit) {
         for (idmap_t::iterator sit = m_start_nodes.begin(); sit != m_start_nodes.end(); ++sit) {
-            double distance = (*sit->second)->distance_to_start_position((*eit->second)->end_position());
+            double distance = (*sit->second)->distance_to_start_position((*eit->second)->last_position());
             if (distance < max_distance) {
                 connections.push_back(Connection(distance, eit, sit));
             }
