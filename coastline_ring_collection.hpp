@@ -85,7 +85,30 @@ public:
 
     unsigned int output_rings(OutputDatabase& output);
 
-    void close_rings();
+    void close_rings(OutputDatabase& output);
+
+private:
+
+    struct Connection {
+
+        double distance;
+        osm_object_id_t start_id;
+        osm_object_id_t end_id;
+
+        Connection(double d, osm_object_id_t s, osm_object_id_t e) : distance(d), start_id(s), end_id(e) { }
+
+        /**
+        * Returns true if start or end ID of this connection is the same as the
+        * other connections start or end ID. Used as predicate in std::remove_if().
+        */
+        bool operator()(const Connection& other) {
+            return start_id == other.start_id || end_id == other.end_id;
+        }
+
+        // Used in std::sort
+        static bool sort_by_distance(const Connection& a, const Connection& b) { return a.distance > b.distance; }
+
+    };
 
 };
 

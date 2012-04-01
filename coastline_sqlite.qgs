@@ -4,10 +4,10 @@
     <mapcanvas>
         <units>degrees</units>
         <extent>
-            <xmin>7.102151</xmin>
-            <ymin>53.567257</ymin>
-            <xmax>7.696805</xmax>
-            <ymax>53.867004</ymax>
+            <xmin>7.124809</xmin>
+            <ymin>53.581545</ymin>
+            <xmax>7.655311</xmax>
+            <ymax>53.848955</ymax>
         </extent>
         <projections>0</projections>
         <destinationsrs>
@@ -70,6 +70,7 @@
                     <category symbol="0" value="not_a_ring" label="not_a_ring"/>
                     <category symbol="1" value="not_closed" label="not_closed"/>
                     <category symbol="2" value="direction" label="direction"/>
+                    <category symbol="3" value="" label="other"/>
                 </categories>
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
@@ -118,6 +119,18 @@
                         <layer pass="0" class="LineDecoration" locked="0">
                             <prop k="color" v="255,85,0,255"/>
                             <prop k="width" v="0.52"/>
+                        </layer>
+                    </symbol>
+                    <symbol outputUnit="MM" alpha="1" type="line" name="3">
+                        <layer pass="0" class="SimpleLine" locked="0">
+                            <prop k="capstyle" v="square"/>
+                            <prop k="color" v="0,255,255,255"/>
+                            <prop k="customdash" v="5;2"/>
+                            <prop k="joinstyle" v="bevel"/>
+                            <prop k="offset" v="0"/>
+                            <prop k="penstyle" v="solid"/>
+                            <prop k="use_custom_dash" v="0"/>
+                            <prop k="width" v="0.5"/>
                         </layer>
                     </symbol>
                 </symbols>
@@ -297,7 +310,7 @@
                 <property key="labeling/dataDefinedProperty9" value=""/>
                 <property key="labeling/dist" value="1"/>
                 <property key="labeling/distInMapUnits" value="false"/>
-                <property key="labeling/enabled" value="true"/>
+                <property key="labeling/enabled" value="false"/>
                 <property key="labeling/fieldName" value="id"/>
                 <property key="labeling/fontFamily" value="Sans"/>
                 <property key="labeling/fontItalic" value="false"/>

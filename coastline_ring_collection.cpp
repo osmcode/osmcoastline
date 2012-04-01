@@ -142,87 +142,78 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     return warnings;
 }
 
-class Connection {
+void CoastlineRingCollection::close_rings(OutputDatabase& output) {
+    const double max_distance = 1;
+    std::vector<Connection> connections;
 
-public:
-
-    double m_distance;
-    idmap_t::iterator m_eit;
-    idmap_t::iterator m_sit;
-
-    Connection(double distance, idmap_t::iterator eit, idmap_t::iterator sit) :
-        m_distance(distance),
-        m_eit(eit),
-        m_sit(sit)
-    {
-    }
-
-    void make_connection() const {
-        CoastlineRing* e = m_eit->second->get();
-        CoastlineRing* s = m_sit->second->get();
-
-        if (e == s) {
-            // connect to itself by closing ring
-            e->close_ring();
-        } else {
-            // connect to other ring
-            e->join_over_gap(*s);
-        }
-    }
-
-    double distance() const {
-        return m_distance;
-    }
-
-    bool operator()(const Connection& other) {
-        return m_eit == other.m_eit || m_sit == other.m_sit;
-    }
-
-    osm_object_id_t start_id() const {
-        return m_sit->first;
-    }
-
-    osm_object_id_t end_id() const {
-        return m_eit->first;
-    }
-
-};
-
-bool sort_by_distance(const Connection& a, const Connection& b) {
-    return a.distance() > b.distance();
-}
-
-const double max_distance = 1;
-
-typedef std::vector<Connection> connections_t;
-
-void CoastlineRingCollection::close_rings() {
     std::cerr << "close_rings():\n";
-    connections_t connections;
 
-    // create vector with all possible combinations of connections between rings
+    // Create vector with all possible combinations of connections between rings.
     for (idmap_t::iterator eit = m_end_nodes.begin(); eit != m_end_nodes.end(); ++eit) {
         for (idmap_t::iterator sit = m_start_nodes.begin(); sit != m_start_nodes.end(); ++sit) {
             double distance = (*sit->second)->distance_to_start_position((*eit->second)->last_position());
             if (distance < max_distance) {
-                connections.push_back(Connection(distance, eit, sit));
+                connections.push_back(Connection(distance, eit->first, sit->first));
             }
         }
     }
 
-    // sort vector by distance
-    std::sort(connections.begin(), connections.end(), sort_by_distance);
+    // Sort vector by distance, shortest at end.
+    std::sort(connections.begin(), connections.end(), Connection::sort_by_distance);
 
-    // go through vector and close rings using the connections in turn
+    // Go through vector starting with the shortest connections and close rings
+    // using the connections in turn.
     while (!connections.empty()) {
-        Connection c = connections.back();
+        Connection conn = connections.back();
         connections.pop_back();
 
-        // invalidate all other connections using one of the same end points
-        connections.erase(remove_if(connections.begin(), connections.end(), c), connections.end());
+        // Invalidate all other connections using one of the same end points.
+        connections.erase(remove_if(connections.begin(), connections.end(), conn), connections.end());
 
-        std::cerr << "  close between " << c.end_id() << " and " << c.start_id() << "\n";
-        c.make_connection();        
+        std::cerr << "  close between " << conn.end_id << " and " << conn.start_id << "\n";
+
+        idmap_t::iterator eit = m_end_nodes.find(conn.start_id);
+        idmap_t::iterator sit = m_start_nodes.find(conn.end_id);
+
+        if (eit != m_end_nodes.end() && sit != m_start_nodes.end()) {
+            CoastlineRing* e = eit->second->get();
+            CoastlineRing* s = sit->second->get();
+
+            output.add_error(e->ogr_last_point(), "fixed_end_point", e->last_node_id());
+            output.add_error(s->ogr_first_point(), "fixed_end_point", s->first_node_id());
+
+            if (e->last_position() != s->first_position()) {
+                OGRLineString* linestring = new OGRLineString;
+                linestring->addPoint(e->ogr_last_point());
+                linestring->addPoint(s->ogr_first_point());
+                output.add_error(linestring, "added_line");
+            }
+
+            if (e == s) {
+                // connect to itself by closing ring
+                e->close_ring();
+
+                m_end_nodes.erase(eit);
+                m_start_nodes.erase(sit);
+            } else {
+                // connect to other ring
+                e->join_over_gap(*s);
+
+                if (e->first_position() == e->last_position()) {
+                    output.add_error(e->ogr_first_point(), "double_node", e->first_node_id());
+                    m_start_nodes.erase(e->first_node_id());
+                    m_end_nodes.erase(eit);
+                    m_start_nodes.erase(sit);
+                    m_end_nodes.erase(e->last_node_id());
+                    e->fake_close();
+                } else {
+                    m_end_nodes[e->last_node_id()] = eit->second;
+                    m_end_nodes.erase(eit);
+                    m_start_nodes.erase(sit);
+                }
+                m_list.erase(sit->second);
+            }
+        }
     }
 }
 

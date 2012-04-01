@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
     errors += handler_pass2.errors();
 
     if (options.close_rings) {
-        coastline_rings.close_rings();
+        coastline_rings.close_rings(*output);
     }
 
     if (output) {

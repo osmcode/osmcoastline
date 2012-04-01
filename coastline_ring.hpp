@@ -116,6 +116,16 @@ public:
     bool is_closed() const { return first_node_id() == last_node_id(); }
 
     /**
+     * When there are two different nodes with the same position
+     * a situation can arise where a CoastlineRing looks not closed
+     * when looking at the node IDs but looks closed then looking
+     * at the positions. To "fix" this we change the node ID of the
+     * last node in the ring to be the same as the first. This
+     * method does this.
+     */
+    void fake_close() { m_way_node_list.back().ref(first_node_id()); }
+
+    /**
      * Add pointers to the node positions to the given posmap. The
      * posmap can than later be used to directly put the positions
      * into the right place.
