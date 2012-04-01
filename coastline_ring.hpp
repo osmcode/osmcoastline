@@ -83,11 +83,15 @@ public:
      */
     void join(const CoastlineRing& other);
 
+    void join_over_gap(const CoastlineRing& other);
+
     /// Add a new way to the end of this ring.
     void add_at_end(const shared_ptr<Osmium::OSM::Way>& way);
 
     /// Add a new way to the front of this ring.
     void add_at_front(const shared_ptr<Osmium::OSM::Way>& way);
+
+    void close_ring();
 
     osm_object_id_t first_node_id() const { return m_first_node_id; }
     osm_object_id_t last_node_id()  const { return m_last_node_id; }
@@ -142,6 +146,10 @@ public:
      * Caller takes ownership of created object.
      */
     OGRPoint* ogr_last_point() const;
+
+    Osmium::OSM::Position start_position() const;
+    Osmium::OSM::Position end_position() const;
+    double distance_to_start_position(Osmium::OSM::Position pos) const;
 
     friend std::ostream& operator<<(std::ostream& out, const CoastlineRing& cp);
 };

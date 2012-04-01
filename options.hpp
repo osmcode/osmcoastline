@@ -56,6 +56,9 @@ public:
     /// Show debug output?
     bool debug;
 
+    /// Attempt to close unclosed rings?
+    bool close_rings;
+
     /// Add spatial index to Spatialite database tables?
     bool create_index;
 
@@ -69,9 +72,11 @@ public:
         split_large_polygons(false),
         max_points_in_polygons(1000),
         debug(false),
+        close_rings(true),
         create_index(false)
     {
         static struct option long_options[] = {
+            {"no-close-rings",  no_argument, 0, 'c'},
             {"debug",           no_argument, 0, 'd'},
             {"help",            no_argument, 0, 'h'},
             {"create-index",    no_argument, 0, 'I'},
@@ -85,11 +90,14 @@ public:
         };
 
         while (1) {
-            int c = getopt_long(argc, argv, "dhIo:r:Rs:S:P:", long_options, 0);
+            int c = getopt_long(argc, argv, "cdhIo:r:Rs:S:P:", long_options, 0);
             if (c == -1)
                 break;
 
             switch (c) {
+                case 'c':
+                    close_rings = false;
+                    break;
                 case 'd':
                     debug = true;
                     std::cerr << "Enabled debug option\n";

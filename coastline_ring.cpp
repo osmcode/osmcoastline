@@ -35,6 +35,20 @@ void CoastlineRing::join(const CoastlineRing& other) {
     m_nways += other.m_nways;
 }
 
+void CoastlineRing::join_over_gap(const CoastlineRing& other) {
+    if (end_position() != other.start_position()) {
+        m_way_node_list.add(other.m_way_node_list.front());
+    }
+
+    m_way_node_list.insert(m_way_node_list.end(), other.m_way_node_list.begin()+1, other.m_way_node_list.end());
+
+    m_last_node_id = other.last_node_id();
+    if (other.min_way_id() < m_min_way_id) {
+        m_min_way_id = other.min_way_id();
+    }
+    m_nways += other.m_nways;
+}
+
 void CoastlineRing::add_at_end(const shared_ptr<Osmium::OSM::Way>& way) {
     assert(last_node_id() == way->get_first_node_id());
     m_way_node_list.insert(m_way_node_list.end(), way->nodes().begin()+1, way->nodes().end());
@@ -57,6 +71,13 @@ void CoastlineRing::add_at_front(const shared_ptr<Osmium::OSM::Way>& way) {
     m_nways++;
 }
 
+void CoastlineRing::close_ring() {
+    if (start_position() != end_position()) {
+        m_way_node_list.add(m_way_node_list.front());
+    }
+    m_last_node_id = m_first_node_id;
+}
+
 void CoastlineRing::setup_positions(posmap_t& posmap) {
     for (Osmium::OSM::WayNodeList::iterator it = m_way_node_list.begin(); it != m_way_node_list.end(); ++it) {
         posmap.insert(std::make_pair(it->ref(), &(it->position())));
@@ -74,13 +95,26 @@ OGRLineString* CoastlineRing::ogr_linestring() const {
 }
 
 OGRPoint* CoastlineRing::ogr_first_point() const {
-    const Osmium::OSM::WayNode& wn = m_way_node_list.back();
+    const Osmium::OSM::WayNode& wn = m_way_node_list.front();
     return new OGRPoint(wn.lon(), wn.lat());
 }
 
 OGRPoint* CoastlineRing::ogr_last_point() const {
-    const Osmium::OSM::WayNode& wn = m_way_node_list.front();
+    const Osmium::OSM::WayNode& wn = m_way_node_list.back();
     return new OGRPoint(wn.lon(), wn.lat());
+}
+
+Osmium::OSM::Position CoastlineRing::start_position() const {
+    return m_way_node_list.front().position();
+}
+
+Osmium::OSM::Position CoastlineRing::end_position() const {
+    return m_way_node_list.back().position();
+}
+
+double CoastlineRing::distance_to_start_position(Osmium::OSM::Position pos) const {
+    Osmium::OSM::Position p = m_way_node_list.front().position();
+    return (pos.lon() - p.lon()) * (pos.lon() - p.lon()) + (pos.lat() - p.lat()) * (pos.lat() - p.lat());
 }
 
 std::ostream& operator<<(std::ostream& out, CoastlineRing& cp) {

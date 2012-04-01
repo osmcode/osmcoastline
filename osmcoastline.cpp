@@ -286,6 +286,10 @@ int main(int argc, char *argv[]) {
     warnings += handler_pass2.warnings();
     errors += handler_pass2.errors();
 
+    if (options.close_rings) {
+        coastline_rings.close_rings();
+    }
+
     if (output) {
         std::cerr << "-------------------------------------------------------------------------------\n";
         std::cerr << "Create and output polygons...\n";

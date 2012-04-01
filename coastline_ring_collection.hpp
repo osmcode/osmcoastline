@@ -84,6 +84,8 @@ public:
 
     unsigned int output_rings(OutputDatabase& output);
 
+    void close_rings();
+
 };
 
 #endif // COASTLINE_RING_COLLECTION_HPP
