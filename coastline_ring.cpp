@@ -28,7 +28,6 @@ void CoastlineRing::join(const CoastlineRing& other) {
     assert(last_node_id() == other.first_node_id());
     m_way_node_list.insert(m_way_node_list.end(), other.m_way_node_list.begin()+1, other.m_way_node_list.end());
 
-    m_last_node_id = other.last_node_id();
     if (other.min_way_id() < m_min_way_id) {
         m_min_way_id = other.min_way_id();
     }
@@ -42,7 +41,6 @@ void CoastlineRing::join_over_gap(const CoastlineRing& other) {
 
     m_way_node_list.insert(m_way_node_list.end(), other.m_way_node_list.begin()+1, other.m_way_node_list.end());
 
-    m_last_node_id = other.last_node_id();
     if (other.min_way_id() < m_min_way_id) {
         m_min_way_id = other.min_way_id();
     }
@@ -53,7 +51,6 @@ void CoastlineRing::add_at_end(const shared_ptr<Osmium::OSM::Way>& way) {
     assert(last_node_id() == way->get_first_node_id());
     m_way_node_list.insert(m_way_node_list.end(), way->nodes().begin()+1, way->nodes().end());
 
-    m_last_node_id = way->get_last_node_id();
     if (way->id() < m_min_way_id) {
         m_min_way_id = way->id();
     }
@@ -64,7 +61,6 @@ void CoastlineRing::add_at_front(const shared_ptr<Osmium::OSM::Way>& way) {
     assert(first_node_id() == way->get_last_node_id());
     m_way_node_list.insert(m_way_node_list.begin(), way->nodes().begin(), way->nodes().end()-1);
 
-    m_first_node_id = way->get_first_node_id();
     if (way->id() < m_min_way_id) {
         m_min_way_id = way->id();
     }
@@ -75,7 +71,6 @@ void CoastlineRing::close_ring() {
     if (start_position() != end_position()) {
         m_way_node_list.add(m_way_node_list.front());
     }
-    m_last_node_id = m_first_node_id;
 }
 
 void CoastlineRing::setup_positions(posmap_t& posmap) {

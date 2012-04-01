@@ -56,9 +56,6 @@ class CoastlineRing {
 
     Osmium::OSM::WayNodeList m_way_node_list;
 
-    osm_object_id_t m_first_node_id;
-    osm_object_id_t m_last_node_id;
-
     /// Minimum ID of all the ways making up the ring.
     osm_object_id_t m_min_way_id;
 
@@ -69,8 +66,6 @@ public:
 
     CoastlineRing(const shared_ptr<Osmium::OSM::Way>& way) :
         m_way_node_list(way->is_closed() ? way->node_count() : 1000),
-        m_first_node_id(way->get_first_node_id()),
-        m_last_node_id(way->get_last_node_id()),
         m_min_way_id(way->id()),
         m_nways(1)
     {
@@ -93,8 +88,8 @@ public:
 
     void close_ring();
 
-    osm_object_id_t first_node_id() const { return m_first_node_id; }
-    osm_object_id_t last_node_id()  const { return m_last_node_id; }
+    osm_object_id_t first_node_id() const { return m_way_node_list.front().ref(); }
+    osm_object_id_t last_node_id()  const { return m_way_node_list.back().ref(); }
     osm_object_id_t min_way_id()    const { return m_min_way_id; }
 
     /// Returns the number of ways making up this ring.
