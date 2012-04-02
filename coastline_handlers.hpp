@@ -25,28 +25,19 @@
 /**
  * Osmium handler for the first pass over the input file in which
  * all ways tagged with 'natural=coastline' are read and CoastlineRings
- * are created.
+ * are created. If raw_output is not NULL, those ways will also be
+ * written out.
  */
 class CoastlineHandlerPass1 : public Osmium::Handler::Base {
 
     Osmium::Output::Base* m_raw_output;
     CoastlineRingCollection& m_coastline_rings;
 
-    // For statistics we keep track of how many coastline polygons were created
-    // from a single ring.
-    int m_count_polygons_from_single_way;
-
-    unsigned int m_warnings;
-    unsigned int m_errors;
-
 public:
 
     CoastlineHandlerPass1(Osmium::Output::Base* raw_output, CoastlineRingCollection& coastline_rings) :
         m_raw_output(raw_output),
-        m_coastline_rings(coastline_rings),
-        m_count_polygons_from_single_way(0),
-        m_warnings(0),
-        m_errors(0)
+        m_coastline_rings(coastline_rings)
     {
     }
 
@@ -60,27 +51,16 @@ public:
     void way(const shared_ptr<Osmium::OSM::Way>& way) {
         // We are only interested in ways tagged with natural=coastline.
         const char* natural = way->tags().get_tag_by_key("natural");
-        if (!natural || strcmp(natural, "coastline")) {
-            return;
-        }
+        if (natural && !strcmp(natural, "coastline")) {
+            if (m_raw_output) {
+                m_raw_output->way(way);
+            }
 
-        if (m_raw_output) {
-            m_raw_output->way(way);
+            m_coastline_rings.add_way(way);
         }
-
-        if (way->is_closed()) {
-            m_count_polygons_from_single_way++;
-        }
-
-        m_coastline_rings.add_way(way);
     }
 
     void after_ways() const {
-        std::cerr << "There are " << m_coastline_rings.number_of_unconnected_nodes() << " nodes where the coastline is not closed.\n";
-        std::cerr << "There are " << m_coastline_rings.size() << " coastline rings ("
-            << m_count_polygons_from_single_way << " from a single way and "
-            << m_coastline_rings.size() - m_count_polygons_from_single_way << " from multiple ways).\n";
-
         if (m_raw_output) {
             m_raw_output->after_ways();
         }
@@ -89,29 +69,27 @@ public:
         throw Osmium::Input::StopReading();
     }
 
-    unsigned int errors() const {
-        return m_errors;
-    }
-
-    unsigned int warnings() const {
-        return m_warnings;
-    }
 };
-
-/* ================================================== */
 
 /**
  * Osmium handler for the second pass over the input file in which
- * node coordinates are added to the CoastlineRings.
+ * node coordinates are added to the CoastlineRings. If raw_output
+ * is not NULL those nodes are also written out.
  */
 class CoastlineHandlerPass2 : public Osmium::Handler::Base {
 
     Osmium::Output::Base* m_raw_output;
     CoastlineRingCollection& m_coastline_rings;
+
+    /**
+     * Multimap for a mapping from node ID to all places where the
+     * position of this node should be written to. Those places
+     * are in the CoastlineRings created from the ways. This map
+     * is set up first thing when the handler is instantiated and
+     * thereafter used for each node coming in.
+     */
     posmap_t m_posmap;
     OutputDatabase* m_output;
-    unsigned int m_warnings;
-    unsigned int m_errors;
 
 public:
 
@@ -119,9 +97,7 @@ public:
         m_raw_output(raw_output),
         m_coastline_rings(coastline_rings),
         m_posmap(),
-        m_output(output),
-        m_warnings(0),
-        m_errors(0)
+        m_output(output)
     {
         m_coastline_rings.setup_positions(m_posmap);
         if (m_raw_output) {
@@ -141,7 +117,6 @@ public:
                     m_output->add_error(point.create_ogr_geometry(), "tagged_node", node->id());
                 } catch (Osmium::Exception::IllegalGeometry) {
                     std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
-                    m_errors++;
                 }
             }
         }
@@ -167,13 +142,6 @@ public:
         throw Osmium::Input::StopReading();
     }
 
-    unsigned int errors() const {
-        return m_errors;
-    }
-
-    unsigned int warnings() const {
-        return m_warnings;
-    }
 };
 
 #endif // COASTLINE_HANDLERS_HPP

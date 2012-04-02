@@ -201,135 +201,189 @@ void output_split_polygons(OGRMultiPolygon* multipolygon, OutputDatabase& output
 
 /* ================================================== */
 
-void print_memory_usage() {
+std::pair<int, int> get_memory_usage() {
     char filename[100];
     sprintf(filename, "/proc/%d/status", getpid());
     std::ifstream status_file(filename);
     std::string line;
 
+    int vmpeak = 0;
+    int vmsize = 0;
     if (status_file.is_open()) {
         while (! status_file.eof() ) {
             std::getline(status_file, line);
-            if (line.substr(0, 6) == "VmPeak" || line.substr(0, 6) == "VmSize") {
-                std::cerr << line << std::endl;
+            if (line.substr(0, 6) == "VmPeak") {
+                int f = line.find_first_of("0123456789");
+                int l = line.find_last_of("0123456789");
+                vmpeak = atoi(line.substr(f, l-f+1).c_str());
+            }
+            if (line.substr(0, 6) == "VmSize") {
+                int f = line.find_first_of("0123456789");
+                int l = line.find_last_of("0123456789");
+                vmsize = atoi(line.substr(f, l-f+1).c_str());
             }
         }
         status_file.close();
     }
+
+    return std::make_pair(vmsize / 1024, vmpeak / 1024);
+}
+
+std::string memory_usage() {
+    std::pair<int, int> mem = get_memory_usage();
+    std::ostringstream s;
+    s << "Memory used currently: " << mem.first << " MB (Peak was: " << mem.second << " MB).\n";
+    return s.str();
 }
 
 /* ================================================== */
 
+class VerboseOutput {
+
+    time_t m_start;
+    bool m_verbose;
+    bool m_newline;
+
+public:
+
+    VerboseOutput(bool verbose) :
+        m_start(time(NULL)),
+        m_verbose(verbose),
+        m_newline(true)
+    { }
+
+    int runtime() const {
+        return time(NULL) - m_start;
+    }
+
+    void start_line() {
+        if (m_newline) {
+            int elapsed = time(NULL) - m_start;
+            int minutes = elapsed / 60;
+            char timestr[20];
+            snprintf(timestr, sizeof(timestr)-1, "[%2d:%02d] ", minutes, elapsed - minutes);
+            std::cerr << timestr;
+            m_newline = false;
+        }
+    }
+
+    template<typename T>
+    friend VerboseOutput& operator<<(VerboseOutput& out, T t) {
+        if (out.m_verbose) {
+            std::ostringstream o;
+            o << t;
+            out.start_line();
+            std::cerr << o.str();
+            if (o.str()[o.str().size()-1] == '\n') {
+                out.m_newline = true;
+            }
+        }
+        return out;
+    }
+
+};
+
+/* ================================================== */
+
 int main(int argc, char *argv[]) {
-    time_t start_time = time(NULL);
     unsigned int warnings = 0;
     unsigned int errors = 0;
 
     Options options(argc, argv);
+
+    VerboseOutput vout(options.verbose);
 
     Osmium::init(options.debug);
 
     Osmium::OSMFile* outfile = NULL;
     Osmium::Output::Base* raw_output = NULL;
     if (options.raw_output.empty()) {
-        if (options.debug) {
-            std::cerr << "Not writing raw output.\n";
-        }
+        vout << "Not writing raw output.\n";
     } else {
-        if (options.debug) {
-            std::cerr << "Writing raw output to file '" << options.raw_output << "'.\n";
-        }
+        vout << "Writing raw output to file '" << options.raw_output << "'.\n";
         outfile = new Osmium::OSMFile(options.raw_output);
         raw_output = outfile->create_output_file();
     }
 
     OutputDatabase* output = NULL;
-    if (!options.outdb.empty()) { 
-        if (options.debug) {
-            std::cerr << "Using SRS " << options.epsg << " for output.\n";
-            if (options.create_index) {
-                std::cerr << "Will create geometry index.\n";
-            } else {
-                std::cerr << "Will NOT create geometry index.\n";
-            }
-        }
-
+    if (options.outdb.empty()) { 
+        vout << "Not writing output database.\n";
+    } else {
+        vout << "Writing to output database '" << options.outdb << "'.\n";
+        vout << "Using SRS " << options.epsg << " for output.\n";
+        vout << "Will " << (options.create_index ? "" : "NOT ") << "create geometry index.\n";
         output = new OutputDatabase(options.outdb, options.epsg, options.create_index);
     }
 
     CoastlineRingCollection coastline_rings;
 
-    time_t t = time(NULL);
     {
         // This is in an extra scope so that the considerable amounts of memory
         // held by the handlers is recovered after we don't need them any more.
-        if (options.debug) {
-            std::cerr << "Reading from file '" << options.osmfile << "'.\n";
-        }
+        vout << "Reading from file '" << options.osmfile << "'.\n";
         Osmium::OSMFile infile(options.osmfile);
 
-        std::cerr << "-------------------------------------------------------------------------------\n";
-        std::cerr << "Reading ways (1st pass through input file)...\n";
+        vout << "Reading ways (1st pass through input file)...\n";
         CoastlineHandlerPass1 handler_pass1(raw_output, coastline_rings);
         infile.read(handler_pass1);
-        std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
-        print_memory_usage();
+        vout << "  There are " << coastline_rings.num_unconnected_nodes() << " nodes where the coastline is not closed.\n";
+        vout << "  There are " << coastline_rings.size() << " coastline rings ("
+             << coastline_rings.num_rings_from_single_way() << " from a single way and "
+             << coastline_rings.size() - coastline_rings.num_rings_from_single_way() << " from multiple ways).\n";
+        vout << memory_usage();
 
-        warnings += handler_pass1.warnings();
-        errors += handler_pass1.errors();
-
-        std::cerr << "-------------------------------------------------------------------------------\n";
-        std::cerr << "Reading nodes (2nd pass through input file)...\n";
-        t = time(NULL);
+        vout << "Reading nodes (2nd pass through input file)...\n";
         CoastlineHandlerPass2 handler_pass2(raw_output, coastline_rings, output);
         infile.read(handler_pass2);
-        std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
-        print_memory_usage();
-
-        warnings += handler_pass2.warnings();
-        errors += handler_pass2.errors();
     }
 
-    print_memory_usage();
+    vout << memory_usage();
 
     if (options.close_rings) {
-        coastline_rings.close_rings(*output);
+        vout << "Fixing broken rings...\n";
+        coastline_rings.close_rings(*output, options.debug);
+        vout << "  Fixed " << coastline_rings.num_fixed_rings() << " rings. This left "
+             << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
+    } else {
+        vout << "Not fixing broken rings (because you did not ask for it with the --close-rings option).\n";
     }
 
     if (output) {
-        std::cerr << "-------------------------------------------------------------------------------\n";
-        std::cerr << "Create and output polygons...\n";
-        t = time(NULL);
         if (options.output_rings) {
+            vout << "Writing out rings...\n";
             warnings += coastline_rings.output_rings(*output);
         }
         if (options.output_polygons) {
+            vout << "Create polygons...\n";
             OGRMultiPolygon* mp = create_polygons(coastline_rings);
-            warnings += fix_coastline_direction(mp, *output);
+
+            vout << "Fixing coastlines going the wrong way...\n";
+            int fixed = fix_coastline_direction(mp, *output);
+            vout << "  Fixed orientation of " << fixed << " polygons.\n";
+            warnings += fixed;
+
             if (options.split_large_polygons) {
+                vout << "Split polygons and write them out...\n";
                 output_split_polygons(mp, *output, options);
             } else {
+                vout << "Writing out complete polygons...\n";
                 output_polygons(mp, *output);
             }
         }
-        std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
-        print_memory_usage();
     }
 
-    std::cerr << "-------------------------------------------------------------------------------\n";
+    vout << "All done.\n";
+    vout << memory_usage();
 
-    output->set_meta(time(NULL) - start_time, 0);
+    output->set_meta(vout.runtime(), get_memory_usage().second);
 
     delete output;
     delete raw_output;
     delete outfile;
 
-    if (warnings) {
-        std::cerr << "There were " << warnings << " warnings.\n";
-    }
-    if (errors) {
-        std::cerr << "There were " << errors << " errors.\n";
-    }
+    vout << "There were " << warnings << " warnings.\n";
+    vout << "There were " << errors << " errors.\n";
+
     if (errors) {
         return return_code_error;
     } else if (warnings) {

@@ -25,7 +25,9 @@
 CoastlineRingCollection::CoastlineRingCollection() :
     m_list(),
     m_start_nodes(),
-    m_end_nodes() {
+    m_end_nodes(),
+    m_rings_from_single_way(0),
+    m_fixed_rings(0) {
 }
 
 /**
@@ -142,11 +144,9 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     return warnings;
 }
 
-void CoastlineRingCollection::close_rings(OutputDatabase& output) {
+void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug) {
     const double max_distance = 1;
     std::vector<Connection> connections;
-
-    std::cerr << "close_rings():\n";
 
     // Create vector with all possible combinations of connections between rings.
     for (idmap_t::iterator eit = m_end_nodes.begin(); eit != m_end_nodes.end(); ++eit) {
@@ -170,12 +170,16 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output) {
         // Invalidate all other connections using one of the same end points.
         connections.erase(remove_if(connections.begin(), connections.end(), conn), connections.end());
 
-        std::cerr << "  close between " << conn.end_id << " and " << conn.start_id << "\n";
-
         idmap_t::iterator eit = m_end_nodes.find(conn.start_id);
         idmap_t::iterator sit = m_start_nodes.find(conn.end_id);
 
         if (eit != m_end_nodes.end() && sit != m_start_nodes.end()) {
+            if (debug) {
+                std::cerr << "Closing ring between node " << conn.end_id << " and node " << conn.start_id << "\n";
+            }
+
+            m_fixed_rings++;
+
             CoastlineRing* e = eit->second->get();
             CoastlineRing* s = sit->second->get();
 

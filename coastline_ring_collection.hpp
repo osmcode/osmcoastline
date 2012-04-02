@@ -52,6 +52,9 @@ class CoastlineRingCollection {
     idmap_t m_start_nodes;
     idmap_t m_end_nodes;
 
+    unsigned int m_rings_from_single_way;
+    unsigned int m_fixed_rings;
+
     void add_partial_ring(const shared_ptr<Osmium::OSM::Way>& way);
 
 public:
@@ -69,15 +72,18 @@ public:
      */
     void add_way(const shared_ptr<Osmium::OSM::Way>& way) {
         if (way->is_closed()) {
+            m_rings_from_single_way++;
             m_list.push_back(make_shared<CoastlineRing>(way));
         } else {
             add_partial_ring(way);
         }
     }
 
-    int number_of_unconnected_nodes() const {
-        return m_start_nodes.size() + m_end_nodes.size();
-    }
+    unsigned int num_rings_from_single_way() const { return m_rings_from_single_way; }
+
+    unsigned int num_unconnected_nodes() const { return m_start_nodes.size() + m_end_nodes.size(); }
+
+    unsigned int num_fixed_rings() const { return m_fixed_rings; }
 
     void setup_positions(posmap_t& posmap);
 
@@ -85,7 +91,7 @@ public:
 
     unsigned int output_rings(OutputDatabase& output);
 
-    void close_rings(OutputDatabase& output);
+    void close_rings(OutputDatabase& output, bool debug);
 
 private:
 

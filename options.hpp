@@ -56,6 +56,9 @@ public:
     /// Show debug output?
     bool debug;
 
+    /// Verbose output?
+    bool verbose;
+
     /// Attempt to close unclosed rings?
     bool close_rings;
 
@@ -75,6 +78,7 @@ public:
         split_large_polygons(false),
         max_points_in_polygons(1000),
         debug(false),
+        verbose(false),
         close_rings(true),
         create_index(false),
         water(false)
@@ -90,12 +94,13 @@ public:
             {"raw-output",      required_argument, 0, 'r'},
             {"split",           optional_argument, 0, 'S'},
             {"srs",             required_argument, 0, 's'},
+            {"verbose",         no_argument, 0, 'v'},
             {"water",           no_argument, 0, 'w'},
             {0, 0, 0, 0}
         };
 
         while (1) {
-            int c = getopt_long(argc, argv, "cdhIo:r:Rs:S:P:w", long_options, 0);
+            int c = getopt_long(argc, argv, "cdhIo:r:Rs:S:P:vw", long_options, 0);
             if (c == -1)
                 break;
 
@@ -124,6 +129,9 @@ public:
                     break;
                 case 'R':
                     output_rings = true;
+                    break;
+                case 'v':
+                    verbose = true;
                     break;
                 case 'w':
                     water = true;
