@@ -62,6 +62,9 @@ public:
     /// Add spatial index to Spatialite database tables?
     bool create_index;
 
+    /// Output water polygons instead of land polygons?
+    bool water;
+
     Options(int argc, char* argv[]) :
         osmfile(),
         outdb(),
@@ -73,7 +76,8 @@ public:
         max_points_in_polygons(1000),
         debug(false),
         close_rings(true),
-        create_index(false)
+        create_index(false),
+        water(false)
     {
         static struct option long_options[] = {
             {"no-close-rings",  no_argument, 0, 'c'},
@@ -86,11 +90,12 @@ public:
             {"raw-output",      required_argument, 0, 'r'},
             {"split",           optional_argument, 0, 'S'},
             {"srs",             required_argument, 0, 's'},
+            {"water",           no_argument, 0, 'w'},
             {0, 0, 0, 0}
         };
 
         while (1) {
-            int c = getopt_long(argc, argv, "cdhIo:r:Rs:S:P:", long_options, 0);
+            int c = getopt_long(argc, argv, "cdhIo:r:Rs:S:P:w", long_options, 0);
             if (c == -1)
                 break;
 
@@ -119,6 +124,9 @@ public:
                     break;
                 case 'R':
                     output_rings = true;
+                    break;
+                case 'w':
+                    water = true;
                     break;
                 case 's':
                     epsg = get_epsg(optarg);

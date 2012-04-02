@@ -166,20 +166,22 @@ public:
     void close_ring();
 
     /**
-     * Create OGRPolygon for this ring. The ring is reversed in the
-     * process.
+     * Create OGRPolygon for this ring.
      *
-     * Caller takes ownership of created object.
+     * Caller takes ownership of the created object.
+     *
+     * @param reverse Reverse the ring when creating the geometry.
      */
-    OGRPolygon* ogr_polygon() const;
+    OGRPolygon* ogr_polygon(bool reverse) const;
 
     /**
-     * Create OGRLineString for this ring. The ring is reversed in the
-     * process.
+     * Create OGRLineString for this ring.
      *
-     * Caller takes ownership of created object.
+     * Caller takes ownership of the created object.
+     *
+     * @param reverse Reverse the ring when creating the geometry.
      */
-    OGRLineString* ogr_linestring() const;
+    OGRLineString* ogr_linestring(bool reverse) const;
 
     /**
      * Create OGRPoint for the first point in this ring.

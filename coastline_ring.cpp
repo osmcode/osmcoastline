@@ -73,13 +73,13 @@ void CoastlineRing::close_ring() {
     m_fixed = true;
 }
 
-OGRPolygon* CoastlineRing::ogr_polygon() const {
-    const Osmium::Geometry::Polygon geom(m_way_node_list, true);
+OGRPolygon* CoastlineRing::ogr_polygon(bool reverse) const {
+    const Osmium::Geometry::Polygon geom(m_way_node_list, reverse);
     return geom.create_ogr_geometry();
 }
 
-OGRLineString* CoastlineRing::ogr_linestring() const {
-    const Osmium::Geometry::LineString geom(m_way_node_list, true);
+OGRLineString* CoastlineRing::ogr_linestring(bool reverse) const {
+    const Osmium::Geometry::LineString geom(m_way_node_list, reverse);
     return geom.create_ogr_geometry();
 }
 

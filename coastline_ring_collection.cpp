@@ -109,7 +109,7 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
     for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
         CoastlineRing& cp = **it;
         if (cp.is_closed() && cp.npoints() > 3) { // XXX what's with rings that don't match here?
-            vector.push_back(cp.ogr_polygon());
+            vector.push_back(cp.ogr_polygon(true));
         }
     }
 }
@@ -121,18 +121,18 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
         CoastlineRing& cp = **it;
         if (cp.is_closed()) {
             if (cp.npoints() > 3) {
-                output.add_ring(cp.ogr_polygon(), cp.ring_id(), cp.nways(), cp.npoints(), cp.is_fixed());
+                output.add_ring(cp.ogr_polygon(true), cp.ring_id(), cp.nways(), cp.npoints(), cp.is_fixed());
             } else if (cp.npoints() == 1) {
                 output.add_error(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
                 warnings++;
             } else { // cp.npoints() == 2 or 3
-                output.add_error(cp.ogr_linestring(), "not_a_ring", cp.ring_id());
+                output.add_error(cp.ogr_linestring(true), "not_a_ring", cp.ring_id());
                 output.add_error(cp.ogr_first_point(), "not_a_ring", cp.first_node_id());
                 output.add_error(cp.ogr_last_point(), "not_a_ring", cp.last_node_id());
                 warnings++;
             }
         } else {
-            output.add_error(cp.ogr_linestring(), "not_closed", cp.ring_id());
+            output.add_error(cp.ogr_linestring(true), "not_closed", cp.ring_id());
             output.add_error(cp.ogr_first_point(), "end_point", cp.first_node_id());
             output.add_error(cp.ogr_last_point(), "end_point", cp.last_node_id());
             warnings++;
