@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
     if (options.close_rings) {
         vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
         vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
-        coastline_rings.close_rings(*output, options.debug, options.close_distance);
+        coastline_rings.close_rings(output, options.debug, options.close_distance);
         vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
              << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
     } else {
@@ -238,11 +238,9 @@ int main(int argc, char *argv[]) {
         } else {
             vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";
         }
-    }
 
-    vout << memory_usage();
+        vout << memory_usage();
 
-    if (output) {
         vout << "Commiting database transactions...\n";
         output->set_meta(vout.runtime(), get_memory_usage().second);
         delete output;

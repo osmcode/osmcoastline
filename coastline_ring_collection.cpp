@@ -144,7 +144,7 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     return warnings;
 }
 
-void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, double max_distance) {
+void CoastlineRingCollection::close_rings(OutputDatabase* output, bool debug, double max_distance) {
     std::vector<Connection> connections;
 
     // Create vector with all possible combinations of connections between rings.
@@ -182,14 +182,16 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
             CoastlineRing* e = eit->second->get();
             CoastlineRing* s = sit->second->get();
 
-            output.add_error(e->ogr_last_point(), "fixed_end_point", e->last_node_id());
-            output.add_error(s->ogr_first_point(), "fixed_end_point", s->first_node_id());
+            if (output) {
+                output->add_error(e->ogr_last_point(), "fixed_end_point", e->last_node_id());
+                output->add_error(s->ogr_first_point(), "fixed_end_point", s->first_node_id());
 
-            if (e->last_position() != s->first_position()) {
-                OGRLineString* linestring = new OGRLineString;
-                linestring->addPoint(e->ogr_last_point());
-                linestring->addPoint(s->ogr_first_point());
-                output.add_error(linestring, "added_line");
+                if (e->last_position() != s->first_position()) {
+                    OGRLineString* linestring = new OGRLineString;
+                    linestring->addPoint(e->ogr_last_point());
+                    linestring->addPoint(s->ogr_first_point());
+                    output->add_error(linestring, "added_line");
+                }
             }
 
             if (e == s) {
@@ -203,7 +205,9 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
                 e->join_over_gap(*s);
 
                 if (e->first_position() == e->last_position()) {
-                    output.add_error(e->ogr_first_point(), "double_node", e->first_node_id());
+                    if (output) {
+                        output->add_error(e->ogr_first_point(), "double_node", e->first_node_id());
+                    }
                     m_start_nodes.erase(e->first_node_id());
                     m_end_nodes.erase(eit);
                     m_start_nodes.erase(sit);
