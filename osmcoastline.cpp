@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
         output_osm = output_osm_file->create_output_file();
     }
 
-    OutputDatabase* output = NULL;
+    OutputDatabase* output_database = NULL;
     if (options.output_database.empty()) { 
         vout << "Not writing output database (because you did not give the --output-database/-o option).\n";
     } else {
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
         } else {
             vout << "Will NOT create geometry index. (If you want an index use --create-index/-i.)\n";
         }
-        output = new OutputDatabase(options.output_database, options.epsg, options.create_index);
+        output_database = new OutputDatabase(options.output_database, options.epsg, options.create_index);
     }
 
     CoastlineRingCollection coastline_rings;
@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
         Osmium::OSMFile infile(options.inputfile);
 
         vout << "Reading ways (1st pass through input file)...\n";
-        CoastlineHandlerPass1 handler_pass1(output_osm, coastline_rings);
+        CoastlineHandlerPass1 handler_pass1(coastline_rings, output_osm);
         infile.read(handler_pass1);
         vout << "  There are " << coastline_rings.num_unconnected_nodes() << " nodes where the coastline is not closed.\n";
         vout << "  There are " << coastline_rings.size() << " coastline rings ("
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
         vout << memory_usage();
 
         vout << "Reading nodes (2nd pass through input file)...\n";
-        CoastlineHandlerPass2 handler_pass2(output_osm, coastline_rings, output);
+        CoastlineHandlerPass2 handler_pass2(coastline_rings, output_osm, output_database);
         infile.read(handler_pass2);
     }
 
@@ -203,24 +203,24 @@ int main(int argc, char *argv[]) {
     if (options.close_rings) {
         vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
         vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
-        coastline_rings.close_rings(output, options.debug, options.close_distance);
+        coastline_rings.close_rings(output_database, options.debug, options.close_distance);
         vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
              << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
     } else {
         vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";
     }
 
-    if (output) {
+    if (output_database) {
         if (options.output_rings) {
             vout << "Writing out rings... (Because you gave the --output-rings/-r option.)\n";
-            warnings += coastline_rings.output_rings(*output);
+            warnings += coastline_rings.output_rings(*output_database);
         } else {
             vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
         }
 
         if (options.output_polygons) {
             vout << "Create polygons...\n";
-            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings), *output, options.bbox_overlap, options.max_points_in_polygon);
+            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings), *output_database, options.bbox_overlap, options.max_points_in_polygon);
 
             vout << "Fixing coastlines going the wrong way...\n";
             int fixed = coastline_polygons.fix_direction();
@@ -242,8 +242,8 @@ int main(int argc, char *argv[]) {
         vout << memory_usage();
 
         vout << "Commiting database transactions...\n";
-        output->set_meta(vout.runtime(), get_memory_usage().second);
-        delete output;
+        output_database->set_meta(vout.runtime(), get_memory_usage().second);
+        delete output_database;
     }
 
     delete output_osm;

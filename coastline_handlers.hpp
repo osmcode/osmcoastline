@@ -35,7 +35,7 @@ class CoastlineHandlerPass1 : public Osmium::Handler::Base {
 
 public:
 
-    CoastlineHandlerPass1(Osmium::Output::Base* raw_output, CoastlineRingCollection& coastline_rings) :
+    CoastlineHandlerPass1(CoastlineRingCollection& coastline_rings, Osmium::Output::Base* raw_output) :
         m_raw_output(raw_output),
         m_coastline_rings(coastline_rings)
     {
@@ -93,7 +93,7 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
 
 public:
 
-    CoastlineHandlerPass2(Osmium::Output::Base* raw_output, CoastlineRingCollection& coastline_rings, OutputDatabase* output) :
+    CoastlineHandlerPass2(CoastlineRingCollection& coastline_rings, Osmium::Output::Base* raw_output, OutputDatabase* output) :
         m_raw_output(raw_output),
         m_coastline_rings(coastline_rings),
         m_posmap(),
