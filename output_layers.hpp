@@ -121,7 +121,7 @@ class LayerPolygons : public Layer {
 public:
 
     LayerPolygons(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
-    void add(OGRPolygon* polygon, bool clockwise);
+    void add(OGRPolygon* polygon);
 
 };
 

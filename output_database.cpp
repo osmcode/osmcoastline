@@ -108,6 +108,10 @@ void OutputDatabase::add_ring(OGRPolygon* polygon, int id, int nways, int npoint
     layer_rings()->add(polygon, id, nways, npoints, fixed, layer_error_points());
 }
 
+void OutputDatabase::add_polygon(OGRPolygon* polygon) {
+    layer_polygons()->add(polygon);
+}
+
 const char** OutputDatabase::layer_options() const {
     return m_with_index ? options_with_index : options_without_index;
 }

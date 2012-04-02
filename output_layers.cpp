@@ -255,23 +255,15 @@ LayerPolygons::LayerPolygons(OGRDataSource* data_source, OGRCoordinateTransforma
         exit(return_code_fatal);
     }
 
-    OGRFieldDefn field_clockwise("clockwise", OFTInteger);
-    field_clockwise.SetWidth(1);
-    if (m_layer->CreateField(&field_clockwise) != OGRERR_NONE ) {
-        std::cerr << "Creating field 'clockwise' on 'polygons' layer failed.\n";
-        exit(return_code_fatal);
-    }
-
     m_layer->StartTransaction();
 }
 
-void LayerPolygons::add(OGRPolygon* polygon, bool clockwise) {
+void LayerPolygons::add(OGRPolygon* polygon) {
     transform_if_needed(polygon);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
     feature->SetGeometryDirectly(polygon);
-    feature->SetField("clockwise", clockwise);
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
         std::cerr << "Failed to create feature in layer 'polygons'.\n";

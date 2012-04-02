@@ -22,6 +22,8 @@
 
 */
 
+#include <string>
+
 #include <osmium/osm/types.hpp>
 #include <ogr_spatialref.h>
 
@@ -32,6 +34,8 @@ class LayerPolygons;
 
 class OGRDataSource;
 class OGRCoordinateTransformation;
+class OGRPoint;
+class OGRLineString;
 
 /**
  * Handle output to an sqlite database (via OGR).
@@ -81,6 +85,7 @@ public:
     void add_error(OGRPoint* point, const char* error, osm_object_id_t id);
     void add_error(OGRLineString* linestring, const char* error, osm_object_id_t id=0);
     void add_ring(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed);
+    void add_polygon(OGRPolygon* polygon);
 
     void set_meta(int runtime, int memory_usage);
 
