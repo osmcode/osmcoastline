@@ -146,12 +146,18 @@ int main(int argc, char *argv[]) {
     unsigned int warnings = 0;
     unsigned int errors = 0;
 
+    // Parse command line and setup 'options' object with them.
     Options options(argc, argv);
 
+    // The vout object is an output stream we can write to instead of
+    // std::cerr. Nothing is written if we are not in verbose mode.
+    // The running time will be prepended to output lines.
     VerboseOutput vout(options.verbose);
 
+    // Initialize Osmium.
     Osmium::init(options.debug);
 
+    // Set up optional OSM raw output file.
     Osmium::OSMFile* output_osm_file = NULL;
     Osmium::Output::Base* output_osm = NULL;
     if (options.output_osm.empty()) {
@@ -162,6 +168,7 @@ int main(int argc, char *argv[]) {
         output_osm = output_osm_file->create_output_file();
     }
 
+    // Set up optional database output file.
     OutputDatabase* output_database = NULL;
     if (options.output_database.empty()) { 
         vout << "Not writing output database (because you did not give the --output-database/-o option).\n";
@@ -176,6 +183,8 @@ int main(int argc, char *argv[]) {
         output_database = new OutputDatabase(options.output_database, options.epsg, options.create_index);
     }
 
+    // The collection of all coastline rings we will be filling and then
+    // operating on.
     CoastlineRingCollection coastline_rings;
 
     {
@@ -200,17 +209,17 @@ int main(int argc, char *argv[]) {
 
     vout << memory_usage();
 
-    if (options.close_rings) {
-        vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
-        vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
-        coastline_rings.close_rings(output_database, options.debug, options.close_distance);
-        vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
-             << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
-    } else {
-        vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";
-    }
-
     if (output_database) {
+        if (options.close_rings) {
+            vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
+            vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
+            coastline_rings.close_rings(output_database, options.debug, options.close_distance);
+            vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
+                << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
+        } else {
+            vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";
+        }
+
         if (options.output_rings) {
             vout << "Writing out rings... (Because you gave the --output-rings/-r option.)\n";
             warnings += coastline_rings.output_rings(*output_database);
@@ -244,13 +253,13 @@ int main(int argc, char *argv[]) {
         vout << "Commiting database transactions...\n";
         output_database->set_meta(vout.runtime(), get_memory_usage().second);
         delete output_database;
+
+        vout << "All done.\n";
+        vout << memory_usage();
     }
 
     delete output_osm;
     delete output_osm_file;
-
-    vout << "All done.\n";
-    vout << memory_usage();
 
     vout << "There were " << warnings << " warnings.\n";
     vout << "There were " << errors << " errors.\n";
