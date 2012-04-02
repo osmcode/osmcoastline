@@ -30,34 +30,16 @@ class Options {
 public:
 
     /// Input OSM file name.
-    std::string osmfile;
+    std::string inputfile;
 
-    /// Output Spatialite database file name.
-    std::string outdb;
+    /// Overlap when splitting polygons.
+    double bbox_overlap;
 
-    /// Output OSM "raw data" file name.
-    std::string raw_output;
-
-    /// EPSG code of output SRS.
-    int epsg;
-
-    /// Should the rings output table be populated?
-    bool output_rings;
-
-    /// Should the polygons output table be populated?
-    bool output_polygons;
-
-    /// Should large polygons be split?
-    bool split_large_polygons;
-
-    /// Maximum number of points in polygons
-    int max_points_in_polygons;
-
-    /// Show debug output?
-    bool debug;
-
-    /// Verbose output?
-    bool verbose;
+    /**
+     * If the distance between two ring-endnodes is smaller than this the ring
+     * can be closed there.
+     */
+    double close_distance;
 
     /// Attempt to close unclosed rings?
     bool close_rings;
@@ -65,48 +47,87 @@ public:
     /// Add spatial index to Spatialite database tables?
     bool create_index;
 
+    /// Show debug output?
+    bool debug;
+
+    /// Maximum number of points in polygons.
+    int max_points_in_polygon;
+
+    /// Should large polygons be split?
+    bool split_large_polygons;
+
+    /// Should the polygons output table be populated?
+    bool output_polygons;
+
+    /// Output Spatialite database file name.
+    std::string output_database;
+
+    /// Output OSM "raw data" file name.
+    std::string output_osm;
+
+    /// Should the rings output table be populated?
+    bool output_rings;
+
+    /// EPSG code of output SRS.
+    int epsg;
+
+    /// Verbose output?
+    bool verbose;
+
     /// Output water polygons instead of land polygons?
     bool water;
 
     Options(int argc, char* argv[]) :
-        osmfile(),
-        outdb(),
-        raw_output(),
-        epsg(4326),
-        output_rings(false),
-        output_polygons(true),
-        split_large_polygons(false),
-        max_points_in_polygons(1000),
-        debug(false),
-        verbose(false),
+        inputfile(),
+        bbox_overlap(0.0001),
+        close_distance(1.0),
         close_rings(true),
         create_index(false),
+        debug(false),
+        max_points_in_polygon(1000),
+        split_large_polygons(true),
+        output_polygons(true),
+        output_database(),
+        output_osm(),
+        output_rings(false),
+        epsg(4326),
+        verbose(false),
         water(false)
     {
         static struct option long_options[] = {
-            {"no-close-rings",  no_argument, 0, 'c'},
-            {"debug",           no_argument, 0, 'd'},
-            {"help",            no_argument, 0, 'h'},
-            {"create-index",    no_argument, 0, 'I'},
-            {"output",          required_argument, 0, 'o'},
-            {"output-rings",    no_argument, 0, 'R'},
-            {"output-polygons", required_argument, 0, 'P'},
-            {"raw-output",      required_argument, 0, 'r'},
-            {"split",           optional_argument, 0, 'S'},
+            {"bbox-overlap",    required_argument, 0, 'b'},
+            {"close-distance",  required_argument, 0, 'c'},
+            {"create-index",          no_argument, 0, 'i'},
+            {"debug",                 no_argument, 0, 'd'},
+            {"help",                  no_argument, 0, 'h'},
+            {"max-points",      required_argument, 0, 'm'},
+            {"no-polygons",           no_argument, 0, 'p'},
+            {"output-database", required_argument, 0, 'o'},
+            {"output-osm",      required_argument, 0, 'O'},
+            {"output-rings",          no_argument, 0, 'r'},
             {"srs",             required_argument, 0, 's'},
-            {"verbose",         no_argument, 0, 'v'},
-            {"water",           no_argument, 0, 'w'},
+            {"verbose",               no_argument, 0, 'v'},
+            {"water",                 no_argument, 0, 'w'},
             {0, 0, 0, 0}
         };
 
         while (1) {
-            int c = getopt_long(argc, argv, "cdhIo:r:Rs:S:P:vw", long_options, 0);
+            int c = getopt_long(argc, argv, "b:c:idhm:po:O:rs:vw", long_options, 0);
             if (c == -1)
                 break;
 
             switch (c) {
+                case 'b':
+                    bbox_overlap = atof(optarg);
+                    break;
                 case 'c':
-                    close_rings = false;
+                    close_distance = atoi(optarg);
+                    if (close_distance == 0) {
+                        close_rings = false;
+                    }
+                    break;
+                case 'i':
+                    create_index = true;
                     break;
                 case 'd':
                     debug = true;
@@ -115,20 +136,26 @@ public:
                 case 'h':
                     print_help();
                     exit(return_code_ok);
-                case 'I':
-                    create_index = true;
+                case 'm':
+                    max_points_in_polygon = atoi(optarg);
+                    if (max_points_in_polygon == 0) {
+                        split_large_polygons = false;
+                    }
                     break;
-                case 'o':
-                    outdb = optarg;
-                    break;
-                case 'P':
+                case 'p':
                     output_polygons = false;
                     break;
-                case 'r':
-                    raw_output = optarg;
+                case 'o':
+                    output_database = optarg;
                     break;
-                case 'R':
+                case 'O':
+                    output_osm = optarg;
+                    break;
+                case 'r':
                     output_rings = true;
+                    break;
+                case 's':
+                    epsg = get_epsg(optarg);
                     break;
                 case 'v':
                     verbose = true;
@@ -136,31 +163,22 @@ public:
                 case 'w':
                     water = true;
                     break;
-                case 's':
-                    epsg = get_epsg(optarg);
-                    break;
-                case 'S':
-                    split_large_polygons = true;
-                    if (optarg) {
-                        max_points_in_polygons = atoi(optarg);
-                    }
-                    break;
                 default:
                     exit(return_code_cmdline);
             }
         }
 
         if (optind != argc - 1) {
-            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE" << std::endl;
+            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
             exit(return_code_cmdline);
         }
 
-        if (outdb.empty() && raw_output.empty()) {
-            std::cerr << "You have to give one or both of the --output or --raw-output options.\n";
+        if (output_database.empty() && output_osm.empty()) {
+            std::cerr << "You have to give one or both of the --output-database/-o and --output-osm/-O options.\n";
             exit(return_code_cmdline);
         }
 
-        osmfile = argv[optind];
+        inputfile = argv[optind];
     }
 
 private:
@@ -188,15 +206,22 @@ private:
     void print_help() {
         std::cout << "osmcoastline [OPTIONS] OSMFILE\n"
                   << "Options:\n"
-                  << "  -d, --debug              - Enable debugging output\n"
-                  << "  -h, --help               - This help message\n"
-                  << "  -I, --create-index       - Create spatial indexes in output database\n"
-                  << "  -o, --output=DBFILE      - Spatialite database file for output\n"
-                  << "  -r, --raw-output=OSMFILE - Write raw OSM output file\n"
-                  << "  -s, --srs=EPSGCODE       - Set output SRS (4326 for WGS84 (default) or 3857)\n"
-                  << "  -S, --split[=N]          - Split polygons with more than N (default 1000) points\n"
+                  << "  -h, --help                 - This help message\n"
+                  << "  -c, --close-distance       - Distance between nodes under which open rings\n"
+                  << "                               are closed (0 - disable closing of rings)\n"
+                  << "  -b, --bbox-overlap         - Set overlap when splitting polygons\n"
+                  << "  -i, --create-index         - Create spatial indexes in output database\n"
+                  << "  -d, --debug                - Enable debugging output\n"
+                  << "  -m, --max-points           - Split polygons with more than this many points\n"
+                  << "                               (0 - disable splitting)\n"
+                  << "  -p, --no-polygons          - Do not create polygons\n"
+                  << "  -o, --output-database=FILE - Spatialite database file for output\n"
+                  << "  -O, --output-osm=FILE      - Write raw OSM output to file\n"
+                  << "  -r, --output-rings         - Output rings to database file\n"
+                  << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
+                  << "  -v, --verbose              - Verbose output\n"
                   << "\n"
-                  << "At least -o and/or -r is needed.\n"
+                  << "At least one of --output-database/-o and --output-osm/-O is needed.\n"
         ;
     }
 

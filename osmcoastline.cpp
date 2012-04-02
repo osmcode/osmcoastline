@@ -95,10 +95,10 @@ OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y
 }
 
 void split(OGRGeometry* g, OutputDatabase& output, const Options& options) {
-    static double expand = 0.0001;
+    static double expand = options.bbox_overlap;
     OGRPolygon* p = static_cast<OGRPolygon*>(g);
 
-    if (p->getExteriorRing()->getNumPoints() <= options.max_points_in_polygons) {
+    if (p->getExteriorRing()->getNumPoints() <= options.max_points_in_polygon) {
         output.layer_polygons()->add(p, 0); // XXX p->getExteriorRing()->isClockwise());
     } else {
         OGREnvelope envelope;
@@ -259,9 +259,8 @@ public:
     void start_line() {
         if (m_newline) {
             int elapsed = time(NULL) - m_start;
-            int minutes = elapsed / 60;
             char timestr[20];
-            snprintf(timestr, sizeof(timestr)-1, "[%2d:%02d] ", minutes, elapsed - minutes);
+            snprintf(timestr, sizeof(timestr)-1, "[%2d:%02d] ", elapsed / 60, elapsed % 60);
             std::cerr << timestr;
             m_newline = false;
         }
@@ -297,22 +296,26 @@ int main(int argc, char *argv[]) {
 
     Osmium::OSMFile* outfile = NULL;
     Osmium::Output::Base* raw_output = NULL;
-    if (options.raw_output.empty()) {
-        vout << "Not writing raw output.\n";
+    if (options.output_osm.empty()) {
+        vout << "Not writing raw OSM output. (Add --output-osm/-O if you want this.)\n";
     } else {
-        vout << "Writing raw output to file '" << options.raw_output << "'.\n";
-        outfile = new Osmium::OSMFile(options.raw_output);
+        vout << "Writing raw output to file '" << options.output_osm << "'. (Was set with --output-osm/-O option.)\n";
+        outfile = new Osmium::OSMFile(options.output_osm);
         raw_output = outfile->create_output_file();
     }
 
     OutputDatabase* output = NULL;
-    if (options.outdb.empty()) { 
-        vout << "Not writing output database.\n";
+    if (options.output_database.empty()) { 
+        vout << "Not writing output database (because you did not give the --output-database/-o option).\n";
     } else {
-        vout << "Writing to output database '" << options.outdb << "'.\n";
-        vout << "Using SRS " << options.epsg << " for output.\n";
-        vout << "Will " << (options.create_index ? "" : "NOT ") << "create geometry index.\n";
-        output = new OutputDatabase(options.outdb, options.epsg, options.create_index);
+        vout << "Writing to output database '" << options.output_database << "'. (Was set with the --output-database/-o option.)\n";
+        vout << "Using SRS " << options.epsg << " for output. (Change with the --srs/s option.)\n";
+        if (options.create_index) {
+            vout << "Will create geometry index (because you told me to using --create-index/-i).\n";
+        } else {
+            vout << "Will NOT create geometry index. (If you want an index use --create-index/-i.)\n";
+        }
+        output = new OutputDatabase(options.output_database, options.epsg, options.create_index);
     }
 
     CoastlineRingCollection coastline_rings;
@@ -320,8 +323,8 @@ int main(int argc, char *argv[]) {
     {
         // This is in an extra scope so that the considerable amounts of memory
         // held by the handlers is recovered after we don't need them any more.
-        vout << "Reading from file '" << options.osmfile << "'.\n";
-        Osmium::OSMFile infile(options.osmfile);
+        vout << "Reading from file '" << options.inputfile << "'.\n";
+        Osmium::OSMFile infile(options.inputfile);
 
         vout << "Reading ways (1st pass through input file)...\n";
         CoastlineHandlerPass1 handler_pass1(raw_output, coastline_rings);
@@ -340,19 +343,23 @@ int main(int argc, char *argv[]) {
     vout << memory_usage();
 
     if (options.close_rings) {
-        vout << "Fixing broken rings...\n";
-        coastline_rings.close_rings(*output, options.debug);
-        vout << "  Fixed " << coastline_rings.num_fixed_rings() << " rings. This left "
+        vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
+        vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
+        coastline_rings.close_rings(*output, options.debug, options.close_distance);
+        vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
              << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
     } else {
-        vout << "Not fixing broken rings (because you did not ask for it with the --close-rings option).\n";
+        vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";
     }
 
     if (output) {
         if (options.output_rings) {
-            vout << "Writing out rings...\n";
+            vout << "Writing out rings... (Because you gave the --output-rings/-r option.)\n";
             warnings += coastline_rings.output_rings(*output);
+        } else {
+            vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
         }
+
         if (options.output_polygons) {
             vout << "Create polygons...\n";
             OGRMultiPolygon* mp = create_polygons(coastline_rings);
@@ -363,23 +370,31 @@ int main(int argc, char *argv[]) {
             warnings += fixed;
 
             if (options.split_large_polygons) {
-                vout << "Split polygons and write them out...\n";
+                vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
+                vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
                 output_split_polygons(mp, *output, options);
             } else {
-                vout << "Writing out complete polygons...\n";
+                vout << "Writing out complete polygons... (Because you set --max-points/-m to 0.)\n";
                 output_polygons(mp, *output);
             }
+        } else {
+            vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";
         }
     }
 
-    vout << "All done.\n";
     vout << memory_usage();
 
-    output->set_meta(vout.runtime(), get_memory_usage().second);
+    if (output) {
+        vout << "Commiting database transactions...\n";
+        output->set_meta(vout.runtime(), get_memory_usage().second);
+        delete output;
+    }
 
-    delete output;
     delete raw_output;
     delete outfile;
+
+    vout << "All done.\n";
+    vout << memory_usage();
 
     vout << "There were " << warnings << " warnings.\n";
     vout << "There were " << errors << " errors.\n";

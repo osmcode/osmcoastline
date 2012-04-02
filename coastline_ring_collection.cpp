@@ -144,8 +144,7 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     return warnings;
 }
 
-void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug) {
-    const double max_distance = 1;
+void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, double max_distance) {
     std::vector<Connection> connections;
 
     // Create vector with all possible combinations of connections between rings.
