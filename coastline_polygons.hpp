@@ -33,7 +33,7 @@ class CoastlinePolygons {
     double m_expand;
     int m_max_points_in_polygon;
 
-    OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand) const;
+    OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand=0) const;
 
     void split(OGRGeometry* g);
 
