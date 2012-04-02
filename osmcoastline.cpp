@@ -152,14 +152,14 @@ int main(int argc, char *argv[]) {
 
     Osmium::init(options.debug);
 
-    Osmium::OSMFile* outfile = NULL;
-    Osmium::Output::Base* raw_output = NULL;
+    Osmium::OSMFile* output_osm_file = NULL;
+    Osmium::Output::Base* output_osm = NULL;
     if (options.output_osm.empty()) {
-        vout << "Not writing raw OSM output. (Add --output-osm/-O if you want this.)\n";
+        vout << "Not writing OSM output. (Add --output-osm/-O if you want this.)\n";
     } else {
-        vout << "Writing raw output to file '" << options.output_osm << "'. (Was set with --output-osm/-O option.)\n";
-        outfile = new Osmium::OSMFile(options.output_osm);
-        raw_output = outfile->create_output_file();
+        vout << "Writing OSM output to file '" << options.output_osm << "'. (Was set with --output-osm/-O option.)\n";
+        output_osm_file = new Osmium::OSMFile(options.output_osm);
+        output_osm = output_osm_file->create_output_file();
     }
 
     OutputDatabase* output = NULL;
@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
         Osmium::OSMFile infile(options.inputfile);
 
         vout << "Reading ways (1st pass through input file)...\n";
-        CoastlineHandlerPass1 handler_pass1(raw_output, coastline_rings);
+        CoastlineHandlerPass1 handler_pass1(output_osm, coastline_rings);
         infile.read(handler_pass1);
         vout << "  There are " << coastline_rings.num_unconnected_nodes() << " nodes where the coastline is not closed.\n";
         vout << "  There are " << coastline_rings.size() << " coastline rings ("
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
         vout << memory_usage();
 
         vout << "Reading nodes (2nd pass through input file)...\n";
-        CoastlineHandlerPass2 handler_pass2(raw_output, coastline_rings, output);
+        CoastlineHandlerPass2 handler_pass2(output_osm, coastline_rings, output);
         infile.read(handler_pass2);
     }
 
@@ -246,8 +246,8 @@ int main(int argc, char *argv[]) {
         delete output;
     }
 
-    delete raw_output;
-    delete outfile;
+    delete output_osm;
+    delete output_osm_file;
 
     vout << "All done.\n";
     vout << memory_usage();
