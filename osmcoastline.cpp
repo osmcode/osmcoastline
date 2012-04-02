@@ -229,11 +229,6 @@ int main(int argc, char *argv[]) {
 
     Osmium::init(options.debug);
 
-    if (options.debug) {
-        std::cerr << "Reading from file '" << options.osmfile << "'.\n";
-    }
-    Osmium::OSMFile infile(options.osmfile);
-
     Osmium::OSMFile* outfile = NULL;
     Osmium::Output::Base* raw_output = NULL;
     if (options.raw_output.empty()) {
@@ -264,27 +259,38 @@ int main(int argc, char *argv[]) {
 
     CoastlineRingCollection coastline_rings;
 
-    std::cerr << "-------------------------------------------------------------------------------\n";
-    std::cerr << "Reading ways (1st pass through input file)...\n";
     time_t t = time(NULL);
-    CoastlineHandlerPass1 handler_pass1(raw_output, coastline_rings);
-    infile.read(handler_pass1);
-    std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
+    {
+        // This is in an extra scope so that the considerable amounts of memory
+        // held by the handlers is recovered after we don't need them any more.
+        if (options.debug) {
+            std::cerr << "Reading from file '" << options.osmfile << "'.\n";
+        }
+        Osmium::OSMFile infile(options.osmfile);
+
+        std::cerr << "-------------------------------------------------------------------------------\n";
+        std::cerr << "Reading ways (1st pass through input file)...\n";
+        CoastlineHandlerPass1 handler_pass1(raw_output, coastline_rings);
+        infile.read(handler_pass1);
+        std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
+        print_memory_usage();
+
+        warnings += handler_pass1.warnings();
+        errors += handler_pass1.errors();
+
+        std::cerr << "-------------------------------------------------------------------------------\n";
+        std::cerr << "Reading nodes (2nd pass through input file)...\n";
+        t = time(NULL);
+        CoastlineHandlerPass2 handler_pass2(raw_output, coastline_rings, output);
+        infile.read(handler_pass2);
+        std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
+        print_memory_usage();
+
+        warnings += handler_pass2.warnings();
+        errors += handler_pass2.errors();
+    }
+
     print_memory_usage();
-
-    warnings += handler_pass1.warnings();
-    errors += handler_pass1.errors();
-
-    std::cerr << "-------------------------------------------------------------------------------\n";
-    std::cerr << "Reading nodes (2nd pass through input file)...\n";
-    t = time(NULL);
-    CoastlineHandlerPass2 handler_pass2(raw_output, coastline_rings, output);
-    infile.read(handler_pass2);
-    std::cerr << "Done (about " << (time(NULL)-t)/60 << " minutes).\n";
-    print_memory_usage();
-
-    warnings += handler_pass2.warnings();
-    errors += handler_pass2.errors();
 
     if (options.close_rings) {
         coastline_rings.close_rings(*output);
