@@ -98,7 +98,7 @@ results are supplied for debugging or other special uses.
 
 Step 1: Filter out all nodes and ways tagged natural=coastline and all nodes
         needed by those ways. The result of this step can be written out as
-        an OSM file with the -r/--raw-output option.
+        an OSM file with the -O/--output-osm option.
 
 Step 2: Assemble all coastline ways into rings.
 
