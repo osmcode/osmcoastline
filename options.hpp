@@ -79,7 +79,7 @@ public:
 
     Options(int argc, char* argv[]) :
         inputfile(),
-        bbox_overlap(0.0001),
+        bbox_overlap(-1),
         close_distance(1.0),
         close_rings(true),
         create_index(false),
@@ -176,6 +176,14 @@ public:
         if (output_database.empty() && output_osm.empty()) {
             std::cerr << "You have to give one or both of the --output-database/-o and --output-osm/-O options.\n";
             exit(return_code_cmdline);
+        }
+
+        if (bbox_overlap == -1) {
+            if (epsg == 4326) {
+                bbox_overlap = 0.0001;
+            } else {
+                bbox_overlap = 10;
+            }
         }
 
         inputfile = argv[optind];

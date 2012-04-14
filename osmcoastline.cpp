@@ -43,9 +43,9 @@
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-OGRMultiPolygon* create_polygons(CoastlineRingCollection coastline_rings) {
+OGRMultiPolygon* create_polygons(CoastlineRingCollection coastline_rings, OGRSpatialReference* srs) {
     std::vector<OGRGeometry*> all_polygons;
-    coastline_rings.add_polygons_to_vector(all_polygons);
+    coastline_rings.add_polygons_to_vector(all_polygons, srs);
 
     int is_valid;
     const char* options[] = { "METHOD=ONLY_CCW", NULL };
@@ -229,20 +229,30 @@ int main(int argc, char *argv[]) {
 
         if (options.output_polygons) {
             vout << "Create polygons...\n";
-            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings), *output_database, options.bbox_overlap, options.max_points_in_polygon);
+            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database->srs_wgs84()), *output_database, options.bbox_overlap, options.max_points_in_polygon);
 
             vout << "Fixing coastlines going the wrong way...\n";
             int fixed = coastline_polygons.fix_direction();
             vout << "  Fixed orientation of " << fixed << " polygons.\n";
             warnings += fixed;
 
-            if (options.split_large_polygons) {
+            if (options.epsg != 4326) {
+                vout << "Transforming polygons to EPSG " << options.epsg << "...\n";
+                coastline_polygons.transform(output_database->get_transformation());
+            }
+
+            if (options.split_large_polygons || options.water) {
                 vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
                 vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
+                coastline_polygons.keep(options.water);
                 coastline_polygons.output_split_polygons();
             } else {
                 vout << "Writing out complete polygons... (Because you set --max-points/-m to 0.)\n";
                 coastline_polygons.output_complete_polygons();
+            }
+            if (options.water) {
+                vout << "Writing out water polygons...\n";
+                coastline_polygons.output_water_polygons();
             }
         } else {
             vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";

@@ -24,6 +24,8 @@
 
 class OGRPolygon;
 class OGRMultiPolygon;
+class OGREnvelope;
+class OGRCoordinateTransformation;
 class OutputDatabase;
 
 class CoastlinePolygons {
@@ -32,8 +34,11 @@ class CoastlinePolygons {
     OutputDatabase& m_output;
     double m_expand;
     int m_max_points_in_polygon;
+    bool m_keep;
 
-    OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand=0) const;
+    std::vector<OGRPolygon*> m_polygons;
+
+    OGRPolygon* create_rectangular_polygon(OGRSpatialReference* srs, double x1, double y1, double x2, double y2, double expand=0) const;
 
     void split(OGRGeometry* g);
 
@@ -43,13 +48,20 @@ public:
         m_multipolygon(multipolygon),
         m_output(output),
         m_expand(expand),
-        m_max_points_in_polygon(max_points_in_polygon) {
+        m_max_points_in_polygon(max_points_in_polygon),
+        m_keep(false),
+        m_polygons() {
     }
 
     /**
      * When polygons have the wrong winding order, this function will fix them.
      */
     unsigned int fix_direction();
+
+    CoastlinePolygons& keep(bool keep) {
+        m_keep = keep;
+        return *this;
+    }
 
     /**
     * Split up all the polygons and write them out.
@@ -61,6 +73,12 @@ public:
     */
     void output_complete_polygons();
 
+    typedef std::vector<OGRPolygon*> polygon_vector_t;
+
+    void split_bbox(OGREnvelope e, polygon_vector_t* v, OGRSpatialReference* srs);
+    void output_water_polygons();
+
+    void transform(OGRCoordinateTransformation* transform);
 };
 
 #endif // COASTLINE_POLYGONS_HPP

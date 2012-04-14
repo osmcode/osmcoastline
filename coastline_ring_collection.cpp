@@ -105,13 +105,26 @@ void CoastlineRingCollection::setup_positions(posmap_t& posmap) {
     }
 }
 
-void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& vector) {
+void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& vector, OGRSpatialReference* srs) {
     vector.reserve(m_list.size());
 
     for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
         CoastlineRing& cp = **it;
         if (cp.is_closed() && cp.npoints() > 3) { // XXX what's with rings that don't match here?
-            vector.push_back(cp.ogr_polygon(true));
+            OGRPolygon* p = cp.ogr_polygon(true);
+            if (p->IsValid()) {
+                p->assignSpatialReference(srs);
+                vector.push_back(p);
+            } else {
+                OGRGeometry* geom = p->Buffer(0);
+                if (geom->getGeometryType() == wkbPolygon && geom->IsValid()) {
+                    geom->assignSpatialReference(srs);
+                    vector.push_back(static_cast<OGRPolygon*>(geom));
+                } else {
+                    delete geom;
+                }
+                delete p;
+            }
         }
     }
 }

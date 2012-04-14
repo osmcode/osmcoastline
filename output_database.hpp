@@ -89,6 +89,11 @@ public:
 
     void set_meta(int runtime, int memory_usage);
 
+    OGRCoordinateTransformation* get_transformation() const { return m_transform; }
+
+    OGRSpatialReference* srs_wgs84() { return &m_srs_wgs84; }
+    OGRSpatialReference* srs_out()   { return &m_srs_out; }
+
 };
 
 #endif // OUTPUT_DATABASE_HPP

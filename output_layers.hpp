@@ -56,7 +56,8 @@ protected:
         }
 
         // Transform if no SRS is set on input geometry or it is set to WGS84.
-        if (geometry->getSpatialReference() == NULL || geometry->getSpatialReference()->IsSame(m_transform->GetSourceCS())) {
+        OGRSpatialReference* srs = geometry->getSpatialReference();
+        if (srs == NULL || srs->IsSame(m_transform->GetSourceCS())) {
             if (geometry->transform(m_transform) != OGRERR_NONE) {
                 // XXX we should do something more clever here
                 std::cerr << "Coordinate transformation failed\n";
