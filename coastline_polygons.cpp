@@ -65,7 +65,9 @@ unsigned int CoastlinePolygons::fix_direction() {
         OGRLinearRing* er = (*it)->getExteriorRing();
         if (!er->isClockwise()) {
             er->reverseWindingOrder();
-            // XXX what about inner rings?
+            for (int i=0; i < (*it)->getNumInteriorRings(); ++i) {
+                (*it)->getInteriorRing(i)->reverseWindingOrder();
+            }
             m_output.add_error(static_cast<OGRLineString*>(er->clone()), "direction");
             warnings++;
         }
