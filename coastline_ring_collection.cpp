@@ -124,6 +124,7 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
                     geom->assignSpatialReference(srs.wgs84());
                     vector.push_back(static_cast<OGRPolygon*>(geom));
                 } else {
+                    std::cerr << "Ignoring invalid polygon geometry (ring_id=" << cp.ring_id() << ").\n";
                     delete geom;
                 }
                 delete p;
