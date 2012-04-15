@@ -37,15 +37,20 @@
 
 #include "options.hpp"
 #include "coastline_handlers.hpp"
+#include "srs.hpp"
+
+// The global SRS object is used in many places to transform
+// from WGS84 to the output SRS etc.
+SRS srs;
 
 /* ================================================== */
 
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-OGRMultiPolygon* create_polygons(CoastlineRingCollection coastline_rings, OGRSpatialReference* srs) {
+OGRMultiPolygon* create_polygons(CoastlineRingCollection coastline_rings) {
     std::vector<OGRGeometry*> all_polygons;
-    coastline_rings.add_polygons_to_vector(all_polygons, srs);
+    coastline_rings.add_polygons_to_vector(all_polygons);
 
     int is_valid;
     const char* options[] = { "METHOD=ONLY_CCW", NULL };
@@ -168,19 +173,24 @@ int main(int argc, char *argv[]) {
         output_osm = output_osm_file->create_output_file();
     }
 
+    vout << "Using SRS " << options.epsg << " for output. (Change with the --srs/s option.)\n";
+    if (!srs.set_output(options.epsg)) {
+        std::cerr << "Setting up output transformation failed\n";
+        exit(return_code_fatal);
+    }
+
     // Set up optional database output file.
     OutputDatabase* output_database = NULL;
     if (options.output_database.empty()) { 
         vout << "Not writing output database (because you did not give the --output-database/-o option).\n";
     } else {
         vout << "Writing to output database '" << options.output_database << "'. (Was set with the --output-database/-o option.)\n";
-        vout << "Using SRS " << options.epsg << " for output. (Change with the --srs/s option.)\n";
         if (options.create_index) {
             vout << "Will create geometry index (because you told me to using --create-index/-i).\n";
         } else {
             vout << "Will NOT create geometry index. (If you want an index use --create-index/-i.)\n";
         }
-        output_database = new OutputDatabase(options.output_database, options.epsg, options.create_index);
+        output_database = new OutputDatabase(options.output_database, options.create_index);
     }
 
     // The collection of all coastline rings we will be filling and then
@@ -229,7 +239,7 @@ int main(int argc, char *argv[]) {
 
         if (options.output_polygons) {
             vout << "Create polygons...\n";
-            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database->srs_wgs84()), *output_database, options.bbox_overlap, options.max_points_in_polygon);
+            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings), *output_database, options.bbox_overlap, options.max_points_in_polygon);
 
             vout << "Fixing coastlines going the wrong way...\n";
             int fixed = coastline_polygons.fix_direction();
@@ -238,7 +248,7 @@ int main(int argc, char *argv[]) {
 
             if (options.epsg != 4326) {
                 vout << "Transforming polygons to EPSG " << options.epsg << "...\n";
-                coastline_polygons.transform(output_database->get_transformation());
+                coastline_polygons.transform();
             }
 
             if (options.split_large_polygons || options.water) {

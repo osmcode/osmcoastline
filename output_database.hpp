@@ -49,12 +49,7 @@ class OutputDatabase {
 
     bool m_with_index;
 
-    OGRSpatialReference m_srs_wgs84;
-    OGRSpatialReference m_srs_out;
     OGRDataSource* m_data_source;
-
-    // If the output SRS is not WGS84, this contains the transformation object. Otherwise NULL.
-    OGRCoordinateTransformation* m_transform;
 
     LayerErrorPoints* m_layer_error_points;
     LayerErrorLines*  m_layer_error_lines;
@@ -68,7 +63,7 @@ class OutputDatabase {
 
 public:
 
-    OutputDatabase(const std::string& outdb, int epsg, bool with_index=false);
+    OutputDatabase(const std::string& outdb, bool with_index=false);
 
     ~OutputDatabase();
 
@@ -88,11 +83,6 @@ public:
     void add_polygon(OGRPolygon* polygon);
 
     void set_meta(int runtime, int memory_usage);
-
-    OGRCoordinateTransformation* get_transformation() const { return m_transform; }
-
-    OGRSpatialReference* srs_wgs84() { return &m_srs_wgs84; }
-    OGRSpatialReference* srs_out()   { return &m_srs_out; }
 
 };
 

@@ -31,29 +31,15 @@
 const char* OutputDatabase::options_with_index[] = { NULL };
 const char* OutputDatabase::options_without_index[] = { "SPATIAL_INDEX=no", NULL };
 
-OutputDatabase::OutputDatabase(const std::string& outdb, int epsg, bool with_index) :
+OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_with_index(with_index),
-    m_srs_wgs84(),
-    m_srs_out(),
     m_data_source(NULL),
-    m_transform(NULL),
     m_layer_error_points(NULL),
     m_layer_error_lines(NULL),
     m_layer_rings(NULL),
     m_layer_polygons(NULL)
 {
     OGRRegisterAll();
-
-    m_srs_wgs84.SetWellKnownGeogCS("WGS84");
-    m_srs_out.importFromEPSG(epsg);
-
-    if (epsg != 4326) {
-        m_transform = OGRCreateCoordinateTransformation(&m_srs_wgs84, &m_srs_out);
-        if (!m_transform) {
-            std::cerr << "Can't create coordinate transformation.\n";
-            exit(return_code_fatal);  
-        }
-    }
 
     const char* driver_name = "SQLite";
     OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name);
@@ -69,10 +55,10 @@ OutputDatabase::OutputDatabase(const std::string& outdb, int epsg, bool with_ind
         exit(return_code_fatal);
     }
 
-    m_layer_error_points = new LayerErrorPoints(m_data_source, m_transform, &m_srs_out, layer_options());
-    m_layer_error_lines = new LayerErrorLines(m_data_source, m_transform, &m_srs_out, layer_options());
-    m_layer_rings = new LayerRings(m_data_source, m_transform, &m_srs_out, layer_options());
-    m_layer_polygons = new LayerPolygons(m_data_source, m_transform, &m_srs_out, layer_options());
+    m_layer_error_points = new LayerErrorPoints(m_data_source, layer_options());
+    m_layer_error_lines = new LayerErrorLines(m_data_source, layer_options());
+    m_layer_rings = new LayerRings(m_data_source, layer_options());
+    m_layer_polygons = new LayerPolygons(m_data_source, layer_options());
 
     exec("CREATE TABLE meta (timestamp TEXT, runtime INTEGER, memory_usage INTEGER)");
 }
@@ -93,7 +79,6 @@ OutputDatabase::~OutputDatabase() {
     m_layer_error_lines->commit();
     m_layer_error_points->commit();
     OGRDataSource::DestroyDataSource(m_data_source);
-    delete m_transform;
 }
 
 void OutputDatabase::add_error(OGRPoint* point, const char* error, osm_object_id_t id) {

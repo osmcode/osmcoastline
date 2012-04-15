@@ -21,6 +21,9 @@
 
 #include "coastline_ring_collection.hpp"
 #include "output_database.hpp"
+#include "srs.hpp"
+
+extern SRS srs;
 
 CoastlineRingCollection::CoastlineRingCollection() :
     m_list(),
@@ -105,7 +108,7 @@ void CoastlineRingCollection::setup_positions(posmap_t& posmap) {
     }
 }
 
-void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& vector, OGRSpatialReference* srs) {
+void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& vector) {
     vector.reserve(m_list.size());
 
     for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
@@ -113,12 +116,12 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
         if (cp.is_closed() && cp.npoints() > 3) { // XXX what's with rings that don't match here?
             OGRPolygon* p = cp.ogr_polygon(true);
             if (p->IsValid()) {
-                p->assignSpatialReference(srs);
+                p->assignSpatialReference(srs.wgs84());
                 vector.push_back(p);
             } else {
                 OGRGeometry* geom = p->Buffer(0);
                 if (geom->getGeometryType() == wkbPolygon && geom->IsValid()) {
-                    geom->assignSpatialReference(srs);
+                    geom->assignSpatialReference(srs.wgs84());
                     vector.push_back(static_cast<OGRPolygon*>(geom));
                 } else {
                     delete geom;

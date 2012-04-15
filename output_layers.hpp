@@ -22,49 +22,27 @@
 
 */
 
+#include "srs.hpp"
+
+extern SRS srs;
+
 class OGRLayer;
 class OGRDataSource;
-class OGRSpatialReference;
 class OGRPoint;
 class OGRLineString;
 class OGRPolygon;
-class OGRCoordinateTransformation;
 
 /**
  * Parent class for all output layers.
  */
 class Layer {
 
-    /// Coordinate transformation, NULL if output is WGS84.
-    OGRCoordinateTransformation* m_transform;
-
 protected:
 
     /// OGRLayer implementing this output layer.
     OGRLayer* m_layer;
 
-    Layer(OGRCoordinateTransformation* transform) :
-        m_transform(transform) {
-    }
-
-    /**
-     * Transform coordinates to output SRS if they are not already transformed.
-     */
-    void transform_if_needed(OGRGeometry* geometry) {
-        if (!m_transform) { // Output SRS is WGS84, no transformation needed.
-            return;
-        }
-
-        // Transform if no SRS is set on input geometry or it is set to WGS84.
-        OGRSpatialReference* srs = geometry->getSpatialReference();
-        if (srs == NULL || srs->IsSame(m_transform->GetSourceCS())) {
-            if (geometry->transform(m_transform) != OGRERR_NONE) {
-                // XXX we should do something more clever here
-                std::cerr << "Coordinate transformation failed\n";
-                exit(return_code_fatal);
-            }
-        }
-    }
+    Layer() {}
 
 public:
 
@@ -80,7 +58,7 @@ class LayerErrorPoints : public Layer {
 
 public:
 
-    LayerErrorPoints(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
+    LayerErrorPoints(OGRDataSource* data_source, const char** options);
     void add(OGRPoint* point, const char* error, osm_object_id_t id);
 
 };
@@ -92,7 +70,7 @@ class LayerErrorLines : public Layer {
 
 public:
 
-    LayerErrorLines(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
+    LayerErrorLines(OGRDataSource* data_source, const char** options);
     void add(OGRLineString* linestring, const char* error, osm_object_id_t id);
 
 };
@@ -108,7 +86,7 @@ class LayerRings : public Layer {
 
 public:
 
-    LayerRings(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
+    LayerRings(OGRDataSource* data_source, const char** options);
     void add(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed, LayerErrorPoints* layer_error_points);
 
 };
@@ -121,7 +99,7 @@ class LayerPolygons : public Layer {
 
 public:
 
-    LayerPolygons(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options);
+    LayerPolygons(OGRDataSource* data_source, const char** options);
     void add(OGRPolygon* polygon);
 
 };

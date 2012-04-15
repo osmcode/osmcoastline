@@ -29,46 +29,31 @@
 #include "coastline_polygons.hpp"
 #include "output_database.hpp"
 #include "osmcoastline.hpp"
+#include "srs.hpp"
 
-OGRPolygon* CoastlinePolygons::create_rectangular_polygon(OGRSpatialReference* srs, double x1, double y1, double x2, double y2, double expand) const {
-    x1 -= expand;
-    x2 += expand;
-    y1 -= expand;
-    y2 += expand;
+extern SRS srs;
 
-    assert(srs != NULL);
-    if (srs->IsGeographic()) {
-        if (x1 < -180) { x1 = -180; }
-        if (x1 >  180) { x1 =  180; }
-        if (x2 < -180) { x2 = -180; }
-        if (x2 >  180) { x2 =  180; }
+OGRPolygon* CoastlinePolygons::create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand) const {
+    OGREnvelope e;
 
-        if (y1 <  -90) { y1 =  -90; }
-        if (y1 >   90) { y2 =   90; }
-        if (y2 <  -90) { y2 =  -90; }
-        if (y2 >   90) { y2 =   90; }
-    } else {
-        if (x1 < -20037508.342789244) { x1 = -20037508.342789244; }
-        if (x1 >  20037508.342789244) { x1 =  20037508.342789244; }
-        if (x2 < -20037508.342789244) { x2 = -20037508.342789244; }
-        if (x2 >  20037508.342789244) { x2 =  20037508.342789244; }
+    e.MinX = x1 - expand;
+    e.MaxX = x2 + expand;
+    e.MinY = y1 - expand;
+    e.MaxY = y2 + expand;
 
-        if (y1 < -20037508.342789244) { y1 = -20037508.342789244; }
-        if (y1 >  20037508.342789244) { y2 =  20037508.342789244; }
-        if (y2 < -20037508.342789244) { y2 = -20037508.342789244; }
-        if (y2 >  20037508.342789244) { y2 =  20037508.342789244; }
-    }
+    // make sure we are inside the bounds for the output SRS
+    e.Intersect(srs.max_extent());
 
     OGRLinearRing* ring = new OGRLinearRing();
-    ring->addPoint(x1, y1);
-    ring->addPoint(x1, y2);
-    ring->addPoint(x2, y2);
-    ring->addPoint(x2, y1);
+    ring->addPoint(e.MinX, e.MinY);
+    ring->addPoint(e.MinX, e.MaxY);
+    ring->addPoint(e.MaxX, e.MaxY);
+    ring->addPoint(e.MaxX, e.MinY);
     ring->closeRings();
 
     OGRPolygon* polygon = new OGRPolygon();
     polygon->addRingDirectly(ring);
-    polygon->assignSpatialReference(srs);
+    polygon->assignSpatialReference(srs.out());
 
     return polygon;
 }
@@ -110,14 +95,14 @@ void CoastlinePolygons::split(OGRGeometry* g) {
             // split vertically
             double MidY = (envelope.MaxY+envelope.MinY) / 2;
 
-            b1 = create_rectangular_polygon(p->getSpatialReference(), envelope.MinX, envelope.MinY, envelope.MaxX, MidY, m_expand);
-            b2 = create_rectangular_polygon(p->getSpatialReference(), envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, m_expand);
+            b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, MidY, m_expand);
+            b2 = create_rectangular_polygon(envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, m_expand);
         } else {
             // split horizontally
             double MidX = (envelope.MaxX+envelope.MinX) / 2;
 
-            b1 = create_rectangular_polygon(p->getSpatialReference(), envelope.MinX, envelope.MinY, MidX, envelope.MaxY, m_expand);
-            b2 = create_rectangular_polygon(p->getSpatialReference(), MidX, envelope.MinY, envelope.MaxX, envelope.MaxY, m_expand);
+            b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, MidX, envelope.MaxY, m_expand);
+            b2 = create_rectangular_polygon(MidX, envelope.MinY, envelope.MaxX, envelope.MaxY, m_expand);
         }
 
         OGRGeometry* g1 = p->Intersection(b1);
@@ -125,10 +110,10 @@ void CoastlinePolygons::split(OGRGeometry* g) {
 
         // for some reason there is sometimes no srs on the geometries, so we add them on
         if (g1) {
-            g1->assignSpatialReference(p->getSpatialReference());
+            g1->assignSpatialReference(srs.out());
         }
         if (g2) {
-            g2->assignSpatialReference(p->getSpatialReference());
+            g2->assignSpatialReference(srs.out());
         }
 
         if (g1 && (g1->getGeometryType() == wkbPolygon || g1->getGeometryType() == wkbMultiPolygon) &&
@@ -208,16 +193,16 @@ void CoastlinePolygons::output_complete_polygons() {
     }
 }
 
-void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v, OGRSpatialReference* srs) {
+void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v) {
 //    std::cerr << "envelope = (" << e.MinX << ", " << e.MinY << "), (" << e.MaxX << ", " << e.MaxY << ") v.size()=" << v->size() << "\n";
     if (v->size() < 100) {
         try {
-            OGRGeometry* geom = create_rectangular_polygon(srs, e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand);
+            OGRGeometry* geom = create_rectangular_polygon(e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand);
             assert(geom->getSpatialReference() != NULL);
             for (polygon_vector_t::const_iterator it = v->begin(); it != v->end(); ++it) {
                 OGRGeometry* diff = geom->Difference(*it);
                 // for some reason there is sometimes no srs on the geometries, so we add them on
-                diff->assignSpatialReference(geom->getSpatialReference());
+                diff->assignSpatialReference(srs.out());
                 delete geom;
                 geom = diff;
             }
@@ -301,8 +286,8 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v, OGRSpatia
             }
         }
         delete v;
-        split_bbox(e1, v1, srs);
-        split_bbox(e2, v2, srs);
+        split_bbox(e1, v1);
+        split_bbox(e2, v2);
     }
 }
 
@@ -318,27 +303,10 @@ void CoastlinePolygons::output_water_polygons() {
             v->push_back(static_cast<OGRPolygon*>(p->Buffer(0)));
         }
     }
-    OGREnvelope e;
-
-    if (m_polygons[0]->getSpatialReference()->IsGeographic()) {
-        e.MinX = -180;
-        e.MinY =  -90;
-        e.MaxX =  180;
-        e.MaxY =   90;
-    } else {
-        e.MinX = -20037508.342789244;
-        e.MinY = -20037508.342789244;
-        e.MaxX =  20037508.342789244;
-        e.MaxY =  20037508.342789244;
-    }
-    split_bbox(e, v, m_polygons[0]->getSpatialReference());
+    split_bbox(srs.max_extent(), v);
 }
 
-void CoastlinePolygons::transform(OGRCoordinateTransformation* transform) {
-    if (m_multipolygon->transform(transform) != OGRERR_NONE) {
-        // XXX we should do something more clever here
-        std::cerr << "Coordinate transformation failed\n";
-        exit(return_code_fatal);
-    }
+void CoastlinePolygons::transform() {
+    srs.transform(m_multipolygon);
 }
 

@@ -30,6 +30,9 @@
 
 #include "osmcoastline.hpp"
 #include "output_layers.hpp"
+#include "srs.hpp"
+
+extern SRS srs;
 
 /***************************************************************/
 
@@ -39,10 +42,10 @@ OGRErr Layer::commit() {
 
 /***************************************************************/
 
-LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options) :
-    Layer(transform)
+LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, const char** options) :
+    Layer()
 {
-    m_layer = data_source->CreateLayer("error_points", srs, wkbPoint, const_cast<char**>(options));
+    m_layer = data_source->CreateLayer("error_points", srs.out(), wkbPoint, const_cast<char**>(options));
     if (m_layer == NULL) {
         std::cerr << "Creating layer 'error_points' failed.\n";
         exit(return_code_fatal);
@@ -66,7 +69,7 @@ LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, OGRCoordinateTran
 }
 
 void LayerErrorPoints::add(OGRPoint* point, const char* error, osm_object_id_t id) {
-    transform_if_needed(point);
+    srs.transform(point);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
@@ -84,10 +87,10 @@ void LayerErrorPoints::add(OGRPoint* point, const char* error, osm_object_id_t i
 
 /***************************************************************/
 
-LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options) :
-    Layer(transform)
+LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, const char** options) :
+    Layer()
 {
-    m_layer = data_source->CreateLayer("error_lines", srs, wkbLineString, const_cast<char**>(options));
+    m_layer = data_source->CreateLayer("error_lines", srs.out(), wkbLineString, const_cast<char**>(options));
     if (m_layer == NULL) {
         std::cerr << "Creating layer 'error_lines' failed.\n";
         exit(return_code_fatal);
@@ -111,7 +114,7 @@ LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, OGRCoordinateTransf
 }
 
 void LayerErrorLines::add(OGRLineString* linestring, const char* error, osm_object_id_t id) {
-    transform_if_needed(linestring);
+    srs.transform(linestring);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
@@ -129,10 +132,10 @@ void LayerErrorLines::add(OGRLineString* linestring, const char* error, osm_obje
 
 /***************************************************************/
 
-LayerRings::LayerRings(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options) :
-    Layer(transform)
+LayerRings::LayerRings(OGRDataSource* data_source, const char** options) :
+    Layer()
 {
-    m_layer = data_source->CreateLayer("rings", srs, wkbPolygon, const_cast<char**>(options));
+    m_layer = data_source->CreateLayer("rings", srs.out(), wkbPolygon, const_cast<char**>(options));
     if (m_layer == NULL) {
         std::cerr << "Creating layer 'rings' failed.\n";
         exit(return_code_fatal);
@@ -184,7 +187,7 @@ LayerRings::LayerRings(OGRDataSource* data_source, OGRCoordinateTransformation* 
 }
 
 void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed, LayerErrorPoints* layer_error_points) {
-    transform_if_needed(polygon);
+    srs.transform(polygon);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
@@ -246,10 +249,10 @@ void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, bool f
 
 /***************************************************************/
 
-LayerPolygons::LayerPolygons(OGRDataSource* data_source, OGRCoordinateTransformation* transform, OGRSpatialReference* srs, const char** options) :
-    Layer(transform)
+LayerPolygons::LayerPolygons(OGRDataSource* data_source, const char** options) :
+    Layer()
 {
-    m_layer = data_source->CreateLayer("polygons", srs, wkbPolygon, const_cast<char**>(options));
+    m_layer = data_source->CreateLayer("polygons", srs.out(), wkbPolygon, const_cast<char**>(options));
     if (m_layer == NULL) {
         std::cerr << "Creating layer 'polygons' failed.\n";
         exit(return_code_fatal);
@@ -259,7 +262,7 @@ LayerPolygons::LayerPolygons(OGRDataSource* data_source, OGRCoordinateTransforma
 }
 
 void LayerPolygons::add(OGRPolygon* polygon) {
-    transform_if_needed(polygon);
+    srs.transform(polygon);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 

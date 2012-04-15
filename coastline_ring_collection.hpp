@@ -87,7 +87,7 @@ public:
 
     void setup_positions(posmap_t& posmap);
 
-    void add_polygons_to_vector(std::vector<OGRGeometry*>& vector, OGRSpatialReference* srs);
+    void add_polygons_to_vector(std::vector<OGRGeometry*>& vector);
 
     unsigned int output_rings(OutputDatabase& output);
 

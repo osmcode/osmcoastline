@@ -25,7 +25,6 @@
 class OGRPolygon;
 class OGRMultiPolygon;
 class OGREnvelope;
-class OGRCoordinateTransformation;
 class OutputDatabase;
 
 class CoastlinePolygons {
@@ -38,7 +37,7 @@ class CoastlinePolygons {
 
     std::vector<OGRPolygon*> m_polygons;
 
-    OGRPolygon* create_rectangular_polygon(OGRSpatialReference* srs, double x1, double y1, double x2, double y2, double expand=0) const;
+    OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand=0) const;
 
     void split(OGRGeometry* g);
 
@@ -75,10 +74,10 @@ public:
 
     typedef std::vector<OGRPolygon*> polygon_vector_t;
 
-    void split_bbox(OGREnvelope e, polygon_vector_t* v, OGRSpatialReference* srs);
+    void split_bbox(OGREnvelope e, polygon_vector_t* v);
     void output_water_polygons();
 
-    void transform(OGRCoordinateTransformation* transform);
+    void transform();
 };
 
 #endif // COASTLINE_POLYGONS_HPP
