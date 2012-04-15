@@ -27,15 +27,16 @@ class OGRMultiPolygon;
 class OGREnvelope;
 class OutputDatabase;
 
+typedef std::vector<OGRPolygon*> polygon_vector_t;
+
 class CoastlinePolygons {
 
-    OGRMultiPolygon* m_multipolygon;
     OutputDatabase& m_output;
     double m_expand;
     int m_max_points_in_polygon;
     bool m_keep;
 
-    std::vector<OGRPolygon*> m_polygons;
+    polygon_vector_t* m_polygons;
 
     OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand=0) const;
 
@@ -43,17 +44,20 @@ class CoastlinePolygons {
 
 public:
 
-    CoastlinePolygons(OGRMultiPolygon* multipolygon, OutputDatabase& output, double expand, unsigned int max_points_in_polygon) :
-        m_multipolygon(multipolygon),
+    CoastlinePolygons(polygon_vector_t* polygons, OutputDatabase& output, double expand, unsigned int max_points_in_polygon) :
         m_output(output),
         m_expand(expand),
         m_max_points_in_polygon(max_points_in_polygon),
         m_keep(false),
-        m_polygons() {
+        m_polygons(polygons) {
+    }
+
+    ~CoastlinePolygons() {
+        delete m_polygons;
     }
 
     /**
-     * When polygons have the wrong winding order, this function will fix them.
+     * When polygons have the wrong winding order, this method will fix them.
      */
     unsigned int fix_direction();
 
@@ -68,11 +72,9 @@ public:
     void output_split_polygons();
 
     /**
-    * Write all polygons as complete polygons to the output database.
+    * Write all polygons to the output database.
     */
-    void output_complete_polygons();
-
-    typedef std::vector<OGRPolygon*> polygon_vector_t;
+    void output_polygons();
 
     void split_bbox(OGREnvelope e, polygon_vector_t* v);
     void output_water_polygons();

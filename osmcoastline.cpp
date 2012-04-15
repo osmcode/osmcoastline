@@ -48,7 +48,7 @@ SRS srs;
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-OGRMultiPolygon* create_polygons(CoastlineRingCollection coastline_rings) {
+polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings) {
     std::vector<OGRGeometry*> all_polygons;
     coastline_rings.add_polygons_to_vector(all_polygons);
 
@@ -58,7 +58,17 @@ OGRMultiPolygon* create_polygons(CoastlineRingCollection coastline_rings) {
 
     assert(mega_multipolygon->getGeometryType() == wkbMultiPolygon);
 
-    return static_cast<OGRMultiPolygon*>(mega_multipolygon);
+    polygon_vector_t* polygons = new polygon_vector_t;
+    polygons->reserve(static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries());
+    for (int i=0; i < static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries(); ++i) {
+        OGRGeometry* ref = static_cast<OGRMultiPolygon*>(mega_multipolygon)->getGeometryRef(i);
+        assert(ref->getGeometryType() == wkbPolygon);
+        polygons->push_back(static_cast<OGRPolygon*>(ref));
+    }
+
+    static_cast<OGRMultiPolygon*>(mega_multipolygon)->removeGeometry(-1, FALSE);
+
+    return polygons;
 }
 
 
@@ -258,7 +268,7 @@ int main(int argc, char *argv[]) {
                 coastline_polygons.output_split_polygons();
             } else {
                 vout << "Writing out complete polygons... (Because you set --max-points/-m to 0.)\n";
-                coastline_polygons.output_complete_polygons();
+                coastline_polygons.output_polygons();
             }
             if (options.water) {
                 vout << "Writing out water polygons...\n";
