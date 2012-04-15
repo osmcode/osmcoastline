@@ -55,6 +55,11 @@ coastline_polygons.o: coastline_polygons.cpp coastline_polygons.hpp output_datab
 osmcoastline: osmcoastline.o coastline_ring.o coastline_ring_collection.o coastline_polygons.o output_database.o output_layers.o srs.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PROTOBUF) $(LIB_OGR) $(LIB_GEOS) $(LIB_XML2)
 
+doc: doc/html/files.html
+
+doc/html/files.html: *.hpp *.cpp
+	doxygen >/dev/null
+
 clean:
 	rm -f *.o core $(PROGRAMS)
 

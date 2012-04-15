@@ -1,4 +1,5 @@
 osmcoastline
 core
+doc
 *.o
 *.swp
