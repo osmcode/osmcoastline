@@ -48,7 +48,7 @@ SRS srs;
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings) {
+polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, OutputDatabase* output) {
     std::vector<OGRGeometry*> all_polygons;
     coastline_rings.add_polygons_to_vector(all_polygons);
 
@@ -61,9 +61,23 @@ polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings) {
     polygon_vector_t* polygons = new polygon_vector_t;
     polygons->reserve(static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries());
     for (int i=0; i < static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries(); ++i) {
-        OGRGeometry* ref = static_cast<OGRMultiPolygon*>(mega_multipolygon)->getGeometryRef(i);
-        assert(ref->getGeometryType() == wkbPolygon);
-        polygons->push_back(static_cast<OGRPolygon*>(ref));
+        OGRGeometry* geom = static_cast<OGRMultiPolygon*>(mega_multipolygon)->getGeometryRef(i);
+        assert(geom->getGeometryType() == wkbPolygon);
+        OGRPolygon* p = static_cast<OGRPolygon*>(geom);
+        if (p->IsValid()) {
+            polygons->push_back(p);
+        } else {
+            output->add_error(static_cast<OGRLineString*>(p->getExteriorRing()->clone()), "invalid");
+            OGRGeometry* buf0 = p->Buffer(0);
+            if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
+                buf0->assignSpatialReference(srs.wgs84());
+                polygons->push_back(static_cast<OGRPolygon*>(buf0));
+            } else {
+                std::cerr << "Ignoring invalid polygon geometry.\n";
+                delete buf0;
+            }
+            delete p;
+        }
     }
 
     static_cast<OGRMultiPolygon*>(mega_multipolygon)->removeGeometry(-1, FALSE);
@@ -249,7 +263,7 @@ int main(int argc, char *argv[]) {
 
         if (options.output_polygons) {
             vout << "Create polygons...\n";
-            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings), *output_database, options.bbox_overlap, options.max_points_in_polygon);
+            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database), *output_database, options.bbox_overlap, options.max_points_in_polygon);
 
             vout << "Fixing coastlines going the wrong way...\n";
             int fixed = coastline_polygons.fix_direction();
