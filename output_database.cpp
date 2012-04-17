@@ -81,11 +81,11 @@ OutputDatabase::~OutputDatabase() {
     OGRDataSource::DestroyDataSource(m_data_source);
 }
 
-void OutputDatabase::add_error(OGRPoint* point, const char* error, osm_object_id_t id) {
+void OutputDatabase::add_error_point(OGRPoint* point, const char* error, osm_object_id_t id) {
     m_layer_error_points->add(point, error, id);
 }
 
-void OutputDatabase::add_error(OGRLineString* linestring, const char* error, osm_object_id_t id) {
+void OutputDatabase::add_error_line(OGRLineString* linestring, const char* error, osm_object_id_t id) {
     m_layer_error_lines->add(linestring, error, id);
 }
 

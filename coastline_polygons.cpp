@@ -66,10 +66,14 @@ unsigned int CoastlinePolygons::fix_direction() {
         OGRLinearRing* er = (*it)->getExteriorRing();
         if (!er->isClockwise()) {
             er->reverseWindingOrder();
+            // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
+            er->setCoordinateDimension(2);
             for (int i=0; i < (*it)->getNumInteriorRings(); ++i) {
                 (*it)->getInteriorRing(i)->reverseWindingOrder();
+                // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
+                (*it)->getInteriorRing(i)->setCoordinateDimension(2);
             }
-            m_output.add_error(static_cast<OGRLineString*>(er->clone()), "direction");
+            m_output.add_error_line(static_cast<OGRLineString*>(er->clone()), "direction");
             warnings++;
         }
     }

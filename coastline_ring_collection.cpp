@@ -142,18 +142,18 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
             if (cp.npoints() > 3) {
                 output.add_ring(cp.ogr_polygon(true), cp.ring_id(), cp.nways(), cp.npoints(), cp.is_fixed());
             } else if (cp.npoints() == 1) {
-                output.add_error(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
+                output.add_error_point(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
                 warnings++;
             } else { // cp.npoints() == 2 or 3
-                output.add_error(cp.ogr_linestring(true), "not_a_ring", cp.ring_id());
-                output.add_error(cp.ogr_first_point(), "not_a_ring", cp.first_node_id());
-                output.add_error(cp.ogr_last_point(), "not_a_ring", cp.last_node_id());
+                output.add_error_line(cp.ogr_linestring(true), "not_a_ring", cp.ring_id());
+                output.add_error_point(cp.ogr_first_point(), "not_a_ring", cp.first_node_id());
+                output.add_error_point(cp.ogr_last_point(), "not_a_ring", cp.last_node_id());
                 warnings++;
             }
         } else {
-            output.add_error(cp.ogr_linestring(true), "not_closed", cp.ring_id());
-            output.add_error(cp.ogr_first_point(), "end_point", cp.first_node_id());
-            output.add_error(cp.ogr_last_point(), "end_point", cp.last_node_id());
+            output.add_error_line(cp.ogr_linestring(true), "not_closed", cp.ring_id());
+            output.add_error_point(cp.ogr_first_point(), "end_point", cp.first_node_id());
+            output.add_error_point(cp.ogr_last_point(), "end_point", cp.last_node_id());
             warnings++;
         }
     }
@@ -200,14 +200,14 @@ void CoastlineRingCollection::close_rings(OutputDatabase* output, bool debug, do
             CoastlineRing* s = sit->second->get();
 
             if (output) {
-                output->add_error(e->ogr_last_point(), "fixed_end_point", e->last_node_id());
-                output->add_error(s->ogr_first_point(), "fixed_end_point", s->first_node_id());
+                output->add_error_point(e->ogr_last_point(), "fixed_end_point", e->last_node_id());
+                output->add_error_point(s->ogr_first_point(), "fixed_end_point", s->first_node_id());
 
                 if (e->last_position() != s->first_position()) {
                     OGRLineString* linestring = new OGRLineString;
-                    linestring->addPoint(e->ogr_last_point());
-                    linestring->addPoint(s->ogr_first_point());
-                    output->add_error(linestring, "added_line");
+                    linestring->addPoint(e->last_position().lon(), e->last_position().lat());
+                    linestring->addPoint(s->first_position().lon(), s->first_position().lat());
+                    output->add_error_line(linestring, "added_line");
                 }
             }
 
@@ -223,7 +223,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase* output, bool debug, do
 
                 if (e->first_position() == e->last_position()) {
                     if (output) {
-                        output->add_error(e->ogr_first_point(), "double_node", e->first_node_id());
+                        output->add_error_point(e->ogr_first_point(), "double_node", e->first_node_id());
                     }
                     m_start_nodes.erase(e->first_node_id());
                     m_end_nodes.erase(eit);

@@ -77,8 +77,8 @@ public:
     LayerRings*       layer_rings()        const { return m_layer_rings; }
     LayerPolygons*    layer_polygons()     const { return m_layer_polygons; }
 
-    void add_error(OGRPoint* point, const char* error, osm_object_id_t id);
-    void add_error(OGRLineString* linestring, const char* error, osm_object_id_t id=0);
+    void add_error_point(OGRPoint* point, const char* error, osm_object_id_t id);
+    void add_error_line(OGRLineString* linestring, const char* error, osm_object_id_t id=0);
     void add_ring(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed);
     void add_polygon(OGRPolygon* polygon);
 

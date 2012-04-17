@@ -70,7 +70,7 @@ polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, Outpu
         if (p->IsValid()) {
             polygons->push_back(p);
         } else {
-            output->add_error(static_cast<OGRLineString*>(p->getExteriorRing()->clone()), "invalid");
+            output->add_error_line(static_cast<OGRLineString*>(p->getExteriorRing()->clone()), "invalid");
             OGRGeometry* buf0 = p->Buffer(0);
             if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
                 buf0->assignSpatialReference(srs.wgs84());

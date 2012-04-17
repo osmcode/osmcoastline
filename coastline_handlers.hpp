@@ -114,7 +114,7 @@ public:
                 raw_out = true;
                 try {
                     Osmium::Geometry::Point point(*node);
-                    m_output->add_error(point.create_ogr_geometry(), "tagged_node", node->id());
+                    m_output->add_error_point(point.create_ogr_geometry(), "tagged_node", node->id());
                 } catch (Osmium::Exception::IllegalGeometry) {
                     std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
                 }
