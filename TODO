@@ -10,5 +10,5 @@ OSMCoastline TODO
 * determine best defaults for bbox overlap, max-points and close distance
 * should create-index be the default?
 * Magic number 100 in split_bbox?
-* Detect when bbox in recursive split doesn't get smaller
+* Output coastlines as lines
 
