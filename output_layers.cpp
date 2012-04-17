@@ -51,7 +51,7 @@ LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, const char** opti
         exit(return_code_fatal);
     }
 
-    OGRFieldDefn field_osm_id("osm_id", OFTInteger);
+    OGRFieldDefn field_osm_id("osm_id", OFTString);
     field_osm_id.SetWidth(10);
     if (m_layer->CreateField(&field_osm_id) != OGRERR_NONE ) {
         std::cerr << "Creating field 'osm_id' on 'error_points' layer failed.\n";
@@ -96,7 +96,7 @@ LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, const char** option
         exit(return_code_fatal);
     }
 
-    OGRFieldDefn field_osm_id("osm_id", OFTInteger);
+    OGRFieldDefn field_osm_id("osm_id", OFTString);
     field_osm_id.SetWidth(10);
     if (m_layer->CreateField(&field_osm_id) != OGRERR_NONE ) {
         std::cerr << "Creating field 'osm_id' on 'error_lines' layer failed.\n";
@@ -141,7 +141,7 @@ LayerRings::LayerRings(OGRDataSource* data_source, const char** options) :
         exit(return_code_fatal);
     }
 
-    OGRFieldDefn field_osm_id("osm_id", OFTInteger);
+    OGRFieldDefn field_osm_id("osm_id", OFTString);
     field_osm_id.SetWidth(10);
     if (m_layer->CreateField(&field_osm_id) != OGRERR_NONE ) {
         std::cerr << "Creating field 'osm_id' on 'rings' layer failed.\n";
