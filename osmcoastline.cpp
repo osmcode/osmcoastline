@@ -278,15 +278,13 @@ int main(int argc, char *argv[]) {
             if (options.split_large_polygons || options.water) {
                 vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
                 vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
-                coastline_polygons.split_polygons();
-            } else {
-                vout << "Writing out complete polygons... (Because you set --max-points/-m to 0.)\n";
+                coastline_polygons.split();
             }
             if (options.water) {
                 vout << "Writing out water polygons...\n";
                 coastline_polygons.output_water_polygons();
             } else {
-                coastline_polygons.output_polygons();
+                coastline_polygons.output_land_polygons();
             }
         } else {
             vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";

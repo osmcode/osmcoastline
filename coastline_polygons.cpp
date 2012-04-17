@@ -76,7 +76,13 @@ unsigned int CoastlinePolygons::fix_direction() {
     return warnings;
 }
 
-void CoastlinePolygons::split(OGRGeometry* g) {
+void CoastlinePolygons::transform() {
+    for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
+        srs.transform(*it);
+    }
+}
+
+void CoastlinePolygons::split_geom(OGRGeometry* g) {
     OGRPolygon* p = static_cast<OGRPolygon*>(g);
 
     if (p->getExteriorRing()->getNumPoints() <= m_max_points_in_polygon) {
@@ -117,25 +123,25 @@ void CoastlinePolygons::split(OGRGeometry* g) {
         if (g1 && (g1->getGeometryType() == wkbPolygon || g1->getGeometryType() == wkbMultiPolygon) &&
             g2 && (g2->getGeometryType() == wkbPolygon || g2->getGeometryType() == wkbMultiPolygon)) {
             if (g1->getGeometryType() == wkbPolygon) {
-                split(g1);
+                split_geom(g1);
             } else {
                 OGRMultiPolygon* mp = static_cast<OGRMultiPolygon*>(g1);
                 assert(mp->getSpatialReference() != NULL);
                 for (int i=0; i < mp->getNumGeometries(); ++i) {
                     OGRPolygon* gp = static_cast<OGRPolygon*>(mp->getGeometryRef(i));
                     gp->assignSpatialReference(mp->getSpatialReference());
-                    split(gp);
+                    split_geom(gp);
                 }
             }
             if (g2->getGeometryType() == wkbPolygon) {
-                split(g2);
+                split_geom(g2);
             } else {
                 OGRMultiPolygon* mp = static_cast<OGRMultiPolygon*>(g2);
                 assert(mp->getSpatialReference() != NULL);
                 for (int i=0; i < mp->getNumGeometries(); ++i) {
                     OGRPolygon* gp = static_cast<OGRPolygon*>(mp->getGeometryRef(i));
                     gp->assignSpatialReference(mp->getSpatialReference());
-                    split(gp);
+                    split_geom(gp);
                 }
             }
         } else {
@@ -162,16 +168,16 @@ void CoastlinePolygons::split(OGRGeometry* g) {
     }
 }
 
-void CoastlinePolygons::split_polygons() {
+void CoastlinePolygons::split() {
     polygon_vector_t* v = m_polygons;
     m_polygons = new polygon_vector_t;
     for (polygon_vector_t::iterator it = v->begin(); it != v->end(); ++it) {
-        split(*it);
+        split_geom(*it);
     }
     delete v;
 }
 
-void CoastlinePolygons::output_polygons() {
+void CoastlinePolygons::output_land_polygons() {
     for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
         m_output.add_polygon(*it);
     }
@@ -288,11 +294,5 @@ void CoastlinePolygons::output_water_polygons() {
         }
     }
     split_bbox(srs.max_extent(), v);
-}
-
-void CoastlinePolygons::transform() {
-    for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
-        srs.transform(*it);
-    }
 }
 

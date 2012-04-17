@@ -29,17 +29,41 @@ class OutputDatabase;
 
 typedef std::vector<OGRPolygon*> polygon_vector_t;
 
+/**
+ * A collection of land polygons created out of coastlines.
+ * Contains operations for SRS transformation, splitting up of large polygons
+ * and converting to water polygons.
+ */
 class CoastlinePolygons {
 
+    /// Output database
     OutputDatabase& m_output;
+
+    /**
+     * When splitting polygons we want them to overlap slightly to avoid
+     * rendering artefacts. This is the amount each geometry is expanded
+     * in each direction.
+     */
     double m_expand;
+
+    /**
+     * When splitting polygons they are split until they have less than
+     * this amount of points in them.
+     */
     int m_max_points_in_polygon;
 
+    /**
+     * Vector of polygons we want to operate on. This is initialized in
+     * the constructor from the polygons created from coastline rings.
+     * After that the different methods on this class will convert the
+     * polygons and always leave the result in this vector again.
+     */
     polygon_vector_t* m_polygons;
 
     OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand=0) const;
 
-    void split(OGRGeometry* g);
+    void split_geom(OGRGeometry* g);
+    void split_bbox(OGREnvelope e, polygon_vector_t* v);
 
 public:
 
@@ -54,25 +78,21 @@ public:
         delete m_polygons;
     }
 
-    /**
-     * When polygons have the wrong winding order, this method will fix them.
-     */
+    /// Turn polygons with wrong winding order around.
     unsigned int fix_direction();
 
-    /**
-    * Split up all the polygons.
-    */
-    void split_polygons();
+    /// Transform all polygons to output SRS.
+    void transform();
 
-    /**
-    * Write all polygons to the output database.
-    */
-    void output_polygons();
+    /// Split up all polygons.
+    void split();
 
-    void split_bbox(OGREnvelope e, polygon_vector_t* v);
+    /// Write all land polygons to the output database.
+    void output_land_polygons();
+
+    /// Write all water polygons to the output database.
     void output_water_polygons();
 
-    void transform();
 };
 
 #endif // COASTLINE_POLYGONS_HPP

@@ -168,6 +168,11 @@ public:
             }
         }
 
+        if (!split_large_polygons && water) {
+            std::cerr << "Options -w/--water and -m/--max-points=0 are mutually exclusive\n";
+            exit(return_code_cmdline);
+        }
+
         if (optind != argc - 1) {
             std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
             exit(return_code_cmdline);
@@ -228,6 +233,7 @@ private:
                   << "  -r, --output-rings         - Output rings to database file\n"
                   << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
                   << "  -v, --verbose              - Verbose output\n"
+                  << "  -w, --water                - Create water polygons instead of land polygons\n"
                   << "\n"
                   << "At least one of --output-database/-o and --output-osm/-O is needed.\n"
         ;
