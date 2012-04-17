@@ -43,6 +43,9 @@
 // from WGS84 to the output SRS etc.
 SRS srs;
 
+// Global debug marker
+bool debug;
+
 /* ================================================== */
 
 /**
@@ -185,6 +188,7 @@ int main(int argc, char *argv[]) {
 
     // Initialize Osmium.
     Osmium::init(options.debug);
+    debug = options.debug;
 
     // Set up optional OSM raw output file.
     Osmium::OSMFile* output_osm_file = NULL;

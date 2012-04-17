@@ -60,9 +60,15 @@ class CoastlinePolygons {
      */
     polygon_vector_t* m_polygons;
 
+    /**
+     * Max depth after recursive splitting.
+     */
+    int m_max_split_depth;
+
     OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand=0) const;
 
-    void split_geom(OGRGeometry* g);
+    void split_geometry(OGRGeometry* geom, int level);
+    void split_polygon(OGRPolygon* polygon, int level);
     void split_bbox(OGREnvelope e, polygon_vector_t* v);
 
 public:
@@ -71,7 +77,8 @@ public:
         m_output(output),
         m_expand(expand),
         m_max_points_in_polygon(max_points_in_polygon),
-        m_polygons(polygons) {
+        m_polygons(polygons),
+        m_max_split_depth(0) {
     }
 
     ~CoastlinePolygons() {
