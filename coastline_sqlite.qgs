@@ -156,7 +156,7 @@
                 <sizescale field=""/>
             </renderer-v2>
             <customproperties/>
-            <displayfield>id</displayfield>
+            <displayfield>osm_id</displayfield>
             <label>0</label>
             <labelattributes>
                 <label fieldname="" text="Label"/>
@@ -181,7 +181,7 @@
             <edittypes>
                 <edittype type="0" name="OGC_FID"/>
                 <edittype type="0" name="error"/>
-                <edittype type="0" name="id"/>
+                <edittype type="0" name="osm_id"/>
             </edittypes>
             <editform>.</editform>
             <editforminit></editforminit>
@@ -311,7 +311,7 @@
                 <property key="labeling/dist" value="1"/>
                 <property key="labeling/distInMapUnits" value="false"/>
                 <property key="labeling/enabled" value="false"/>
-                <property key="labeling/fieldName" value="id"/>
+                <property key="labeling/fieldName" value="osm_id"/>
                 <property key="labeling/fontFamily" value="Sans"/>
                 <property key="labeling/fontItalic" value="false"/>
                 <property key="labeling/fontSize" value="10"/>
@@ -333,7 +333,7 @@
                 <property key="labeling/textColorG" value="0"/>
                 <property key="labeling/textColorR" value="0"/>
             </customproperties>
-            <displayfield>id</displayfield>
+            <displayfield>osm_id</displayfield>
             <label>0</label>
             <labelattributes>
                 <label fieldname="" text="Label"/>
@@ -358,7 +358,7 @@
             <edittypes>
                 <edittype type="0" name="OGC_FID"/>
                 <edittype type="0" name="error"/>
-                <edittype type="0" name="id"/>
+                <edittype type="0" name="osm_id"/>
             </edittypes>
             <editform>.</editform>
             <editforminit></editforminit>
@@ -498,7 +498,7 @@
                 <sizescale field=""/>
             </renderer-v2>
             <customproperties/>
-            <displayfield>id</displayfield>
+            <displayfield>osm_id</displayfield>
             <label>0</label>
             <labelattributes>
                 <label fieldname="" text="Label"/>
@@ -522,7 +522,7 @@
             </labelattributes>
             <edittypes>
                 <edittype type="0" name="OGC_FID"/>
-                <edittype type="0" name="id"/>
+                <edittype type="0" name="osm_id"/>
                 <edittype type="0" name="land"/>
                 <edittype type="0" name="npoints"/>
                 <edittype type="0" name="nways"/>

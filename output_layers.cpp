@@ -51,10 +51,10 @@ LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, const char** opti
         exit(return_code_fatal);
     }
 
-    OGRFieldDefn field_id("id", OFTInteger);
-    field_id.SetWidth(10);
-    if (m_layer->CreateField(&field_id) != OGRERR_NONE ) {
-        std::cerr << "Creating field 'id' on 'error_points' layer failed.\n";
+    OGRFieldDefn field_osm_id("osm_id", OFTInteger);
+    field_osm_id.SetWidth(10);
+    if (m_layer->CreateField(&field_osm_id) != OGRERR_NONE ) {
+        std::cerr << "Creating field 'osm_id' on 'error_points' layer failed.\n";
         exit(return_code_fatal);
     }
 
@@ -68,13 +68,13 @@ LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, const char** opti
     m_layer->StartTransaction();
 }
 
-void LayerErrorPoints::add(OGRPoint* point, const char* error, osm_object_id_t id) {
+void LayerErrorPoints::add(OGRPoint* point, const char* error, osm_object_id_t osm_id) {
     srs.transform(point);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
     feature->SetGeometryDirectly(point);
-    feature->SetField("id", id);
+    feature->SetField("osm_id", osm_id);
     feature->SetField("error", error);
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
@@ -96,10 +96,10 @@ LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, const char** option
         exit(return_code_fatal);
     }
 
-    OGRFieldDefn field_id("id", OFTInteger);
-    field_id.SetWidth(10);
-    if (m_layer->CreateField(&field_id) != OGRERR_NONE ) {
-        std::cerr << "Creating field 'id' on 'error_lines' layer failed.\n";
+    OGRFieldDefn field_osm_id("osm_id", OFTInteger);
+    field_osm_id.SetWidth(10);
+    if (m_layer->CreateField(&field_osm_id) != OGRERR_NONE ) {
+        std::cerr << "Creating field 'osm_id' on 'error_lines' layer failed.\n";
         exit(return_code_fatal);
     }
 
@@ -113,13 +113,13 @@ LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, const char** option
     m_layer->StartTransaction();
 }
 
-void LayerErrorLines::add(OGRLineString* linestring, const char* error, osm_object_id_t id) {
+void LayerErrorLines::add(OGRLineString* linestring, const char* error, osm_object_id_t osm_id) {
     srs.transform(linestring);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
     feature->SetGeometryDirectly(linestring);
-    feature->SetField("id", id);
+    feature->SetField("osm_id", osm_id);
     feature->SetField("error", error);
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
@@ -141,10 +141,10 @@ LayerRings::LayerRings(OGRDataSource* data_source, const char** options) :
         exit(return_code_fatal);
     }
 
-    OGRFieldDefn field_id("id", OFTInteger);
-    field_id.SetWidth(10);
-    if (m_layer->CreateField(&field_id) != OGRERR_NONE ) {
-        std::cerr << "Creating field 'id' on 'rings' layer failed.\n";
+    OGRFieldDefn field_osm_id("osm_id", OFTInteger);
+    field_osm_id.SetWidth(10);
+    if (m_layer->CreateField(&field_osm_id) != OGRERR_NONE ) {
+        std::cerr << "Creating field 'osm_id' on 'rings' layer failed.\n";
         exit(return_code_fatal);
     }
 
@@ -186,13 +186,13 @@ LayerRings::LayerRings(OGRDataSource* data_source, const char** options) :
     m_layer->StartTransaction();
 }
 
-void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed, LayerErrorPoints* layer_error_points) {
+void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bool fixed, LayerErrorPoints* layer_error_points) {
     srs.transform(polygon);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
     feature->SetGeometryDirectly(polygon);
-    feature->SetField("id", id);
+    feature->SetField("osm_id", osm_id);
     feature->SetField("nways", nways);
     feature->SetField("npoints", npoints);
     feature->SetField("fixed", fixed ? 0 : 1);
@@ -234,7 +234,7 @@ void LayerRings::add(OGRPolygon* polygon, int id, int nways, int npoints, bool f
         point->setX(x);
         point->setY(y);
 
-        layer_error_points->add(point, reason.c_str(), id);
+        layer_error_points->add(point, reason.c_str(), osm_id);
 
         feature->SetField("valid", 0);
     }
