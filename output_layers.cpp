@@ -205,7 +205,7 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
 
     if (polygon->IsValid()) {
         feature->SetField("valid", 1);
-    } else if (layer_error_points) {
+    } else {
         /*
            When the polygon is invalid we find out what and where the problem is.
            This code is a bit strange because older versions of the GEOS library
@@ -234,6 +234,9 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
         point->setX(x);
         point->setY(y);
 
+        if (reason == "Self-intersection") {
+            reason = "self_intersection";
+        }
         layer_error_points->add(point, reason.c_str(), osm_id);
 
         feature->SetField("valid", 0);
