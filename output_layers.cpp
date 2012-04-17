@@ -22,6 +22,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <assert.h>
 
 #include <ogrsf_frmts.h>
 #include <geos_c.h>
@@ -114,6 +115,7 @@ LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, const char** option
 }
 
 void LayerErrorLines::add(OGRLineString* linestring, const char* error, osm_object_id_t osm_id) {
+    assert(linestring->getGeometryType() == wkbLineString);
     srs.transform(linestring);
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
