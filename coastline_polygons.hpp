@@ -34,7 +34,6 @@ class CoastlinePolygons {
     OutputDatabase& m_output;
     double m_expand;
     int m_max_points_in_polygon;
-    bool m_keep;
 
     polygon_vector_t* m_polygons;
 
@@ -48,7 +47,6 @@ public:
         m_output(output),
         m_expand(expand),
         m_max_points_in_polygon(max_points_in_polygon),
-        m_keep(false),
         m_polygons(polygons) {
     }
 
@@ -61,15 +59,10 @@ public:
      */
     unsigned int fix_direction();
 
-    CoastlinePolygons& keep(bool keep) {
-        m_keep = keep;
-        return *this;
-    }
-
     /**
-    * Split up all the polygons and write them out.
+    * Split up all the polygons.
     */
-    void output_split_polygons();
+    void split_polygons();
 
     /**
     * Write all polygons to the output database.

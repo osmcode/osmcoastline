@@ -80,11 +80,7 @@ void CoastlinePolygons::split(OGRGeometry* g) {
     OGRPolygon* p = static_cast<OGRPolygon*>(g);
 
     if (p->getExteriorRing()->getNumPoints() <= m_max_points_in_polygon) {
-        if (m_keep) {
-            m_polygons->push_back(p);
-        } else {
-            m_output.add_polygon(p);
-        }
+        m_polygons->push_back(p);
     } else {
         OGREnvelope envelope;
         p->getEnvelope(&envelope);
@@ -156,11 +152,7 @@ void CoastlinePolygons::split(OGRGeometry* g) {
                     std::cerr << "   num=" << static_cast<OGRGeometryCollection*>(g2)->getNumGeometries() << "\n";
                 }
             }
-            if (m_keep) {
-                m_polygons->push_back(p);
-            } else {
-                m_output.add_polygon(p);
-            }
+            m_polygons->push_back(p);
             delete g2;
             delete g1;
         }
@@ -170,23 +162,11 @@ void CoastlinePolygons::split(OGRGeometry* g) {
     }
 }
 
-void CoastlinePolygons::output_split_polygons() {
+void CoastlinePolygons::split_polygons() {
     polygon_vector_t* v = m_polygons;
     m_polygons = new polygon_vector_t;
     for (polygon_vector_t::iterator it = v->begin(); it != v->end(); ++it) {
-        OGRPolygon* p = *it;
-        if (p->IsValid()) {
-            split(p);
-        } else {
-            OGRPolygon* pb = dynamic_cast<OGRPolygon*>(p->Buffer(0));
-            if (pb) {
-                std::cerr << "not valid, but buffer ok\n";
-                pb->assignSpatialReference(p->getSpatialReference());
-                split(pb);
-            } else {
-                std::cerr << "not valid, and buffer not polygon\n";
-            }
-        }
+        split(*it);
     }
     delete v;
 }
