@@ -24,6 +24,7 @@
 #include <list>
 #include <time.h>
 #include <getopt.h>
+#include <unistd.h>
 
 #include <osmium.hpp>
 #include <osmium/geometry/point.hpp>
@@ -197,6 +198,10 @@ int main(int argc, char *argv[]) {
         vout << "Not writing OSM output. (Add --output-osm/-O if you want this.)\n";
     } else {
         vout << "Writing OSM output to file '" << options.output_osm << "'. (Was set with --output-osm/-O option.)\n";
+        if (options.overwrite_output) {
+            vout << "Removing OSM output file (if it exists) (because you told me to with --overwrite/-f).\n";
+            unlink(options.output_osm.c_str());
+        }
         output_osm_file = new Osmium::OSMFile(options.output_osm);
         output_osm = output_osm_file->create_output_file();
     }
@@ -213,10 +218,14 @@ int main(int argc, char *argv[]) {
         vout << "Not writing output database (because you did not give the --output-database/-o option).\n";
     } else {
         vout << "Writing to output database '" << options.output_database << "'. (Was set with the --output-database/-o option.)\n";
+        if (options.overwrite_output) {
+            vout << "Removing database output file (if it exists) (because you told me to with --overwrite/-f).\n";
+            unlink(options.output_database.c_str());
+        }
         if (options.create_index) {
-            vout << "Will create geometry index (because you told me to using --create-index/-i).\n";
+            vout << "Will create geometry index. (If you do not want an index use --no-index/-i.)\n";
         } else {
-            vout << "Will NOT create geometry index. (If you want an index use --create-index/-i.)\n";
+            vout << "Will NOT create geometry index (because you told me to using --no-index/-i).\n";
         }
         output_database = new OutputDatabase(options.output_database, options.create_index);
     }

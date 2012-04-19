@@ -65,6 +65,9 @@ public:
     /// Output OSM "raw data" file name.
     std::string output_osm;
 
+    /// Should output files be overwritten
+    bool overwrite_output;
+
     /// Should the rings output table be populated?
     bool output_rings;
 
@@ -82,13 +85,14 @@ public:
         bbox_overlap(-1),
         close_distance(1.0),
         close_rings(true),
-        create_index(false),
+        create_index(true),
         debug(false),
         max_points_in_polygon(1000),
         split_large_polygons(true),
         output_polygons(true),
         output_database(),
         output_osm(),
+        overwrite_output(false),
         output_rings(false),
         epsg(4326),
         verbose(false),
@@ -97,7 +101,7 @@ public:
         static struct option long_options[] = {
             {"bbox-overlap",    required_argument, 0, 'b'},
             {"close-distance",  required_argument, 0, 'c'},
-            {"create-index",          no_argument, 0, 'i'},
+            {"no-index",              no_argument, 0, 'i'},
             {"debug",                 no_argument, 0, 'd'},
             {"help",                  no_argument, 0, 'h'},
             {"max-points",      required_argument, 0, 'm'},
@@ -105,6 +109,7 @@ public:
             {"output-database", required_argument, 0, 'o'},
             {"output-osm",      required_argument, 0, 'O'},
             {"output-rings",          no_argument, 0, 'r'},
+            {"overwrite",             no_argument, 0, 'f'},
             {"srs",             required_argument, 0, 's'},
             {"verbose",               no_argument, 0, 'v'},
             {"water",                 no_argument, 0, 'w'},
@@ -112,7 +117,7 @@ public:
         };
 
         while (1) {
-            int c = getopt_long(argc, argv, "b:c:idhm:po:O:rs:vw", long_options, 0);
+            int c = getopt_long(argc, argv, "b:c:idhm:po:O:rfs:vw", long_options, 0);
             if (c == -1)
                 break;
 
@@ -127,7 +132,7 @@ public:
                     }
                     break;
                 case 'i':
-                    create_index = true;
+                    create_index = false;
                     break;
                 case 'd':
                     debug = true;
@@ -153,6 +158,9 @@ public:
                     break;
                 case 'r':
                     output_rings = true;
+                    break;
+                case 'f':
+                    overwrite_output = true;
                     break;
                 case 's':
                     epsg = get_epsg(optarg);
@@ -223,8 +231,9 @@ private:
                   << "  -c, --close-distance       - Distance between nodes under which open rings\n"
                   << "                               are closed (0 - disable closing of rings)\n"
                   << "  -b, --bbox-overlap         - Set overlap when splitting polygons\n"
-                  << "  -i, --create-index         - Create spatial indexes in output database\n"
+                  << "  -i, --no-index             - Do not create spatial indexes in output database\n"
                   << "  -d, --debug                - Enable debugging output\n"
+                  << "  -f, --overwrite            - Overwrite output files if they already exist\n"
                   << "  -m, --max-points           - Split polygons with more than this many points\n"
                   << "                               (0 - disable splitting)\n"
                   << "  -p, --no-polygons          - Do not create polygons\n"

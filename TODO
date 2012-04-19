@@ -8,7 +8,6 @@ OSMCoastline TODO
 * make fixing of direction optional?
     * only when there are no warnings?
 * determine best defaults for bbox overlap, max-points and close distance
-* should create-index be the default?
 * Magic number 100 in split_bbox?
 * Output coastlines as lines
 
