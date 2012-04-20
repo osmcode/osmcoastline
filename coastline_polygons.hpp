@@ -91,6 +91,12 @@ public:
     /// Transform all polygons to output SRS.
     void transform();
 
+    /**
+     * Simplify geometry of all polygons.
+     * This feature is experimental.
+     */
+    void simplify(double tolerance);
+
     /// Split up all polygons.
     void split();
 

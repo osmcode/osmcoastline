@@ -87,6 +87,28 @@ void CoastlinePolygons::transform() {
     }
 }
 
+/*
+  This is experimental. Not all polygons seem to "survive" this.
+*/
+void CoastlinePolygons::simplify(double tolerance) {
+    polygon_vector_t* v = m_polygons;
+    m_polygons = new polygon_vector_t;
+    m_polygons->reserve(v->size());
+    for (polygon_vector_t::iterator it = v->begin(); it != v->end(); ++it) {
+        OGRGeometry* geom = (*it)->Simplify(tolerance);
+        geom->assignSpatialReference((*it)->getSpatialReference());
+        if (geom->getGeometryType() == wkbPolygon && geom->IsValid()) {
+            m_polygons->push_back(static_cast<OGRPolygon*>(geom));
+            delete *it;
+        } else {
+            m_polygons->push_back(*it);
+            std::cerr << "Warning: Polygon could not be simplified. Using unsimplified polygon.\n";
+            delete geom;
+        }
+    }
+    delete v;
+}
+
 void CoastlinePolygons::split_geometry(OGRGeometry* geom, int level) {
     if (geom->getGeometryType() == wkbPolygon) {
         geom->assignSpatialReference(srs.out());
@@ -194,6 +216,7 @@ void CoastlinePolygons::split_polygon(OGRPolygon* polygon, int level) {
 void CoastlinePolygons::split() {
     polygon_vector_t* v = m_polygons;
     m_polygons = new polygon_vector_t;
+    m_polygons->reserve(v->size());
     for (polygon_vector_t::iterator it = v->begin(); it != v->end(); ++it) {
         split_polygon(*it, 0);
     }

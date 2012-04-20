@@ -74,6 +74,12 @@ public:
     /// EPSG code of output SRS.
     int epsg;
 
+    /// Should the coastline be simplified?
+    bool simplify;
+
+    /// Tolerance for simplification
+    double tolerance;
+
     /// Verbose output?
     bool verbose;
 
@@ -95,6 +101,8 @@ public:
         overwrite_output(false),
         output_rings(false),
         epsg(4326),
+        simplify(false),
+        tolerance(0),
         verbose(false),
         water(false)
     {
@@ -111,13 +119,16 @@ public:
             {"output-rings",          no_argument, 0, 'r'},
             {"overwrite",             no_argument, 0, 'f'},
             {"srs",             required_argument, 0, 's'},
+#ifdef EXPERIMENTAL
+            {"simplify",        required_argument, 0, 'S'},
+#endif
             {"verbose",               no_argument, 0, 'v'},
             {"water",                 no_argument, 0, 'w'},
             {0, 0, 0, 0}
         };
 
         while (1) {
-            int c = getopt_long(argc, argv, "b:c:idhm:po:O:rfs:vw", long_options, 0);
+            int c = getopt_long(argc, argv, "b:c:idhm:po:O:rfs:S:vw", long_options, 0);
             if (c == -1)
                 break;
 
@@ -165,6 +176,12 @@ public:
                 case 's':
                     epsg = get_epsg(optarg);
                     break;
+#ifdef EXPERIMENTAL
+                case 'S':
+                    simplify = true;
+                    tolerance = atof(optarg);
+                    break;
+#endif
                 case 'v':
                     verbose = true;
                     break;
@@ -241,6 +258,9 @@ private:
                   << "  -O, --output-osm=FILE      - Write raw OSM output to file\n"
                   << "  -r, --output-rings         - Output rings to database file\n"
                   << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
+#ifdef EXPERIMENTAL
+                  << "  -S, --simplify=TOLERANCE   - Simplify coastline with given tolerance\n"
+#endif
                   << "  -v, --verbose              - Verbose output\n"
                   << "  -w, --water                - Create water polygons instead of land polygons\n"
                   << "\n"

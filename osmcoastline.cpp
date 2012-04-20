@@ -288,6 +288,11 @@ int main(int argc, char *argv[]) {
                 coastline_polygons.transform();
             }
 
+            if (options.simplify) {
+                vout << "Simplifying polygons with tolerance " << options.tolerance << " (because you used --simplify/-S).\n";
+                coastline_polygons.simplify(options.tolerance);
+            }
+
             if (options.split_large_polygons || options.water) {
                 vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
                 vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
