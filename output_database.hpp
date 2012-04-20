@@ -37,6 +37,8 @@ class OGRCoordinateTransformation;
 class OGRPoint;
 class OGRLineString;
 
+class Options;
+
 /**
  * Handle output to an sqlite database (via OGR).
  * Several tables/layers are created using the right SRS for the different
@@ -82,7 +84,8 @@ public:
     void add_ring(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed);
     void add_polygon(OGRPolygon* polygon);
 
-    void set_meta(int runtime, int memory_usage);
+    void set_options(const Options& options);
+    void set_meta(int runtime, int memory_usage, int num_land_polygons_before_split, int num_land_polygons_after_split);
 
 };
 

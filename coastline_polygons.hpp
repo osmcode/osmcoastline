@@ -85,6 +85,9 @@ public:
         delete m_polygons;
     }
 
+    /// Number of polygons
+    int num_polygons() const { return m_polygons->size(); }
+
     /// Turn polygons with wrong winding order around.
     unsigned int fix_direction();
 

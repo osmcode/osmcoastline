@@ -27,6 +27,7 @@
 #include "osmcoastline.hpp"
 #include "output_database.hpp"
 #include "output_layers.hpp"
+#include "options.hpp"
 
 const char* OutputDatabase::options_with_index[] = { NULL };
 const char* OutputDatabase::options_without_index[] = { "SPATIAL_INDEX=no", NULL };
@@ -60,16 +61,40 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_layer_rings = new LayerRings(m_data_source, layer_options());
     m_layer_polygons = new LayerPolygons(m_data_source, layer_options());
 
-    exec("CREATE TABLE meta (timestamp TEXT, runtime INTEGER, memory_usage INTEGER)");
+    exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER, water INTEGER)");
+    exec("CREATE TABLE meta (timestamp TEXT, runtime INTEGER, memory_usage INTEGER, num_land_polygons_before_split INTEGER, num_land_polygons_after_split INTEGER)");
 }
 
-void OutputDatabase::set_meta(int runtime, int memory_usage) {
+void OutputDatabase::set_options(const Options& options) {
     std::ostringstream sql;
-    sql << "INSERT INTO meta (timestamp, runtime, memory_usage) VALUES (datetime('now'), "
-        << runtime
-        << ", "
-        << memory_usage
+
+    sql << "INSERT INTO options (overlap, close_distance, max_points_in_polygons, split_large_polygons, water) VALUES ("
+        << options.bbox_overlap << ", ";
+
+    if (options.close_distance==0) {
+        sql << "NULL, ";
+    } else {
+        sql << options.close_distance << ", ";
+    }
+
+    sql << options.max_points_in_polygon << ", "
+        << (options.split_large_polygons ? 1 : 0) << ", "
+        << (options.water ? 1 : 0)
         << ")";
+
+    exec(sql.str().c_str());
+}
+
+void OutputDatabase::set_meta(int runtime, int memory_usage, int num_land_polygons_before_split, int num_land_polygons_after_split) {
+    std::ostringstream sql;
+
+    sql << "INSERT INTO meta (timestamp, runtime, memory_usage, num_land_polygons_before_split, num_land_polygons_after_split) VALUES (datetime('now'), "
+        << runtime << ", "
+        << memory_usage << ", "
+        << num_land_polygons_before_split << ", "
+        << num_land_polygons_after_split
+        << ")";
+
     exec(sql.str().c_str());
 }
 

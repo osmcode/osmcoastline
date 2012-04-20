@@ -37,7 +37,10 @@ osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp coastline_r
 srs.o: srs.cpp srs.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
-output_database.o: output_database.cpp output_database.hpp output_layers.hpp osmcoastline.hpp
+options.o: options.cpp options.hpp
+	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
+
+output_database.o: output_database.cpp output_database.hpp output_layers.hpp osmcoastline.hpp options.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
 output_layers.o: output_layers.cpp output_layers.hpp osmcoastline.hpp srs.hpp
@@ -52,7 +55,7 @@ coastline_ring_collection.o: coastline_ring_collection.cpp coastline_ring_collec
 coastline_polygons.o: coastline_polygons.cpp coastline_polygons.hpp output_database.hpp osmcoastline.hpp srs.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
-osmcoastline: osmcoastline.o coastline_ring.o coastline_ring_collection.o coastline_polygons.o output_database.o output_layers.o srs.o
+osmcoastline: osmcoastline.o coastline_ring.o coastline_ring_collection.o coastline_polygons.o output_database.o output_layers.o srs.o options.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PROTOBUF) $(LIB_OGR) $(LIB_GEOS) $(LIB_XML2)
 
 doc: doc/html/files.html
