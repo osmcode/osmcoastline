@@ -1,0 +1,24 @@
+#
+#  Mapserver configuration
+#
+#  For rendering using this file see render_image.sh.
+#
+MAP
+    NAME coastline
+    IMAGECOLOR 255 255 255
+
+    LAYER
+        NAME polygons
+        TYPE POLYGON
+        STATUS ON
+        CONNECTIONTYPE OGR
+        CONNECTION "coastline-mapserver.db"
+        DATA "polygons"
+        CLASS
+            STYLE
+                COLOR 0 0 0
+            END
+        END
+    END
+
+END
