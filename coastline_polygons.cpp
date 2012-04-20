@@ -129,7 +129,7 @@ void CoastlinePolygons::split_polygon(OGRPolygon* polygon, int level) {
         OGRPolygon* b2;
 
         if (envelope.MaxX - envelope.MinX < envelope.MaxY-envelope.MinY) {
-            if (m_expand >= (envelope.MaxY - envelope.MinY) / 2) {
+            if (m_expand >= (envelope.MaxY - envelope.MinY) / 4) {
                 std::cerr << "Not splitting polygon with " << num_points << " points on outer ring. It would not get smaller because --bbox-overlap/-b is set to high.\n";
                 m_polygons->push_back(polygon);
                 return;
@@ -141,7 +141,7 @@ void CoastlinePolygons::split_polygon(OGRPolygon* polygon, int level) {
             b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, MidY, m_expand);
             b2 = create_rectangular_polygon(envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, m_expand);
         } else {
-            if (m_expand >= (envelope.MaxX - envelope.MinX) / 2) {
+            if (m_expand >= (envelope.MaxX - envelope.MinX) / 4) {
                 std::cerr << "Not splitting polygon with " << num_points << " points on outer ring. It would not get smaller because --bbox-overlap/-b is set to high.\n";
                 m_polygons->push_back(polygon);
                 return;
