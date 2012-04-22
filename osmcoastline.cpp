@@ -35,6 +35,7 @@
 #include "output_layers.hpp"
 
 #include "options.hpp"
+#include "stats.hpp"
 #include "coastline_handlers.hpp"
 #include "srs.hpp"
 
@@ -174,6 +175,7 @@ public:
 /* ================================================== */
 
 int main(int argc, char *argv[]) {
+    Stats stats;
     unsigned int warnings = 0;
     unsigned int errors = 0;
 
@@ -274,13 +276,10 @@ int main(int argc, char *argv[]) {
             vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
         }
 
-        int num_land_polygons_before_split = 0;
-        int num_land_polygons_after_split = 0;
-
         if (options.output_polygons) {
             vout << "Create polygons...\n";
             CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database), *output_database, options.bbox_overlap, options.max_points_in_polygon);
-            num_land_polygons_before_split = coastline_polygons.num_polygons();
+            stats.num_land_polygons_before_split = coastline_polygons.num_polygons();
 
             vout << "Fixing coastlines going the wrong way...\n";
             int fixed = coastline_polygons.fix_direction();
@@ -301,7 +300,7 @@ int main(int argc, char *argv[]) {
                 vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
                 vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
                 coastline_polygons.split();
-                num_land_polygons_after_split = coastline_polygons.num_polygons();
+                stats.num_land_polygons_after_split = coastline_polygons.num_polygons();
             }
             if (options.water) {
                 vout << "Writing out water polygons...\n";
@@ -316,7 +315,7 @@ int main(int argc, char *argv[]) {
         vout << memory_usage();
 
         vout << "Commiting database transactions...\n";
-        output_database->set_meta(vout.runtime(), get_memory_usage().second, num_land_polygons_before_split, num_land_polygons_after_split);
+        output_database->set_meta(vout.runtime(), get_memory_usage().second, stats);
         delete output_database;
 
         vout << "All done.\n";

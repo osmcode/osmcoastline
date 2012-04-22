@@ -28,6 +28,7 @@
 #include "output_database.hpp"
 #include "output_layers.hpp"
 #include "options.hpp"
+#include "stats.hpp"
 
 const char* OutputDatabase::options_with_index[] = { NULL };
 const char* OutputDatabase::options_without_index[] = { "SPATIAL_INDEX=no", NULL };
@@ -85,14 +86,14 @@ void OutputDatabase::set_options(const Options& options) {
     exec(sql.str().c_str());
 }
 
-void OutputDatabase::set_meta(int runtime, int memory_usage, int num_land_polygons_before_split, int num_land_polygons_after_split) {
+void OutputDatabase::set_meta(int runtime, int memory_usage, const Stats& stats) {
     std::ostringstream sql;
 
     sql << "INSERT INTO meta (timestamp, runtime, memory_usage, num_land_polygons_before_split, num_land_polygons_after_split) VALUES (datetime('now'), "
         << runtime << ", "
         << memory_usage << ", "
-        << num_land_polygons_before_split << ", "
-        << num_land_polygons_after_split
+        << stats.num_land_polygons_before_split << ", "
+        << stats.num_land_polygons_after_split
         << ")";
 
     exec(sql.str().c_str());

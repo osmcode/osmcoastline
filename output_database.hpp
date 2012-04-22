@@ -38,6 +38,7 @@ class OGRPoint;
 class OGRLineString;
 
 class Options;
+class Stats;
 
 /**
  * Handle output to an sqlite database (via OGR).
@@ -85,7 +86,7 @@ public:
     void add_polygon(OGRPolygon* polygon);
 
     void set_options(const Options& options);
-    void set_meta(int runtime, int memory_usage, int num_land_polygons_before_split, int num_land_polygons_after_split);
+    void set_meta(int runtime, int memory_usage, const Stats& stats);
 
 };
 

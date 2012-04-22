@@ -31,7 +31,7 @@ PROGRAMS = osmcoastline
 
 all: $(PROGRAMS)
 
-osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp coastline_ring_collection.hpp output_database.hpp output_layers.hpp options.hpp coastline_handlers.hpp coastline_polygons.hpp
+osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp coastline_ring_collection.hpp output_database.hpp output_layers.hpp options.hpp coastline_handlers.hpp coastline_polygons.hpp stats.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) $(CXXFLAGS_OGR) -o $@ $<
 
 srs.o: srs.cpp srs.hpp
@@ -40,7 +40,7 @@ srs.o: srs.cpp srs.hpp
 options.o: options.cpp options.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
-output_database.o: output_database.cpp output_database.hpp output_layers.hpp osmcoastline.hpp options.hpp
+output_database.o: output_database.cpp output_database.hpp output_layers.hpp osmcoastline.hpp options.hpp stats.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
 output_layers.o: output_layers.cpp output_layers.hpp osmcoastline.hpp srs.hpp
