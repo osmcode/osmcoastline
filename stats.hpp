@@ -23,8 +23,12 @@
 */
 
 struct Stats {
-    int num_land_polygons_before_split;
-    int num_land_polygons_after_split;
+    int ways;
+    int unconnected_nodes;
+    int coastline_rings;
+    int coastline_rings_from_single_way;
+    int land_polygons_before_split;
+    int land_polygons_after_split;
 };
 
 #endif // STATS_HPP

@@ -52,6 +52,7 @@ class CoastlineRingCollection {
     idmap_t m_start_nodes;
     idmap_t m_end_nodes;
 
+    unsigned int m_ways;
     unsigned int m_rings_from_single_way;
     unsigned int m_fixed_rings;
 
@@ -71,6 +72,7 @@ public:
      * or it will be joined to an existing CoastlineRing.
      */
     void add_way(const shared_ptr<Osmium::OSM::Way>& way) {
+        m_ways++;
         if (way->is_closed()) {
             m_rings_from_single_way++;
             m_list.push_back(make_shared<CoastlineRing>(way));
@@ -78,6 +80,8 @@ public:
             add_partial_ring(way);
         }
     }
+
+    unsigned int num_ways() const { return m_ways; }
 
     unsigned int num_rings_from_single_way() const { return m_rings_from_single_way; }
 

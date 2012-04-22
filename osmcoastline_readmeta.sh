@@ -40,6 +40,21 @@ sqlite3 $DBFILE "SELECT CAST(round(CAST(runtime AS REAL)/60) AS INT) FROM meta;"
 echo -n "  Memory usage (MB): "
 sqlite3 $DBFILE "SELECT memory_usage FROM meta;"
 
+echo -n "  Ways tagged natural=coastline: "
+sqlite3 $DBFILE "SELECT num_ways FROM meta;"
+
+echo -n "  Number of nodes where coastline is not closed: "
+sqlite3 $DBFILE "SELECT num_unconnected_nodes FROM meta;"
+
+echo -n "  Coastline rings: "
+sqlite3 $DBFILE "SELECT num_coastline_rings FROM meta;"
+
+echo -n "  Coastline rings created from a single way: "
+sqlite3 $DBFILE "SELECT num_coastline_rings_from_single_way FROM meta;"
+
+echo -n "  Coastline rings created from more then one way: "
+sqlite3 $DBFILE "SELECT num_coastline_rings - num_coastline_rings_from_single_way FROM meta;"
+
 echo -n "  Number of land polygons before split: "
 sqlite3 $DBFILE "SELECT num_land_polygons_before_split FROM meta;"
 

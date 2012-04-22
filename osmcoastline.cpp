@@ -243,6 +243,10 @@ int main(int argc, char *argv[]) {
         vout << "Reading ways (1st pass through input file)...\n";
         CoastlineHandlerPass1 handler_pass1(coastline_rings, output_osm);
         infile.read(handler_pass1);
+        stats.ways = coastline_rings.num_ways();
+        stats.unconnected_nodes = coastline_rings.num_unconnected_nodes();
+        stats.coastline_rings = coastline_rings.size();
+        stats.coastline_rings_from_single_way = coastline_rings.num_rings_from_single_way();
         vout << "  There are " << coastline_rings.num_unconnected_nodes() << " nodes where the coastline is not closed.\n";
         vout << "  There are " << coastline_rings.size() << " coastline rings ("
              << coastline_rings.num_rings_from_single_way() << " from a single way and "
@@ -279,7 +283,7 @@ int main(int argc, char *argv[]) {
         if (options.output_polygons) {
             vout << "Create polygons...\n";
             CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database), *output_database, options.bbox_overlap, options.max_points_in_polygon);
-            stats.num_land_polygons_before_split = coastline_polygons.num_polygons();
+            stats.land_polygons_before_split = coastline_polygons.num_polygons();
 
             vout << "Fixing coastlines going the wrong way...\n";
             int fixed = coastline_polygons.fix_direction();
@@ -300,7 +304,7 @@ int main(int argc, char *argv[]) {
                 vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
                 vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
                 coastline_polygons.split();
-                stats.num_land_polygons_after_split = coastline_polygons.num_polygons();
+                stats.land_polygons_after_split = coastline_polygons.num_polygons();
             }
             if (options.water) {
                 vout << "Writing out water polygons...\n";

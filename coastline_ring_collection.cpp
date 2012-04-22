@@ -29,6 +29,7 @@ CoastlineRingCollection::CoastlineRingCollection() :
     m_list(),
     m_start_nodes(),
     m_end_nodes(),
+    m_ways(0),
     m_rings_from_single_way(0),
     m_fixed_rings(0) {
 }
