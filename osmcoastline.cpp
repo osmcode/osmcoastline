@@ -245,8 +245,8 @@ int main(int argc, char *argv[]) {
         infile.read(handler_pass1);
         stats.ways = coastline_rings.num_ways();
         stats.unconnected_nodes = coastline_rings.num_unconnected_nodes();
-        stats.coastline_rings = coastline_rings.size();
-        stats.coastline_rings_from_single_way = coastline_rings.num_rings_from_single_way();
+        stats.rings = coastline_rings.size();
+        stats.rings_from_single_way = coastline_rings.num_rings_from_single_way();
         vout << "  There are " << coastline_rings.num_unconnected_nodes() << " nodes where the coastline is not closed.\n";
         vout << "  There are " << coastline_rings.size() << " coastline rings ("
              << coastline_rings.num_rings_from_single_way() << " from a single way and "
@@ -267,6 +267,7 @@ int main(int argc, char *argv[]) {
             vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
             vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
             coastline_rings.close_rings(output_database, options.debug, options.close_distance);
+            stats.rings_fixed = coastline_rings.num_fixed_rings();
             vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
                 << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
         } else {
@@ -286,9 +287,9 @@ int main(int argc, char *argv[]) {
             stats.land_polygons_before_split = coastline_polygons.num_polygons();
 
             vout << "Fixing coastlines going the wrong way...\n";
-            int fixed = coastline_polygons.fix_direction();
-            vout << "  Turned " << fixed << " polygons around.\n";
-            warnings += fixed;
+            stats.rings_turned_around = coastline_polygons.fix_direction();
+            vout << "  Turned " << stats.rings_turned_around << " polygons around.\n";
+            warnings += stats.rings_turned_around;
 
             if (options.epsg != 4326) {
                 vout << "Transforming polygons to EPSG " << options.epsg << "...\n";

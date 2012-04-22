@@ -43,23 +43,29 @@ sqlite3 $DBFILE "SELECT memory_usage FROM meta;"
 echo -n "  Ways tagged natural=coastline: "
 sqlite3 $DBFILE "SELECT num_ways FROM meta;"
 
-echo -n "  Number of nodes where coastline is not closed: "
+echo -n "  Number of nodes where coastline is not closed (before fixing): "
 sqlite3 $DBFILE "SELECT num_unconnected_nodes FROM meta;"
 
 echo -n "  Coastline rings: "
-sqlite3 $DBFILE "SELECT num_coastline_rings FROM meta;"
+sqlite3 $DBFILE "SELECT num_rings FROM meta;"
 
 echo -n "  Coastline rings created from a single way: "
-sqlite3 $DBFILE "SELECT num_coastline_rings_from_single_way FROM meta;"
+sqlite3 $DBFILE "SELECT num_rings_from_single_way FROM meta;"
 
 echo -n "  Coastline rings created from more then one way: "
-sqlite3 $DBFILE "SELECT num_coastline_rings - num_coastline_rings_from_single_way FROM meta;"
+sqlite3 $DBFILE "SELECT num_rings - num_rings_from_single_way FROM meta;"
+
+echo -n "  Number of rings fixed (closed): "
+sqlite3 $DBFILE "SELECT num_rings_fixed FROM meta;"
+
+echo -n "  Number of rings turned around: "
+sqlite3 $DBFILE "SELECT num_rings_turned_around FROM meta;"
 
 echo -n "  Number of land polygons before split: "
 sqlite3 $DBFILE "SELECT num_land_polygons_before_split FROM meta;"
 
-echo -n "  Number of land polygons after split (0 if not split): "
-sqlite3 $DBFILE "SELECT num_land_polygons_after_split FROM meta;"
+echo -n "  Number of land polygons after split: "
+sqlite3 $DBFILE "SELECT CASE num_land_polygons_after_split WHEN 0 THEN 'NOT SPLIT' ELSE num_land_polygons_after_split END FROM meta;"
 
 echo "\nErrors/warnings on points:\n"
 echo ".width 3 20\nSELECT count(*), error FROM error_points GROUP BY error;" | sqlite3 -column $DBFILE | sed -e 's/^/  /'

@@ -63,15 +63,18 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_layer_polygons = new LayerPolygons(m_data_source, layer_options());
 
     exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER, water INTEGER)");
-    exec("CREATE TABLE meta (timestamp TEXT, "
-         "runtime INTEGER, "
-         "memory_usage INTEGER, "
-         "num_ways INTEGER, "
-         "num_unconnected_nodes INTEGER, "
-         "num_coastline_rings INTEGER, "
-         "num_coastline_rings_from_single_way, "
+    exec("CREATE TABLE meta ("
+         "timestamp                      TEXT, "
+         "runtime                        INTEGER, "
+         "memory_usage                   INTEGER, "
+         "num_ways                       INTEGER, "
+         "num_unconnected_nodes          INTEGER, "
+         "num_rings                      INTEGER, "
+         "num_rings_from_single_way      INTEGER, "
+         "num_rings_fixed                INTEGER, "
+         "num_rings_turned_around        INTEGER, "
          "num_land_polygons_before_split INTEGER, "
-         "num_land_polygons_after_split INTEGER)");
+         "num_land_polygons_after_split  INTEGER)");
 }
 
 void OutputDatabase::set_options(const Options& options) {
@@ -97,15 +100,17 @@ void OutputDatabase::set_options(const Options& options) {
 void OutputDatabase::set_meta(int runtime, int memory_usage, const Stats& stats) {
     std::ostringstream sql;
 
-    sql << "INSERT INTO meta (timestamp, runtime, "
-        << "memory_usage, num_ways, num_unconnected_nodes, num_coastline_rings, num_coastline_rings_from_single_way, "
+    sql << "INSERT INTO meta (timestamp, runtime, memory_usage, "
+        << "num_ways, num_unconnected_nodes, num_rings, num_rings_from_single_way, num_rings_fixed, num_rings_turned_around, "
         << "num_land_polygons_before_split, num_land_polygons_after_split) VALUES (datetime('now'), "
         << runtime << ", "
         << memory_usage << ", "
         << stats.ways << ", "
         << stats.unconnected_nodes << ", "
-        << stats.coastline_rings << ", "
-        << stats.coastline_rings_from_single_way << ", "
+        << stats.rings << ", "
+        << stats.rings_from_single_way << ", "
+        << stats.rings_fixed << ", "
+        << stats.rings_turned_around << ", "
         << stats.land_polygons_before_split << ", "
         << stats.land_polygons_after_split
         << ")";
