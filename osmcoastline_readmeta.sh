@@ -9,6 +9,11 @@ else
     DBFILE=$1
 fi
 
+if [ ! -e $DBFILE ]; then
+    echo "Can't open '$DBFILE'"
+    exit 1
+fi
+
 echo "Options used to create this data:\n"
 
 echo -n "  Overlap (--bbox-overlap/-b): "
