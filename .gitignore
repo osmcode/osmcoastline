@@ -1,4 +1,5 @@
 osmcoastline
+osmcoastline_extract
 core
 doc
 *.o
