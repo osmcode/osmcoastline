@@ -62,10 +62,7 @@ public:
     /// Output Spatialite database file name.
     std::string output_database;
 
-    /// Output OSM "raw data" file name.
-    std::string output_osm;
-
-    /// Should output files be overwritten
+    /// Should output database be overwritten
     bool overwrite_output;
 
     /// Should the rings output table be populated?

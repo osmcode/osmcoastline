@@ -23,8 +23,14 @@
 #include <set>
 #include <osmium.hpp>
 
+#include "osmcoastline.hpp"
+
 typedef std::set<osm_object_id_t> idset;
 
+/**
+ * Handler for first pass. Find all ways tagged with natural=coastline
+ * and write them out. Also remember all nodes needed for those ways.
+ */
 class CoastlineExtractHandler1 : public Osmium::Handler::Base {
 
     Osmium::Output::Base* m_output;
@@ -64,6 +70,11 @@ public:
 
 };
 
+/**
+ * Handler for the second pass. Write out all nodes that are tagged
+ * natural=coastline or that we need for the ways we found in the first
+ * pass.
+ */
 class CoastlineExtractHandler2 : public Osmium::Handler::Base {
 
     Osmium::Output::Base* m_output;
@@ -101,8 +112,8 @@ int main(int argc, char* argv[]) {
     Osmium::init(false);
 
     if (argc != 3) {
-        std::cerr << "Usage: osmcoastline_extract OSMFILE OUTFILE\n";
-        exit(1);
+        std::cerr << "Usage: osmcoastline_extract INFILE OUTFILE\n";
+        exit(return_code_cmdline);
     }
 
     Osmium::OSMFile outfile(argv[2]);

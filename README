@@ -39,7 +39,7 @@ BUILDING
 
 You'll need all the prerequisites including Osmium installed.
 
-Run "make" to build the "osmcoastline" program.
+Run "make" to build the "osmcoastline" and "osmcoastline_extract" programs.
 
 Run "make clean" to clean up.
 
@@ -97,8 +97,7 @@ In most cases you will only be interested in the end result but preliminary
 results are supplied for debugging or other special uses.
 
 Step 1: Filter out all nodes and ways tagged natural=coastline and all nodes
-        needed by those ways. The result of this step can be written out as
-        an OSM file with the -O/--output-osm option.
+        needed by those ways.
 
 Step 2: Assemble all coastline ways into rings.
 
@@ -106,6 +105,8 @@ Step 3: Assemble polygons from the rings, possibly including holes for
         water areas.
 
 Step 4: Split up large polygons into smaller ones.
+
+Step 5: Create water polygons as the "inverse" of the land polygons.
 
 The errors encountered in each step are written to the error_points and
 error_lines tables.
@@ -121,10 +122,25 @@ RETURN CODES
 4 - Error parsing command line arguments
 
 
+OSMCOASTLINE_EXTRACT
+--------------------
+
+The program "osmcoastline_extract" can be used to extract from an OSM planet
+file all nodes and ways needed for building the coastlines and writing them out
+in OSM format. This file will be a lot smaller (less than 1%) than the original
+planet file, but contain everything needed to assemble the coastline polygons.
+If you are playing around or want to run "osmcoastline" several times with
+different parameters, run "osmcoastline_extract" once first and use its output
+as the input for "osmcoastline".
+
+Run it as follows:
+  osmcoastline_extract INFILE OUTFILE
+
+
 LICENSE
 -------
 
-Osmium is available under the GNU GPL version 3 or later.
+OSMCoastline is available under the GNU GPL version 3 or later.
 
 
 AUTHORS

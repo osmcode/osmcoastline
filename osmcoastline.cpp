@@ -191,44 +191,24 @@ int main(int argc, char *argv[]) {
     Osmium::init(options.debug);
     debug = options.debug;
 
-    // Set up optional OSM raw output file.
-    Osmium::OSMFile* output_osm_file = NULL;
-    Osmium::Output::Base* output_osm = NULL;
-    if (options.output_osm.empty()) {
-        vout << "Not writing OSM output. (Add --output-osm/-O if you want this.)\n";
-    } else {
-        vout << "Writing OSM output to file '" << options.output_osm << "'. (Was set with --output-osm/-O option.)\n";
-        if (options.overwrite_output) {
-            vout << "Removing OSM output file (if it exists) (because you told me to with --overwrite/-f).\n";
-            unlink(options.output_osm.c_str());
-        }
-        output_osm_file = new Osmium::OSMFile(options.output_osm);
-        output_osm = output_osm_file->create_output_file();
-    }
-
     vout << "Using SRS " << options.epsg << " for output. (Change with the --srs/s option.)\n";
     if (!srs.set_output(options.epsg)) {
         std::cerr << "Setting up output transformation failed\n";
         exit(return_code_fatal);
     }
 
-    // Set up optional database output file.
-    OutputDatabase* output_database = NULL;
-    if (options.output_database.empty()) { 
-        vout << "Not writing output database (because you did not give the --output-database/-o option).\n";
-    } else {
-        vout << "Writing to output database '" << options.output_database << "'. (Was set with the --output-database/-o option.)\n";
-        if (options.overwrite_output) {
-            vout << "Removing database output file (if it exists) (because you told me to with --overwrite/-f).\n";
-            unlink(options.output_database.c_str());
-        }
-        if (options.create_index) {
-            vout << "Will create geometry index. (If you do not want an index use --no-index/-i.)\n";
-        } else {
-            vout << "Will NOT create geometry index (because you told me to using --no-index/-i).\n";
-        }
-        output_database = new OutputDatabase(options.output_database, options.create_index);
+    // Set up output database.
+    vout << "Writing to output database '" << options.output_database << "'. (Was set with the --output-database/-o option.)\n";
+    if (options.overwrite_output) {
+        vout << "Removing database output file (if it exists) (because you told me to with --overwrite/-f).\n";
+        unlink(options.output_database.c_str());
     }
+    if (options.create_index) {
+        vout << "Will create geometry index. (If you do not want an index use --no-index/-i.)\n";
+    } else {
+        vout << "Will NOT create geometry index (because you told me to using --no-index/-i).\n";
+    }
+    OutputDatabase* output_database = new OutputDatabase(options.output_database, options.create_index);
 
     // The collection of all coastline rings we will be filling and then
     // operating on.
@@ -241,7 +221,7 @@ int main(int argc, char *argv[]) {
         Osmium::OSMFile infile(options.inputfile);
 
         vout << "Reading ways (1st pass through input file)...\n";
-        CoastlineHandlerPass1 handler_pass1(coastline_rings, output_osm);
+        CoastlineHandlerPass1 handler_pass1(coastline_rings);
         infile.read(handler_pass1);
         stats.ways = coastline_rings.num_ways();
         stats.unconnected_nodes = coastline_rings.num_unconnected_nodes();
@@ -254,7 +234,7 @@ int main(int argc, char *argv[]) {
         vout << memory_usage();
 
         vout << "Reading nodes (2nd pass through input file)...\n";
-        CoastlineHandlerPass2 handler_pass2(coastline_rings, output_osm, output_database);
+        CoastlineHandlerPass2 handler_pass2(coastline_rings, output_database);
         infile.read(handler_pass2);
     }
 
@@ -326,9 +306,6 @@ int main(int argc, char *argv[]) {
         vout << "All done.\n";
         vout << memory_usage();
     }
-
-    delete output_osm;
-    delete output_osm_file;
 
     vout << "There were " << warnings << " warnings.\n";
     vout << "There were " << errors << " errors.\n";

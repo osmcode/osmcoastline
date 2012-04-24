@@ -39,7 +39,6 @@ Options::Options(int argc, char* argv[]) :
     split_large_polygons(true),
     output_polygons(true),
     output_database(),
-    output_osm(),
     overwrite_output(false),
     output_rings(false),
     epsg(4326),
@@ -57,7 +56,6 @@ Options::Options(int argc, char* argv[]) :
         {"max-points",      required_argument, 0, 'm'},
         {"no-polygons",           no_argument, 0, 'p'},
         {"output-database", required_argument, 0, 'o'},
-        {"output-osm",      required_argument, 0, 'O'},
         {"output-rings",          no_argument, 0, 'r'},
         {"overwrite",             no_argument, 0, 'f'},
         {"srs",             required_argument, 0, 's'},
@@ -70,7 +68,7 @@ Options::Options(int argc, char* argv[]) :
     };
 
     while (1) {
-        int c = getopt_long(argc, argv, "b:c:idhm:po:O:rfs:S:vw", long_options, 0);
+        int c = getopt_long(argc, argv, "b:c:idhm:po:rfs:S:vw", long_options, 0);
         if (c == -1)
             break;
 
@@ -105,9 +103,6 @@ Options::Options(int argc, char* argv[]) :
                 break;
             case 'o':
                 output_database = optarg;
-                break;
-            case 'O':
-                output_osm = optarg;
                 break;
             case 'r':
                 output_rings = true;
@@ -145,8 +140,8 @@ Options::Options(int argc, char* argv[]) :
         exit(return_code_cmdline);
     }
 
-    if (output_database.empty() && output_osm.empty()) {
-        std::cerr << "You have to give one or both of the --output-database/-o and --output-osm/-O options.\n";
+    if (output_database.empty()) {
+        std::cerr << "Missing --output-database/-o option.\n";
         exit(return_code_cmdline);
     }
 
@@ -178,7 +173,7 @@ int Options::get_epsg(const char* text) {
 
 void Options::print_help() {
     std::cout << "osmcoastline [OPTIONS] OSMFILE\n"
-                << "Options:\n"
+                << "\nOptions:\n"
                 << "  -h, --help                 - This help message\n"
                 << "  -c, --close-distance       - Distance between nodes under which open rings\n"
                 << "                               are closed (0 - disable closing of rings)\n"
@@ -190,7 +185,6 @@ void Options::print_help() {
                 << "                               (0 - disable splitting)\n"
                 << "  -p, --no-polygons          - Do not create polygons\n"
                 << "  -o, --output-database=FILE - Spatialite database file for output\n"
-                << "  -O, --output-osm=FILE      - Write raw OSM output to file\n"
                 << "  -r, --output-rings         - Output rings to database file\n"
                 << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
 #ifdef EXPERIMENTAL
@@ -198,8 +192,6 @@ void Options::print_help() {
 #endif
                 << "  -v, --verbose              - Verbose output\n"
                 << "  -w, --water                - Create water polygons instead of land polygons\n"
-                << "\n"
-                << "At least one of --output-database/-o and --output-osm/-O is needed.\n"
-    ;
+                << "\n";
 }
 

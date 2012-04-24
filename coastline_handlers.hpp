@@ -25,46 +25,28 @@
 /**
  * Osmium handler for the first pass over the input file in which
  * all ways tagged with 'natural=coastline' are read and CoastlineRings
- * are created. If raw_output is not NULL, those ways will also be
- * written out.
+ * are created.
  */
 class CoastlineHandlerPass1 : public Osmium::Handler::Base {
 
-    Osmium::Output::Base* m_raw_output;
     CoastlineRingCollection& m_coastline_rings;
 
 public:
 
-    CoastlineHandlerPass1(CoastlineRingCollection& coastline_rings, Osmium::Output::Base* raw_output) :
-        m_raw_output(raw_output),
+    CoastlineHandlerPass1(CoastlineRingCollection& coastline_rings) :
         m_coastline_rings(coastline_rings)
     {
-    }
-
-    void init(Osmium::OSM::Meta& meta) {
-        if (m_raw_output) {
-            m_raw_output->init(meta);
-            m_raw_output->before_ways();
-        }
     }
 
     void way(const shared_ptr<Osmium::OSM::Way>& way) {
         // We are only interested in ways tagged with natural=coastline.
         const char* natural = way->tags().get_tag_by_key("natural");
         if (natural && !strcmp(natural, "coastline")) {
-            if (m_raw_output) {
-                m_raw_output->way(way);
-            }
-
             m_coastline_rings.add_way(way);
         }
     }
 
     void after_ways() const {
-        if (m_raw_output) {
-            m_raw_output->after_ways();
-        }
-
         // We only need to read ways in this pass.
         throw Osmium::Input::StopReading();
     }
@@ -73,12 +55,10 @@ public:
 
 /**
  * Osmium handler for the second pass over the input file in which
- * node coordinates are added to the CoastlineRings. If raw_output
- * is not NULL those nodes are also written out.
+ * node coordinates are added to the CoastlineRings.
  */
 class CoastlineHandlerPass2 : public Osmium::Handler::Base {
 
-    Osmium::Output::Base* m_raw_output;
     CoastlineRingCollection& m_coastline_rings;
 
     /**
@@ -93,25 +73,18 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
 
 public:
 
-    CoastlineHandlerPass2(CoastlineRingCollection& coastline_rings, Osmium::Output::Base* raw_output, OutputDatabase* output) :
-        m_raw_output(raw_output),
+    CoastlineHandlerPass2(CoastlineRingCollection& coastline_rings, OutputDatabase* output) :
         m_coastline_rings(coastline_rings),
         m_posmap(),
         m_output(output)
     {
         m_coastline_rings.setup_positions(m_posmap);
-        if (m_raw_output) {
-            m_raw_output->before_nodes();
-        }
     }
 
     void node(const shared_ptr<Osmium::OSM::Node const>& node) {
-        bool raw_out = false;
-
         if (m_output) {
             const char* natural = node->tags().get_tag_by_key("natural");
             if (natural && !strcmp(natural, "coastline")) {
-                raw_out = true;
                 try {
                     Osmium::Geometry::Point point(*node);
                     m_output->add_error_point(point.create_ogr_geometry(), "tagged_node", node->id());
@@ -124,20 +97,10 @@ public:
         std::pair<posmap_t::iterator, posmap_t::iterator> ret = m_posmap.equal_range(node->id());
         for (posmap_t::iterator it=ret.first; it != ret.second; ++it) {
             *(it->second) = node->position();
-            raw_out = true;
-        }
-
-        if (m_raw_output && raw_out) {
-            m_raw_output->node(node);
         }
     }
 
     void after_nodes() const {
-        if (m_raw_output) {
-            m_raw_output->after_nodes();
-            m_raw_output->final();
-        }
-
         // We only need to read nodes in this pass.
         throw Osmium::Input::StopReading();
     }
