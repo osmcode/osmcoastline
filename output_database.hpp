@@ -88,6 +88,8 @@ public:
     void set_options(const Options& options);
     void set_meta(int runtime, int memory_usage, const Stats& stats);
 
+    void commit();
+
 };
 
 #endif // OUTPUT_DATABASE_HPP

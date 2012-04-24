@@ -119,11 +119,14 @@ void OutputDatabase::set_meta(int runtime, int memory_usage, const Stats& stats)
 }
 
 OutputDatabase::~OutputDatabase() {
+    OGRDataSource::DestroyDataSource(m_data_source);
+}
+
+void OutputDatabase::commit() {
     m_layer_polygons->commit();
     m_layer_rings->commit();
     m_layer_error_lines->commit();
     m_layer_error_points->commit();
-    OGRDataSource::DestroyDataSource(m_data_source);
 }
 
 void OutputDatabase::add_error_point(OGRPoint* point, const char* error, osm_object_id_t id) {

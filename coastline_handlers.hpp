@@ -69,11 +69,11 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
      * thereafter used for each node coming in.
      */
     posmap_t m_posmap;
-    OutputDatabase* m_output;
+    OutputDatabase& m_output;
 
 public:
 
-    CoastlineHandlerPass2(CoastlineRingCollection& coastline_rings, OutputDatabase* output) :
+    CoastlineHandlerPass2(CoastlineRingCollection& coastline_rings, OutputDatabase& output) :
         m_coastline_rings(coastline_rings),
         m_posmap(),
         m_output(output)
@@ -82,15 +82,13 @@ public:
     }
 
     void node(const shared_ptr<Osmium::OSM::Node const>& node) {
-        if (m_output) {
-            const char* natural = node->tags().get_tag_by_key("natural");
-            if (natural && !strcmp(natural, "coastline")) {
-                try {
-                    Osmium::Geometry::Point point(*node);
-                    m_output->add_error_point(point.create_ogr_geometry(), "tagged_node", node->id());
-                } catch (Osmium::Exception::IllegalGeometry) {
-                    std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
-                }
+        const char* natural = node->tags().get_tag_by_key("natural");
+        if (natural && !strcmp(natural, "coastline")) {
+            try {
+                Osmium::Geometry::Point point(*node);
+                m_output.add_error_point(point.create_ogr_geometry(), "tagged_node", node->id());
+            } catch (Osmium::Exception::IllegalGeometry) {
+                std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
             }
         }
 

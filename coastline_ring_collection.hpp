@@ -95,7 +95,7 @@ public:
 
     unsigned int output_rings(OutputDatabase& output);
 
-    void close_rings(OutputDatabase* output, bool debug, double max_distance);
+    void close_rings(OutputDatabase& output, bool debug, double max_distance);
 
 private:
 

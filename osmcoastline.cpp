@@ -51,7 +51,7 @@ bool debug;
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, OutputDatabase* output) {
+polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, OutputDatabase& output) {
     std::vector<OGRGeometry*> all_polygons;
     coastline_rings.add_polygons_to_vector(all_polygons);
 
@@ -70,7 +70,7 @@ polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, Outpu
         if (p->IsValid()) {
             polygons->push_back(p);
         } else {
-            output->add_error_line(static_cast<OGRLineString*>(p->getExteriorRing()->clone()), "invalid");
+            output.add_error_line(static_cast<OGRLineString*>(p->getExteriorRing()->clone()), "invalid");
             OGRGeometry* buf0 = p->Buffer(0);
             if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
                 buf0->assignSpatialReference(srs.wgs84());
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
     } else {
         vout << "Will NOT create geometry index (because you told me to using --no-index/-i).\n";
     }
-    OutputDatabase* output_database = new OutputDatabase(options.output_database, options.create_index);
+    OutputDatabase output_database(options.output_database, options.create_index);
 
     // The collection of all coastline rings we will be filling and then
     // operating on.
@@ -240,72 +240,69 @@ int main(int argc, char *argv[]) {
 
     vout << memory_usage();
 
-    if (output_database) {
-        output_database->set_options(options);
+    output_database.set_options(options);
 
-        if (options.close_rings) {
-            vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
-            vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
-            coastline_rings.close_rings(output_database, options.debug, options.close_distance);
-            stats.rings_fixed = coastline_rings.num_fixed_rings();
-            vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
-                << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
-        } else {
-            vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";
-        }
-
-        if (options.output_rings) {
-            vout << "Writing out rings... (Because you gave the --output-rings/-r option.)\n";
-            warnings += coastline_rings.output_rings(*output_database);
-        } else {
-            vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
-        }
-
-        if (options.output_polygons) {
-            vout << "Create polygons...\n";
-            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database), *output_database, options.bbox_overlap, options.max_points_in_polygon);
-            stats.land_polygons_before_split = coastline_polygons.num_polygons();
-
-            vout << "Fixing coastlines going the wrong way...\n";
-            stats.rings_turned_around = coastline_polygons.fix_direction();
-            vout << "  Turned " << stats.rings_turned_around << " polygons around.\n";
-            warnings += stats.rings_turned_around;
-
-            if (options.epsg != 4326) {
-                vout << "Transforming polygons to EPSG " << options.epsg << "...\n";
-                coastline_polygons.transform();
-            }
-
-            if (options.simplify) {
-                vout << "Simplifying polygons with tolerance " << options.tolerance << " (because you used --simplify/-S).\n";
-                coastline_polygons.simplify(options.tolerance);
-            }
-
-            if (options.split_large_polygons || options.water) {
-                vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
-                vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
-                coastline_polygons.split();
-                stats.land_polygons_after_split = coastline_polygons.num_polygons();
-            }
-            if (options.water) {
-                vout << "Writing out water polygons...\n";
-                coastline_polygons.output_water_polygons();
-            } else {
-                coastline_polygons.output_land_polygons();
-            }
-        } else {
-            vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";
-        }
-
-        vout << memory_usage();
-
-        vout << "Commiting database transactions...\n";
-        output_database->set_meta(vout.runtime(), get_memory_usage().second, stats);
-        delete output_database;
-
-        vout << "All done.\n";
-        vout << memory_usage();
+    if (options.close_rings) {
+        vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
+        vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
+        coastline_rings.close_rings(output_database, options.debug, options.close_distance);
+        stats.rings_fixed = coastline_rings.num_fixed_rings();
+        vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
+            << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
+    } else {
+        vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";
     }
+
+    if (options.output_rings) {
+        vout << "Writing out rings... (Because you gave the --output-rings/-r option.)\n";
+        warnings += coastline_rings.output_rings(output_database);
+    } else {
+        vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
+    }
+
+    if (options.output_polygons) {
+        vout << "Create polygons...\n";
+        CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database), output_database, options.bbox_overlap, options.max_points_in_polygon);
+        stats.land_polygons_before_split = coastline_polygons.num_polygons();
+
+        vout << "Fixing coastlines going the wrong way...\n";
+        stats.rings_turned_around = coastline_polygons.fix_direction();
+        vout << "  Turned " << stats.rings_turned_around << " polygons around.\n";
+        warnings += stats.rings_turned_around;
+
+        if (options.epsg != 4326) {
+            vout << "Transforming polygons to EPSG " << options.epsg << "...\n";
+            coastline_polygons.transform();
+        }
+
+        if (options.simplify) {
+            vout << "Simplifying polygons with tolerance " << options.tolerance << " (because you used --simplify/-S).\n";
+            coastline_polygons.simplify(options.tolerance);
+        }
+
+        if (options.split_large_polygons || options.water) {
+            vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
+            vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
+            coastline_polygons.split();
+            stats.land_polygons_after_split = coastline_polygons.num_polygons();
+        }
+        if (options.water) {
+            vout << "Writing out water polygons...\n";
+            coastline_polygons.output_water_polygons();
+        } else {
+            coastline_polygons.output_land_polygons();
+        }
+    } else {
+        vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";
+    }
+
+    vout << memory_usage();
+
+    vout << "Commiting database transactions...\n";
+    output_database.set_meta(vout.runtime(), get_memory_usage().second, stats);
+    output_database.commit();
+    vout << "All done.\n";
+    vout << memory_usage();
 
     vout << "There were " << warnings << " warnings.\n";
     vout << "There were " << errors << " errors.\n";
