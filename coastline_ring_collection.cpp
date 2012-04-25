@@ -114,14 +114,14 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
 
     for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
         CoastlineRing& cp = **it;
-        if (cp.is_closed() && cp.npoints() > 3) { // XXX what's with rings that don't match here?
+        if (cp.is_closed() && cp.npoints() > 3) { // everything that doesn't match here is bad beyond repair and reported elsewhere
             OGRPolygon* p = cp.ogr_polygon(true);
             if (p->IsValid()) {
                 p->assignSpatialReference(srs.wgs84());
                 vector.push_back(p);
             } else {
                 OGRGeometry* geom = p->Buffer(0);
-                if (geom->getGeometryType() == wkbPolygon && geom->IsValid()) {
+                if ((geom->getGeometryType() == wkbPolygon) && (static_cast<OGRPolygon*>(geom)->getNumInteriorRings() == 0) && geom->IsValid()) {
                     geom->assignSpatialReference(srs.wgs84());
                     vector.push_back(static_cast<OGRPolygon*>(geom));
                 } else {
