@@ -57,7 +57,13 @@ polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, Outpu
 
     int is_valid;
     const char* options[] = { "METHOD=ONLY_CCW", NULL };
+    if (debug) {
+        std::cerr << "Calling organizePolygons()\n";
+    }
     OGRGeometry* mega_multipolygon = OGRGeometryFactory::organizePolygons(&all_polygons[0], all_polygons.size(), &is_valid, options);
+    if (debug) {
+        std::cerr << "organizePolygons() done\n";
+    }
 
     assert(mega_multipolygon->getGeometryType() == wkbMultiPolygon);
 

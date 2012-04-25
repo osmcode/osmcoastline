@@ -121,7 +121,7 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
                 vector.push_back(p);
             } else {
                 OGRGeometry* geom = p->Buffer(0);
-                if ((geom->getGeometryType() == wkbPolygon) && (static_cast<OGRPolygon*>(geom)->getNumInteriorRings() == 0) && geom->IsValid()) {
+                if (geom && (geom->getGeometryType() == wkbPolygon) && (static_cast<OGRPolygon*>(geom)->getExteriorRing()->getNumPoints() > 3) && (static_cast<OGRPolygon*>(geom)->getNumInteriorRings() == 0) && geom->IsValid()) {
                     geom->assignSpatialReference(srs.wgs84());
                     vector.push_back(static_cast<OGRPolygon*>(geom));
                 } else {
