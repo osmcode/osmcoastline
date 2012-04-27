@@ -1,5 +1,6 @@
 osmcoastline
 osmcoastline_extract
+osmcoastline_ways
 core
 doc
 *.o

@@ -25,17 +25,23 @@ LIB_GEOS     = $(shell geos-config --libs) -l geos_c
 LIB_OGR      = $(shell gdal-config --libs)
 LIB_XML2     = $(shell xml2-config --libs)
 
-PROGRAMS = osmcoastline_extract osmcoastline
+PROGRAMS = osmcoastline_extract osmcoastline_ways osmcoastline
 
 .PHONY: all clean
 
 all: $(PROGRAMS)
 
-osmcoastline_extract.o: osmcoastline_extract.cpp
+osmcoastline_extract.o: osmcoastline_extract.cpp osmcoastline.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) -o $@ $<
+
+osmcoastline_ways.o: osmcoastline_ways.cpp osmcoastline.hpp
+	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) $(CXXFLAGS_OGR) -o $@ $<
 
 osmcoastline_extract: osmcoastline_extract.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PROTOBUF) $(LIB_XML2)
+
+osmcoastline_ways: osmcoastline_ways.o
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PROTOBUF) $(LIB_OGR) $(LIB_GEOS) $(LIB_XML2)
 
 osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp coastline_ring_collection.hpp output_database.hpp output_layers.hpp options.hpp coastline_handlers.hpp coastline_polygons.hpp stats.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) $(CXXFLAGS_OGR) -o $@ $<
