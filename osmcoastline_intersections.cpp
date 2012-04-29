@@ -301,38 +301,30 @@ int main(int argc, char* argv[]) {
     std::cerr << "Sorting...\n";
     std::sort(segments.begin(), segments.end());
 
-    std::cerr << "Finding overlaps...\n";
-    std::vector<Segment>::iterator first = segments.begin();
-    while (first != segments.end()) {
-        first = std::adjacent_find(first, segments.end());
-        if (first != segments.end()) {
-
-            OGRFeature* feature = OGRFeature::CreateFeature(layer_overlaps->GetLayerDefn());
-            OGRLineString* line = first->ogr_linestring();
-            feature->SetGeometryDirectly(line);
-
-            if (layer_overlaps->CreateFeature(feature) != OGRERR_NONE) {
-                std::cerr << "Failed to create feature.\n";
-                exit(return_code_fatal);
-            }
-
-            OGRFeature::DestroyFeature(feature);
-
-            first++;
-        }
-    }
-
     std::cerr << "Finding intersections...\n";
     std::vector<Osmium::OSM::Position> intersections;
     for (std::vector<Segment>::const_iterator it1 = segments.begin(); it1 != segments.end()-1; ++it1) {
         const Segment& s1 = *it1;
         for (std::vector<Segment>::const_iterator it2 = it1+1; it2 != segments.end(); ++it2) {
             const Segment& s2 = *it2;
-            if (s2.outside_x_range(s1)) {
-                break;
-            }
-            if (s1.y_range_overlap(s2)) {
-                s1.check_intersection(s2, intersections);
+            if (s1 == s2) {
+                OGRFeature* feature = OGRFeature::CreateFeature(layer_overlaps->GetLayerDefn());
+                OGRLineString* line = s1.ogr_linestring();
+                feature->SetGeometryDirectly(line);
+
+                if (layer_overlaps->CreateFeature(feature) != OGRERR_NONE) {
+                    std::cerr << "Failed to create feature.\n";
+                    exit(return_code_fatal);
+                }
+
+                OGRFeature::DestroyFeature(feature);
+            } else {
+                if (s2.outside_x_range(s1)) {
+                    break;
+                }
+                if (s1.y_range_overlap(s2)) {
+                    s1.check_intersection(s2, intersections);
+                }
             }
         }
     }
