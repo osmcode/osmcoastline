@@ -27,6 +27,7 @@
 #include <osmium.hpp>
 #include <osmium/storage/byid/sparsetable.hpp>
 #include <osmium/handler/coordinates_for_ways.hpp>
+#include <osmium/geometry/haversine.hpp>
 
 #include "osmcoastline.hpp"
 
@@ -56,6 +57,7 @@ public:
 class CoastlineWaysHandler2 : public Osmium::Handler::Base {
 
     cfw_handler_t& m_cfw;
+    double m_length;
 
     OGRDataSource* m_data_source;
     OGRLayer* m_layer_ways;
@@ -63,7 +65,8 @@ class CoastlineWaysHandler2 : public Osmium::Handler::Base {
 public:
 
     CoastlineWaysHandler2(cfw_handler_t& cfw) :
-        m_cfw(cfw) {
+        m_cfw(cfw),
+        m_length(0.0) {
         OGRRegisterAll();
 
         const char* driver_name = "SQLite";
@@ -120,6 +123,7 @@ public:
 
     void way(const shared_ptr<Osmium::OSM::Way>& way) {
         m_cfw.way(way);
+        m_length += Osmium::Geometry::Haversine::distance(way->nodes());
         try {
             Osmium::Geometry::LineString linestring(*way);
 
@@ -146,6 +150,10 @@ public:
         throw Osmium::Input::StopReading();
     }
 
+    double sum_length() const {
+        return m_length;
+    }
+
 };
 
 int main(int argc, char* argv[]) {
@@ -165,5 +173,7 @@ int main(int argc, char* argv[]) {
     infile.read(handler1);
     CoastlineWaysHandler2 handler2(handler_cfw);
     infile.read(handler2);
+
+    std::cerr << "Sum of way lengths: " << handler2.sum_length() << "m\n";
 }
 
