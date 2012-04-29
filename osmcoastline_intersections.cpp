@@ -24,19 +24,6 @@
 
 #include <ogrsf_frmts.h>
 
-#include <CGAL/Cartesian.h>
-#include <CGAL/MP_Float.h>
-#include <CGAL/Quotient.h>
-#include <CGAL/Arr_segment_traits_2.h>
-#include <CGAL/Sweep_line_2_algorithms.h>
-
-typedef CGAL::Quotient<CGAL::MP_Float>     NT;
-typedef CGAL::Cartesian<NT>                Kernel;
-typedef Kernel::Point_2                    Point_2;
-typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
-typedef Traits_2::Curve_2                  Segment_2;
-typedef std::vector<Segment_2>             Segments;
-
 #include <osmium.hpp>
 #include <osmium/storage/byid/sparsetable.hpp>
 #include <osmium/handler/coordinates_for_ways.hpp>
@@ -46,14 +33,14 @@ typedef std::vector<Segment_2>             Segments;
 typedef Osmium::Storage::ById::SparseTable<Osmium::OSM::Position> storage_sparsetable_t;
 typedef Osmium::Handler::CoordinatesForWays<storage_sparsetable_t, storage_sparsetable_t> cfw_handler_t;
 
-class OSMSegment {
+class Segment {
 
 public:
 
     Osmium::OSM::Position start;
     Osmium::OSM::Position end;
 
-    OSMSegment(const Osmium::OSM::Position& p1, const Osmium::OSM::Position& p2) :
+    Segment(const Osmium::OSM::Position& p1, const Osmium::OSM::Position& p2) :
         start(p1),
         end(p2) {
     }
@@ -68,11 +55,62 @@ public:
         return line;
     }
 
-    friend bool operator==(const OSMSegment& s1, const OSMSegment& s2) {
+    bool outside_x_range(const Segment& other) const {
+        if (start.x() > other.end.x()) {
+            return true;
+        }
+        return false;
+    }
+
+    bool y_range_overlap(const Segment& other) const {
+        int tmin = start.y() < end.y() ? start.y() : end.y();
+        int tmax = start.y() < end.y() ? end.y() : start.y();
+        int omin = other.start.y() < other.end.y() ? other.start.y() : other.end.y();
+        int omax = other.start.y() < other.end.y() ? other.end.y() : other.start.y();
+        if (tmin > omax || omin > tmax) {
+            return false;
+        }
+        return true;
+    }
+
+    void check_intersection(const Segment& other, std::vector<Osmium::OSM::Position>& intersections) const {
+        if (start == other.start || start == other.end || end == other.start || end == other.end) {
+            return;
+        }
+
+        double denom = ((other.end.lat() - other.start.lat())*(end.lon() - start.lon())) -
+                       ((other.end.lon() - other.start.lon())*(end.lat() - start.lat()));
+
+        if (denom == 0) {
+            return;
+        }
+
+        double nume_a = ((other.end.lon() - other.start.lon())*(start.lat() - other.start.lat())) -
+                        ((other.end.lat() - other.start.lat())*(start.lon() - other.start.lon()));
+
+        double nume_b = ((end.lon() - start.lon())*(start.lat() - other.start.lat())) -
+                        ((end.lat() - start.lat())*(start.lon() - other.start.lon()));
+
+        if ((denom > 0 && nume_a >= 0 && nume_a <= denom && nume_b >= 0 && nume_b <= denom) ||
+            (denom < 0 && nume_a <= 0 && nume_a >= denom && nume_b <= 0 && nume_b >= denom)) {
+            double ua = nume_a / denom;
+            double ix = start.lon() + ua*(end.lon() - start.lon());
+            double iy = start.lat() + ua*(end.lat() - start.lat());
+            intersections.push_back(Osmium::OSM::Position(ix, iy));
+        }
+    }
+
+    /// Segments are the same if their start and end points are the same.
+    friend bool operator==(const Segment& s1, const Segment& s2) {
         return s1.start == s2.start && s1.end == s2.end;
     }
 
-    friend bool operator<(const OSMSegment& s1, const OSMSegment& s2) {
+    /**
+     * Segments are "smaller" if they are to the left and down of another
+     * segment. Start position is checked first and only if they have the
+     * same start position the end position is taken into account.
+     */
+    friend bool operator<(const Segment& s1, const Segment& s2) {
         if (s1.start.x() < s2.start.x()) {
             return true;
         }
@@ -130,12 +168,12 @@ public:
 class CoastlineWaysHandler2 : public Osmium::Handler::Base {
 
     cfw_handler_t& m_cfw;
-    std::vector<OSMSegment>& m_segments;
+    std::vector<Segment>& m_segments;
     Osmium::OSM::WayNodeList& m_dpoints;
 
 public:
 
-    CoastlineWaysHandler2(cfw_handler_t& cfw, std::vector<OSMSegment>& segments, Osmium::OSM::WayNodeList& dpoints) :
+    CoastlineWaysHandler2(cfw_handler_t& cfw, std::vector<Segment>& segments, Osmium::OSM::WayNodeList& dpoints) :
         m_cfw(cfw),
         m_segments(segments),
         m_dpoints(dpoints) {
@@ -151,9 +189,9 @@ public:
             const Osmium::OSM::Position& p2 = m_cfw.get_node_pos((it+1)->ref());
             if (p1 != p2) {
                 if (p1.x() <= p2.x()) {
-                    m_segments.push_back(OSMSegment(p1, p2));
+                    m_segments.push_back(Segment(p1, p2));
                 } else {
-                    m_segments.push_back(OSMSegment(p2, p1));
+                    m_segments.push_back(Segment(p2, p1));
                 }
             } else {
                 m_dpoints.push_back(Osmium::OSM::WayNode(it->ref(), p1));
@@ -236,7 +274,7 @@ int main(int argc, char* argv[]) {
         exit(return_code_fatal);
     }
 
-    std::vector<OSMSegment> osmsegments;
+    std::vector<Segment> segments;
     {
         storage_sparsetable_t store_pos;
         storage_sparsetable_t store_neg;
@@ -248,10 +286,10 @@ int main(int argc, char* argv[]) {
         std::cerr << "Reading nodes...\n";
         infile.read(handler1);
 
-        osmsegments.reserve(handler1.num_nodes() + 500);
+        segments.reserve(handler1.num_nodes() + 500);
 
         Osmium::OSM::WayNodeList dpoints;
-        CoastlineWaysHandler2 handler2(handler_cfw, osmsegments, dpoints);
+        CoastlineWaysHandler2 handler2(handler_cfw, segments, dpoints);
         std::cerr << "Reading ways...\n";
         infile.read(handler2);
 
@@ -260,11 +298,14 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    std::sort(osmsegments.begin(), osmsegments.end());
-    std::vector<OSMSegment>::iterator first = osmsegments.begin();
-    while (first != osmsegments.end()) {
-        first = std::adjacent_find(first, osmsegments.end());
-        if (first != osmsegments.end()) {
+    std::cerr << "Sorting...\n";
+    std::sort(segments.begin(), segments.end());
+
+    std::cerr << "Finding overlaps...\n";
+    std::vector<Segment>::iterator first = segments.begin();
+    while (first != segments.end()) {
+        first = std::adjacent_find(first, segments.end());
+        if (first != segments.end()) {
 
             OGRFeature* feature = OGRFeature::CreateFeature(layer_overlaps->GetLayerDefn());
             OGRLineString* line = first->ogr_linestring();
@@ -281,27 +322,23 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    const int width = 10;
-    const int overlap = 1;
-    for (int minx=-180, maxx=minx+width+overlap; minx <= 180; minx += width, maxx += width) {
-        std::cerr << "Interval [" << minx << ", " << maxx << "]\n";
-
-        Segments segments;
-        for (std::vector<OSMSegment>::const_iterator it = osmsegments.begin(); it != osmsegments.end(); ++it) {
-            if (it->start.lon() >= minx && it->start.lon() <= maxx) {
-                segments.push_back( Segment_2(Point_2(it->start.lon(), it->start.lat()), Point_2(it->end.lon(), it->end.lat())) );
+    std::cerr << "Finding intersections...\n";
+    std::vector<Osmium::OSM::Position> intersections;
+    for (std::vector<Segment>::const_iterator it1 = segments.begin(); it1 != segments.end()-1; ++it1) {
+        const Segment& s1 = *it1;
+        for (std::vector<Segment>::const_iterator it2 = it1+1; it2 != segments.end(); ++it2) {
+            const Segment& s2 = *it2;
+            if (s2.outside_x_range(s1)) {
+                break;
+            }
+            if (s1.y_range_overlap(s2)) {
+                s1.check_intersection(s2, intersections);
             }
         }
-        
-        std::cerr << "Computing intersections...\n";
-        std::vector<Point_2> points;
-        CGAL::compute_intersection_points(segments.begin(), segments.end(), std::back_inserter(points));
+    }
 
-        std::cerr << "Writing intersections...\n";
-        for (std::vector<Point_2>::const_iterator it = points.begin(); it != points.end(); ++it) {
-            std::cout << "(" << CGAL::to_double(it->x()) << ", " << CGAL::to_double(it->y()) << ")\n";
-            add_point(layer_points, CGAL::to_double(it->x()), CGAL::to_double(it->y()), 0, "intersection");
-        }
+    for (std::vector<Osmium::OSM::Position>::const_iterator it = intersections.begin(); it != intersections.end(); ++it) {
+        add_point(layer_points, it->lon(), it->lat(), 0, "intersection");
     }
 
     OGRDataSource::DestroyDataSource(data_source);
