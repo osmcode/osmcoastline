@@ -728,6 +728,7 @@
   <way id='-2' visible='true'>
     <nd ref='-564'/>
     <nd ref='-566'/>
+    <nd ref='-566'/>
     <tag k='natural' v='coastline' />
     <tag k='status' v='error' />
   </way>

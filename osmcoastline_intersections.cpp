@@ -91,12 +91,14 @@ class CoastlineWaysHandler2 : public Osmium::Handler::Base {
 
     cfw_handler_t& m_cfw;
     std::vector<OSMSegment>& m_segments;
+    Osmium::OSM::WayNodeList& m_dpoints;
 
 public:
 
-    CoastlineWaysHandler2(cfw_handler_t& cfw, std::vector<OSMSegment>& segments) :
+    CoastlineWaysHandler2(cfw_handler_t& cfw, std::vector<OSMSegment>& segments, Osmium::OSM::WayNodeList& dpoints) :
         m_cfw(cfw),
-        m_segments(segments) {
+        m_segments(segments),
+        m_dpoints(dpoints) {
     }
 
     void way(const shared_ptr<Osmium::OSM::Way const>& way) {
@@ -113,6 +115,8 @@ public:
                 } else {
                     m_segments.push_back(OSMSegment(p2, p1));
                 }
+            } else {
+                m_dpoints.push_back(Osmium::OSM::WayNode(it->ref(), p1));
             }
         }
     }
@@ -123,10 +127,12 @@ public:
 
 };
 
-void add_point(OGRLayer* layer, double lon, double lat) {
+void add_point(OGRLayer* layer, double lon, double lat, osm_object_id_t osm_id, const char* error) {
     OGRFeature* feature = OGRFeature::CreateFeature(layer->GetLayerDefn());
     OGRPoint point(lon, lat);
     feature->SetGeometry(&point);
+    feature->SetField("osm_id", osm_id);
+    feature->SetField("error", error);
 
     if (layer->CreateFeature(feature) != OGRERR_NONE) {
         std::cerr << "Failed to create feature.\n";
@@ -170,6 +176,22 @@ int main(int argc, char* argv[]) {
         exit(return_code_fatal);
     }
 
+    OGRFieldDefn field_osm_id("osm_id", OFTString);
+    field_osm_id.SetWidth(10);
+    if (layer_points->CreateField(&field_osm_id) != OGRERR_NONE ) {
+        std::cerr << "Creating field 'osm_id' on 'points' layer failed.\n";
+        exit(return_code_fatal);
+    }
+
+    OGRFieldDefn field_error("error", OFTString);
+    field_error.SetWidth(16);
+    if (layer_points->CreateField(&field_error) != OGRERR_NONE ) {
+        std::cerr << "Creating field 'error' on 'points' layer failed.\n";
+        exit(return_code_fatal);
+    }
+
+    layer_points->StartTransaction();
+
     std::vector<OSMSegment> osmsegments;
     {
         storage_sparsetable_t store_pos;
@@ -184,12 +206,15 @@ int main(int argc, char* argv[]) {
 
         osmsegments.reserve(handler1.num_nodes() + 500);
 
-        CoastlineWaysHandler2 handler2(handler_cfw, osmsegments);
+        Osmium::OSM::WayNodeList dpoints;
+        CoastlineWaysHandler2 handler2(handler_cfw, osmsegments, dpoints);
         std::cerr << "Reading ways...\n";
         infile.read(handler2);
-    }
 
-    layer_points->StartTransaction();
+        for (Osmium::OSM::WayNodeList::const_iterator it = dpoints.begin(); it != dpoints.end(); ++it) {
+            add_point(layer_points, it->lon(), it->lat(), it->ref(), "double_point");
+        }
+    }
 
     const int width = 10;
     const int overlap = 1;
@@ -210,7 +235,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "Writing intersections...\n";
         for (std::vector<Point_2>::const_iterator it = points.begin(); it != points.end(); ++it) {
             std::cout << "(" << CGAL::to_double(it->x()) << ", " << CGAL::to_double(it->y()) << ")\n";
-            add_point(layer_points, CGAL::to_double(it->x()), CGAL::to_double(it->y()));
+            add_point(layer_points, CGAL::to_double(it->x()), CGAL::to_double(it->y()), 0, "intersection");
         }
     }
 
