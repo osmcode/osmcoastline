@@ -58,6 +58,46 @@ public:
         end(p2) {
     }
 
+    OGRLineString* ogr_linestring() const {
+        OGRLineString* line = new OGRLineString;
+        line->setNumPoints(2);
+        line->setPoint(0, start.lon(), start.lat());
+        line->setPoint(1, end.lon(), end.lat());
+        line->setCoordinateDimension(2);
+
+        return line;
+    }
+
+    friend bool operator==(const OSMSegment& s1, const OSMSegment& s2) {
+        return s1.start == s2.start && s1.end == s2.end;
+    }
+
+    friend bool operator<(const OSMSegment& s1, const OSMSegment& s2) {
+        if (s1.start.x() < s2.start.x()) {
+            return true;
+        }
+        if (s1.start.x() > s2.start.x()) {
+            return false;
+        }
+        if (s1.start.y() < s2.start.y()) {
+            return true;
+        }
+        if (s1.start.y() > s2.start.y()) {
+            return false;
+        }
+
+        if (s1.end.x() < s2.end.x()) {
+            return true;
+        }
+        if (s1.end.x() > s2.end.x()) {
+            return false;
+        }
+        if (s1.end.y() < s2.end.y()) {
+            return true;
+        }
+        return false;
+    }
+
 };
 
 class CoastlineWaysHandler1 : public Osmium::Handler::Base {
@@ -190,7 +230,11 @@ int main(int argc, char* argv[]) {
         exit(return_code_fatal);
     }
 
-    layer_points->StartTransaction();
+    OGRLayer* layer_overlaps = data_source->CreateLayer("overlaps", &sparef, wkbLineString, NULL);
+    if (layer_overlaps == NULL) {
+        std::cerr << "Layer creation failed.\n";
+        exit(return_code_fatal);
+    }
 
     std::vector<OSMSegment> osmsegments;
     {
@@ -216,6 +260,27 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    std::sort(osmsegments.begin(), osmsegments.end());
+    std::vector<OSMSegment>::iterator first = osmsegments.begin();
+    while (first != osmsegments.end()) {
+        first = std::adjacent_find(first, osmsegments.end());
+        if (first != osmsegments.end()) {
+
+            OGRFeature* feature = OGRFeature::CreateFeature(layer_overlaps->GetLayerDefn());
+            OGRLineString* line = first->ogr_linestring();
+            feature->SetGeometryDirectly(line);
+
+            if (layer_overlaps->CreateFeature(feature) != OGRERR_NONE) {
+                std::cerr << "Failed to create feature.\n";
+                exit(return_code_fatal);
+            }
+
+            OGRFeature::DestroyFeature(feature);
+
+            first++;
+        }
+    }
+
     const int width = 10;
     const int overlap = 1;
     for (int minx=-180, maxx=minx+width+overlap; minx <= 180; minx += width, maxx += width) {
@@ -238,8 +303,6 @@ int main(int argc, char* argv[]) {
             add_point(layer_points, CGAL::to_double(it->x()), CGAL::to_double(it->y()), 0, "intersection");
         }
     }
-
-    layer_points->CommitTransaction();
 
     OGRDataSource::DestroyDataSource(data_source);
 }
