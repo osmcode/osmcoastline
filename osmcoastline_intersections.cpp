@@ -51,36 +51,6 @@ public:
         return m_second;
     }
 
-    Osmium::OSM::Position intersection(const Segment& other) const {
-        if (first()  == other.first()  ||
-            first()  == other.second() ||
-            second() == other.first()  ||
-            second() == other.second()) {
-            return Osmium::OSM::Position();
-        }
-
-        double denom = ((other.second().lat() - other.first().lat())*(second().lon() - first().lon())) -
-                       ((other.second().lon() - other.first().lon())*(second().lat() - first().lat()));
-
-        if (denom != 0) {
-            double nume_a = ((other.second().lon() - other.first().lon())*(first().lat() - other.first().lat())) -
-                            ((other.second().lat() - other.first().lat())*(first().lon() - other.first().lon()));
-
-            double nume_b = ((second().lon() - first().lon())*(first().lat() - other.first().lat())) -
-                            ((second().lat() - first().lat())*(first().lon() - other.first().lon()));
-
-            if ((denom > 0 && nume_a >= 0 && nume_a <= denom && nume_b >= 0 && nume_b <= denom) ||
-                (denom < 0 && nume_a <= 0 && nume_a >= denom && nume_b <= 0 && nume_b >= denom)) {
-                double ua = nume_a / denom;
-                double ix = first().lon() + ua*(second().lon() - first().lon());
-                double iy = first().lat() + ua*(second().lat() - first().lat());
-                return Osmium::OSM::Position(ix, iy);
-            }
-        }
-
-        return Osmium::OSM::Position();
-    }
-
 protected:
 
     void swap_positions() {
@@ -110,24 +80,6 @@ public:
         }
     }
 
-    bool outside_x_range(const UndirectedSegment& other) const {
-        if (first().x() > other.second().x()) {
-            return true;
-        }
-        return false;
-    }
-
-    bool y_range_overlap(const UndirectedSegment& other) const {
-        int tmin = first().y() < second().y() ? first().y() : second().y();
-        int tmax = first().y() < second().y() ? second().y() : first().y();
-        int omin = other.first().y() < other.second().y() ? other.first().y() : other.second().y();
-        int omax = other.first().y() < other.second().y() ? other.second().y() : other.first().y();
-        if (tmin > omax || omin > tmax) {
-            return false;
-        }
-        return true;
-    }
-
 };
 
 /**
@@ -141,6 +93,54 @@ bool operator<(const UndirectedSegment& lhs, const UndirectedSegment& rhs) {
     } else {
         return lhs.first() < rhs.first();
     }
+}
+
+Osmium::OSM::Position intersection(const Segment& s1, const Segment&s2) {
+    if (s1.first()  == s2.first()  ||
+        s1.first()  == s2.second() ||
+        s1.second() == s2.first()  ||
+        s1.second() == s2.second()) {
+        return Osmium::OSM::Position();
+    }
+
+    double denom = ((s2.second().lat() - s2.first().lat())*(s1.second().lon() - s1.first().lon())) -
+                   ((s2.second().lon() - s2.first().lon())*(s1.second().lat() - s1.first().lat()));
+
+    if (denom != 0) {
+        double nume_a = ((s2.second().lon() - s2.first().lon())*(s1.first().lat() - s2.first().lat())) -
+                        ((s2.second().lat() - s2.first().lat())*(s1.first().lon() - s2.first().lon()));
+
+        double nume_b = ((s1.second().lon() - s1.first().lon())*(s1.first().lat() - s2.first().lat())) -
+                        ((s1.second().lat() - s1.first().lat())*(s1.first().lon() - s2.first().lon()));
+
+        if ((denom > 0 && nume_a >= 0 && nume_a <= denom && nume_b >= 0 && nume_b <= denom) ||
+            (denom < 0 && nume_a <= 0 && nume_a >= denom && nume_b <= 0 && nume_b >= denom)) {
+            double ua = nume_a / denom;
+            double ix = s1.first().lon() + ua*(s1.second().lon() - s1.first().lon());
+            double iy = s1.first().lat() + ua*(s1.second().lat() - s1.first().lat());
+            return Osmium::OSM::Position(ix, iy);
+        }
+    }
+
+    return Osmium::OSM::Position();
+}
+
+bool outside_x_range(const UndirectedSegment& s1, const UndirectedSegment& s2) {
+    if (s1.first().x() > s2.second().x()) {
+        return true;
+    }
+    return false;
+}
+
+bool y_range_overlap(const UndirectedSegment& s1, const UndirectedSegment& s2) {
+    int tmin = s1.first().y() < s1.second().y() ? s1.first().y( ) : s1.second().y();
+    int tmax = s1.first().y() < s1.second().y() ? s1.second().y() : s1.first().y();
+    int omin = s2.first().y() < s2.second().y() ? s2.first().y()  : s2.second().y();
+    int omax = s2.first().y() < s2.second().y() ? s2.second().y() : s2.first().y();
+    if (tmin > omax || omin > tmax) {
+        return false;
+    }
+    return true;
 }
 
 class CoastlineWaysHandler1 : public Osmium::Handler::Base {
@@ -330,11 +330,11 @@ int main(int argc, char* argv[]) {
 
                 OGRFeature::DestroyFeature(feature);
             } else {
-                if (s2.outside_x_range(s1)) {
+                if (outside_x_range(s2, s1)) {
                     break;
                 }
-                if (s1.y_range_overlap(s2)) {
-                    Osmium::OSM::Position i = s1.intersection(s2);
+                if (y_range_overlap(s1, s2)) {
+                    Osmium::OSM::Position i = intersection(s1, s2);
                     if (i.defined()) {
                         intersections.push_back(i);
                     }
