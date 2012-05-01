@@ -110,16 +110,6 @@ public:
         }
     }
 
-    OGRLineString* ogr_linestring() const {
-        OGRLineString* line = new OGRLineString;
-        line->setNumPoints(2);
-        line->setPoint(0, first().lon(), first().lat());
-        line->setPoint(1, second().lon(), second().lat());
-        line->setCoordinateDimension(2);
-
-        return line;
-    }
-
     bool outside_x_range(const UndirectedSegment& other) const {
         if (first().x() > other.second().x()) {
             return true;
@@ -215,6 +205,16 @@ public:
     }
 
 };
+
+OGRLineString* create_ogr_linestring(const Segment& segment) {
+    OGRLineString* line = new OGRLineString;
+    line->setNumPoints(2);
+    line->setPoint(0, segment.first().lon(), segment.first().lat());
+    line->setPoint(1, segment.second().lon(), segment.second().lat());
+    line->setCoordinateDimension(2);
+
+    return line;
+}
 
 void add_point(OGRLayer* layer, double lon, double lat, osm_object_id_t osm_id, const char* error) {
     OGRFeature* feature = OGRFeature::CreateFeature(layer->GetLayerDefn());
@@ -320,7 +320,7 @@ int main(int argc, char* argv[]) {
             const UndirectedSegment& s2 = *it2;
             if (s1 == s2) {
                 OGRFeature* feature = OGRFeature::CreateFeature(layer_overlaps->GetLayerDefn());
-                OGRLineString* line = s1.ogr_linestring();
+                OGRLineString* line = create_ogr_linestring(s1);
                 feature->SetGeometryDirectly(line);
 
                 if (layer_overlaps->CreateFeature(feature) != OGRERR_NONE) {
