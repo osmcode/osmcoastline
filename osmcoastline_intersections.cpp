@@ -26,6 +26,7 @@
 #include <ogrsf_frmts.h>
 
 #include <osmium.hpp>
+#include <osmium/osm/undirected_segment.hpp>
 #include <osmium/storage/byid/sparsetable.hpp>
 #include <osmium/handler/coordinates_for_ways.hpp>
 
@@ -34,68 +35,7 @@
 typedef Osmium::Storage::ById::SparseTable<Osmium::OSM::Position> storage_sparsetable_t;
 typedef Osmium::Handler::CoordinatesForWays<storage_sparsetable_t, storage_sparsetable_t> cfw_handler_t;
 
-class Segment : boost::equality_comparable<Segment> {
-
-public:
-
-    Segment(const Osmium::OSM::Position& p1, const Osmium::OSM::Position& p2) :
-        m_first(p1),
-        m_second(p2) {
-    }
-
-    const Osmium::OSM::Position first() const {
-        return m_first;
-    }
-
-    const Osmium::OSM::Position second() const {
-        return m_second;
-    }
-
-protected:
-
-    void swap_positions() {
-        std::swap(m_first, m_second);
-    }
-
-private:
-
-    Osmium::OSM::Position m_first;
-    Osmium::OSM::Position m_second;
-
-};
-
-/// Segments are equal if both their positions are equal
-bool operator==(const Segment& lhs, const Segment& rhs) {
-    return lhs.first() == rhs.first() && lhs.second() == rhs.second();
-}
-
-class UndirectedSegment : boost::less_than_comparable<UndirectedSegment>, public Segment {
-
-public:
-
-    UndirectedSegment(const Osmium::OSM::Position& p1, const Osmium::OSM::Position& p2) :
-        Segment(p1, p2) {
-        if (p2 < p1) {
-            swap_positions();
-        }
-    }
-
-};
-
-/**
- * UndirectedSegments are "smaller" if they are to the left and down of another
- * segment. The first() position is checked first() and only if they have the
- * same first() position the second() position is taken into account.
- */
-bool operator<(const UndirectedSegment& lhs, const UndirectedSegment& rhs) {
-    if (lhs.first() == rhs.first()) {
-        return lhs.second() < rhs.second();
-    } else {
-        return lhs.first() < rhs.first();
-    }
-}
-
-Osmium::OSM::Position intersection(const Segment& s1, const Segment&s2) {
+Osmium::OSM::Position intersection(const Osmium::OSM::Segment& s1, const Osmium::OSM::Segment&s2) {
     if (s1.first()  == s2.first()  ||
         s1.first()  == s2.second() ||
         s1.second() == s2.first()  ||
@@ -125,14 +65,14 @@ Osmium::OSM::Position intersection(const Segment& s1, const Segment&s2) {
     return Osmium::OSM::Position();
 }
 
-bool outside_x_range(const UndirectedSegment& s1, const UndirectedSegment& s2) {
+bool outside_x_range(const Osmium::OSM::UndirectedSegment& s1, const Osmium::OSM::UndirectedSegment& s2) {
     if (s1.first().x() > s2.second().x()) {
         return true;
     }
     return false;
 }
 
-bool y_range_overlap(const UndirectedSegment& s1, const UndirectedSegment& s2) {
+bool y_range_overlap(const Osmium::OSM::UndirectedSegment& s1, const Osmium::OSM::UndirectedSegment& s2) {
     int tmin = s1.first().y() < s1.second().y() ? s1.first().y( ) : s1.second().y();
     int tmax = s1.first().y() < s1.second().y() ? s1.second().y() : s1.first().y();
     int omin = s2.first().y() < s2.second().y() ? s2.first().y()  : s2.second().y();
@@ -173,12 +113,12 @@ public:
 class CoastlineWaysHandler2 : public Osmium::Handler::Base {
 
     cfw_handler_t& m_cfw;
-    std::vector<UndirectedSegment>& m_segments;
+    std::vector<Osmium::OSM::UndirectedSegment>& m_segments;
     Osmium::OSM::WayNodeList& m_dpoints;
 
 public:
 
-    CoastlineWaysHandler2(cfw_handler_t& cfw, std::vector<UndirectedSegment>& segments, Osmium::OSM::WayNodeList& dpoints) :
+    CoastlineWaysHandler2(cfw_handler_t& cfw, std::vector<Osmium::OSM::UndirectedSegment>& segments, Osmium::OSM::WayNodeList& dpoints) :
         m_cfw(cfw),
         m_segments(segments),
         m_dpoints(dpoints) {
@@ -193,7 +133,7 @@ public:
             const Osmium::OSM::Position& p1 = m_cfw.get_node_pos(it->ref());
             const Osmium::OSM::Position& p2 = m_cfw.get_node_pos((it+1)->ref());
             if (p1 != p2) {
-                m_segments.push_back(UndirectedSegment(p1, p2));
+                m_segments.push_back(Osmium::OSM::UndirectedSegment(p1, p2));
             } else {
                 m_dpoints.push_back(Osmium::OSM::WayNode(it->ref(), p1));
             }
@@ -206,7 +146,7 @@ public:
 
 };
 
-OGRLineString* create_ogr_linestring(const Segment& segment) {
+OGRLineString* create_ogr_linestring(const Osmium::OSM::Segment& segment) {
     OGRLineString* line = new OGRLineString;
     line->setNumPoints(2);
     line->setPoint(0, segment.first().lon(), segment.first().lat());
@@ -285,7 +225,7 @@ int main(int argc, char* argv[]) {
         exit(return_code_fatal);
     }
 
-    std::vector<UndirectedSegment> segments;
+    std::vector<Osmium::OSM::UndirectedSegment> segments;
     {
         storage_sparsetable_t store_pos;
         storage_sparsetable_t store_neg;
@@ -314,10 +254,10 @@ int main(int argc, char* argv[]) {
 
     std::cerr << "Finding intersections...\n";
     std::vector<Osmium::OSM::Position> intersections;
-    for (std::vector<UndirectedSegment>::const_iterator it1 = segments.begin(); it1 != segments.end()-1; ++it1) {
-        const UndirectedSegment& s1 = *it1;
-        for (std::vector<UndirectedSegment>::const_iterator it2 = it1+1; it2 != segments.end(); ++it2) {
-            const UndirectedSegment& s2 = *it2;
+    for (std::vector<Osmium::OSM::UndirectedSegment>::const_iterator it1 = segments.begin(); it1 != segments.end()-1; ++it1) {
+        const Osmium::OSM::UndirectedSegment& s1 = *it1;
+        for (std::vector<Osmium::OSM::UndirectedSegment>::const_iterator it2 = it1+1; it2 != segments.end(); ++it2) {
+            const Osmium::OSM::UndirectedSegment& s2 = *it2;
             if (s1 == s2) {
                 OGRFeature* feature = OGRFeature::CreateFeature(layer_overlaps->GetLayerDefn());
                 OGRLineString* line = create_ogr_linestring(s1);
