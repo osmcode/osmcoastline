@@ -24,6 +24,7 @@
 #include "srs.hpp"
 
 extern SRS srs;
+extern bool debug;
 
 CoastlineRingCollection::CoastlineRingCollection() :
     m_list(),
@@ -160,6 +161,103 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     }
 
     return warnings;
+}
+
+Osmium::OSM::Position intersection(const Osmium::OSM::Segment& s1, const Osmium::OSM::Segment&s2) {
+    if (s1.first()  == s2.first()  ||
+        s1.first()  == s2.second() ||
+        s1.second() == s2.first()  ||
+        s1.second() == s2.second()) {
+        return Osmium::OSM::Position();
+    }
+
+    double denom = ((s2.second().lat() - s2.first().lat())*(s1.second().lon() - s1.first().lon())) -
+                   ((s2.second().lon() - s2.first().lon())*(s1.second().lat() - s1.first().lat()));
+
+    if (denom != 0) {
+        double nume_a = ((s2.second().lon() - s2.first().lon())*(s1.first().lat() - s2.first().lat())) -
+                        ((s2.second().lat() - s2.first().lat())*(s1.first().lon() - s2.first().lon()));
+
+        double nume_b = ((s1.second().lon() - s1.first().lon())*(s1.first().lat() - s2.first().lat())) -
+                        ((s1.second().lat() - s1.first().lat())*(s1.first().lon() - s2.first().lon()));
+
+        if ((denom > 0 && nume_a >= 0 && nume_a <= denom && nume_b >= 0 && nume_b <= denom) ||
+            (denom < 0 && nume_a <= 0 && nume_a >= denom && nume_b <= 0 && nume_b >= denom)) {
+            double ua = nume_a / denom;
+            double ix = s1.first().lon() + ua*(s1.second().lon() - s1.first().lon());
+            double iy = s1.first().lat() + ua*(s1.second().lat() - s1.first().lat());
+            return Osmium::OSM::Position(ix, iy);
+        }
+    }
+
+    return Osmium::OSM::Position();
+}
+
+bool outside_x_range(const Osmium::OSM::UndirectedSegment& s1, const Osmium::OSM::UndirectedSegment& s2) {
+    if (s1.first().x() > s2.second().x()) {
+        return true;
+    }
+    return false;
+}
+
+bool y_range_overlap(const Osmium::OSM::UndirectedSegment& s1, const Osmium::OSM::UndirectedSegment& s2) {
+    int tmin = s1.first().y() < s1.second().y() ? s1.first().y( ) : s1.second().y();
+    int tmax = s1.first().y() < s1.second().y() ? s1.second().y() : s1.first().y();
+    int omin = s2.first().y() < s2.second().y() ? s2.first().y()  : s2.second().y();
+    int omax = s2.first().y() < s2.second().y() ? s2.second().y() : s2.first().y();
+    if (tmin > omax || omin > tmax) {
+        return false;
+    }
+    return true;
+}
+
+OGRLineString* create_ogr_linestring(const Osmium::OSM::Segment& segment) {
+    OGRLineString* line = new OGRLineString;
+    line->setNumPoints(2);
+    line->setPoint(0, segment.first().lon(), segment.first().lat());
+    line->setPoint(1, segment.second().lon(), segment.second().lat());
+    line->setCoordinateDimension(2);
+
+    return line;
+}
+
+void CoastlineRingCollection::check_for_intersections(OutputDatabase& output) {
+    std::vector<Osmium::OSM::UndirectedSegment> segments;
+    if (debug) std::cerr << "Setting up segments...\n";
+    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
+        it->get()->add_segments_to_vector(segments);
+    }
+
+    if (debug) std::cerr << "Sorting...\n";
+    std::sort(segments.begin(), segments.end());
+
+    if (debug) std::cerr << "Finding intersections...\n";
+    std::vector<Osmium::OSM::Position> intersections;
+    for (std::vector<Osmium::OSM::UndirectedSegment>::const_iterator it1 = segments.begin(); it1 != segments.end()-1; ++it1) {
+        const Osmium::OSM::UndirectedSegment& s1 = *it1;
+        for (std::vector<Osmium::OSM::UndirectedSegment>::const_iterator it2 = it1+1; it2 != segments.end(); ++it2) {
+            const Osmium::OSM::UndirectedSegment& s2 = *it2;
+            if (s1 == s2) {
+                OGRLineString* line = create_ogr_linestring(s1);
+                output.add_error_line(line, "overlap");
+            } else {
+                if (outside_x_range(s2, s1)) {
+                    break;
+                }
+                if (y_range_overlap(s1, s2)) {
+                    Osmium::OSM::Position i = intersection(s1, s2);
+                    if (i.defined()) {
+                        intersections.push_back(i);
+                    }
+                }
+            }
+        }
+    }
+
+    for (std::vector<Osmium::OSM::Position>::const_iterator it = intersections.begin(); it != intersections.end(); ++it) {
+        OGRPoint* point = new OGRPoint(it->lon(), it->lat());
+        output.add_error_point(point, "intersection");
+    }
 }
 
 void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, double max_distance) {

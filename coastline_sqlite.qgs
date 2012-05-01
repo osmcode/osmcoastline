@@ -4,9 +4,9 @@
     <mapcanvas>
         <units>degrees</units>
         <extent>
-            <xmin>7.114399</xmin>
+            <xmin>7.114238</xmin>
             <ymin>53.609922</ymin>
-            <xmax>7.667646</xmax>
+            <xmax>7.667807</xmax>
             <ymax>53.888797</ymax>
         </extent>
         <projections>0</projections>
@@ -72,7 +72,8 @@
                     <category symbol="2" value="direction" label="direction"/>
                     <category symbol="3" value="added_line" label="added_line"/>
                     <category symbol="4" value="invalid" label="invalid"/>
-                    <category symbol="5" value="" label="(unknown)"/>
+                    <category symbol="5" value="overlap" label="overlap"/>
+                    <category symbol="6" value="" label="(unknown)"/>
                 </categories>
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
@@ -148,6 +149,28 @@
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="line" name="5">
+                        <layer pass="0" class="SimpleLine" locked="0">
+                            <prop k="capstyle" v="round"/>
+                            <prop k="color" v="170,0,0,255"/>
+                            <prop k="customdash" v="5;2"/>
+                            <prop k="joinstyle" v="bevel"/>
+                            <prop k="offset" v="0"/>
+                            <prop k="penstyle" v="solid"/>
+                            <prop k="use_custom_dash" v="0"/>
+                            <prop k="width" v="4"/>
+                        </layer>
+                        <layer pass="0" class="SimpleLine" locked="0">
+                            <prop k="capstyle" v="round"/>
+                            <prop k="color" v="255,255,255,255"/>
+                            <prop k="customdash" v="5;2"/>
+                            <prop k="joinstyle" v="bevel"/>
+                            <prop k="offset" v="0"/>
+                            <prop k="penstyle" v="solid"/>
+                            <prop k="use_custom_dash" v="0"/>
+                            <prop k="width" v="3"/>
+                        </layer>
+                    </symbol>
+                    <symbol outputUnit="MM" alpha="1" type="line" name="6">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="square"/>
                             <prop k="color" v="255,0,0,255"/>
@@ -241,7 +264,8 @@
                     <category symbol="3" value="tagged_node" label="tagged_node"/>
                     <category symbol="4" value="fixed_end_point" label="fixed_end_point"/>
                     <category symbol="5" value="double_node" label="double_node"/>
-                    <category symbol="6" value="" label="(unknown)"/>
+                    <category symbol="6" value="intersection" label="intersection"/>
+                    <category symbol="7" value="" label="(unknown)"/>
                 </categories>
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="0">
@@ -313,6 +337,32 @@
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="6">
+                        <layer pass="0" class="SimpleMarker" locked="0">
+                            <prop k="angle" v="0"/>
+                            <prop k="color" v="255,0,0,255"/>
+                            <prop k="color_border" v="255,0,0,255"/>
+                            <prop k="name" v="cross2"/>
+                            <prop k="offset" v="0,0"/>
+                            <prop k="size" v="4"/>
+                        </layer>
+                        <layer pass="0" class="SimpleMarker" locked="0">
+                            <prop k="angle" v="5"/>
+                            <prop k="color" v="255,0,0,255"/>
+                            <prop k="color_border" v="255,0,0,255"/>
+                            <prop k="name" v="cross2"/>
+                            <prop k="offset" v="0,0"/>
+                            <prop k="size" v="4"/>
+                        </layer>
+                        <layer pass="0" class="SimpleMarker" locked="0">
+                            <prop k="angle" v="355"/>
+                            <prop k="color" v="255,0,0,255"/>
+                            <prop k="color_border" v="255,0,0,255"/>
+                            <prop k="name" v="cross2"/>
+                            <prop k="offset" v="0,0"/>
+                            <prop k="size" v="4"/>
+                        </layer>
+                    </symbol>
+                    <symbol outputUnit="MM" alpha="1" type="marker" name="7">
                         <layer pass="0" class="SimpleMarker" locked="0">
                             <prop k="angle" v="0"/>
                             <prop k="color" v="255,0,0,255"/>

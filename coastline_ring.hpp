@@ -25,6 +25,7 @@
 #include <map>
 
 #include <osmium/osm/way.hpp>
+#include <osmium/osm/undirected_segment.hpp>
 
 typedef std::multimap<osm_object_id_t, Osmium::OSM::Position*> posmap_t;
 
@@ -198,6 +199,8 @@ public:
     OGRPoint* ogr_last_point() const;
 
     double distance_to_start_position(Osmium::OSM::Position pos) const;
+
+    void add_segments_to_vector(std::vector<Osmium::OSM::UndirectedSegment>& segments) const;
 
     friend std::ostream& operator<<(std::ostream& out, const CoastlineRing& cp);
 };

@@ -100,6 +100,14 @@ double CoastlineRing::distance_to_start_position(Osmium::OSM::Position pos) cons
     return (pos.lon() - p.lon()) * (pos.lon() - p.lon()) + (pos.lat() - p.lat()) * (pos.lat() - p.lat());
 }
 
+void CoastlineRing::add_segments_to_vector(std::vector<Osmium::OSM::UndirectedSegment>& segments) const {
+    if (m_way_node_list.size() > 1) {
+        for (Osmium::OSM::WayNodeList::const_iterator it = m_way_node_list.begin(); it != m_way_node_list.end()-1; ++it) {
+            segments.push_back(Osmium::OSM::UndirectedSegment(it->position(), (it+1)->position()));
+        }
+    }
+}
+
 std::ostream& operator<<(std::ostream& out, CoastlineRing& cp) {
     out << "CoastlineRing(ring_id=" << cp.ring_id() << ", nways=" << cp.nways() << ", npoints=" << cp.npoints() << ", first_node_id=" << cp.first_node_id() << ", last_node_id=" << cp.last_node_id();
     if (cp.is_closed()) {

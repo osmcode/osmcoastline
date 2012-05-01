@@ -248,6 +248,9 @@ int main(int argc, char *argv[]) {
 
     output_database.set_options(options);
 
+    vout << "Check line segements for intersections and overlaps...\n";
+    coastline_rings.check_for_intersections(output_database);
+
     if (options.close_rings) {
         vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
         vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
