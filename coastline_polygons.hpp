@@ -94,11 +94,13 @@ public:
     /// Transform all polygons to output SRS.
     void transform();
 
+#ifdef EXPERIMENTAL
     /**
      * Simplify geometry of all polygons.
      * This feature is experimental.
      */
     void simplify(double tolerance);
+#endif
 
     /// Split up all polygons.
     void split();

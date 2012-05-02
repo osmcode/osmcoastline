@@ -14,6 +14,7 @@ PREREQUISITES
 Osmium
     http://github.com/joto/osmium
     http://wiki.openstreetmap.org/wiki/Osmium
+    (Do not use the Osmium coming with Ubuntu 12.04, it is too old.)
 
 boost (several libraries)
     http://www.boost.org/
@@ -26,8 +27,10 @@ zlib (for PBF support)
 GDAL (for OGR support)
     http://gdal.org/
     Debian/Ubuntu: libgdal1-dev
-    (must be built with GEOS support which is the true for Debian/Ubuntu
-    packages)
+    (Must be built with GEOS support which is the true for Debian/Ubuntu
+    packages. You need GDAL 1.7.0 or greater, consider using
+    https://wiki.ubuntu.com/UbuntuGIS when using Ubuntu to get newer
+    versions of GIS libraries.)
 
 GEOS (for assembling multipolygons etc.)
     http://trac.osgeo.org/geos/

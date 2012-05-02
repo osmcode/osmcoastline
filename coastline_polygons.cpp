@@ -87,6 +87,7 @@ void CoastlinePolygons::transform() {
     }
 }
 
+#ifdef EXPERIMENTAL
 /*
   This is experimental. Not all polygons seem to "survive" this.
 */
@@ -108,6 +109,7 @@ void CoastlinePolygons::simplify(double tolerance) {
     }
     delete v;
 }
+#endif // EXPERIMENTAL
 
 void CoastlinePolygons::split_geometry(OGRGeometry* geom, int level) {
     if (geom->getGeometryType() == wkbPolygon) {
