@@ -94,7 +94,7 @@ private:
      */
     int get_epsg(const char* text);
 
-    void print_help();
+    void print_help() const;
 
 };
 

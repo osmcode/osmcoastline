@@ -81,6 +81,9 @@ doc: doc/html/files.html
 doc/html/files.html: *.hpp *.cpp
 	doxygen >/dev/null
 
+check:
+	cppcheck --enable=all *.cpp
+
 clean:
 	rm -f *.o core $(PROGRAMS)
 

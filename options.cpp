@@ -171,7 +171,7 @@ int Options::get_epsg(const char* text) {
     exit(return_code_cmdline);
 }
 
-void Options::print_help() {
+void Options::print_help() const {
     std::cout << "osmcoastline [OPTIONS] OSMFILE\n"
                 << "\nOptions:\n"
                 << "  -h, --help                 - This help message\n"
