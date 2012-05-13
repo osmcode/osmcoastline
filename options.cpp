@@ -41,6 +41,7 @@ Options::Options(int argc, char* argv[]) :
     output_database(),
     overwrite_output(false),
     output_rings(false),
+    output_lines(false),
     epsg(4326),
     simplify(false),
     tolerance(0),
@@ -53,6 +54,7 @@ Options::Options(int argc, char* argv[]) :
         {"no-index",              no_argument, 0, 'i'},
         {"debug",                 no_argument, 0, 'd'},
         {"help",                  no_argument, 0, 'h'},
+        {"output-lines",          no_argument, 0, 'l'},
         {"max-points",      required_argument, 0, 'm'},
         {"no-polygons",           no_argument, 0, 'p'},
         {"output-database", required_argument, 0, 'o'},
@@ -68,7 +70,7 @@ Options::Options(int argc, char* argv[]) :
     };
 
     while (1) {
-        int c = getopt_long(argc, argv, "b:c:idhm:po:rfs:S:vw", long_options, 0);
+        int c = getopt_long(argc, argv, "b:c:idhlm:po:rfs:S:vw", long_options, 0);
         if (c == -1)
             break;
 
@@ -92,6 +94,9 @@ Options::Options(int argc, char* argv[]) :
             case 'h':
                 print_help();
                 exit(return_code_ok);
+            case 'l':
+                output_lines = true;
+                break;
             case 'm':
                 max_points_in_polygon = atoi(optarg);
                 if (max_points_in_polygon == 0) {
@@ -181,6 +186,7 @@ void Options::print_help() const {
                 << "  -i, --no-index             - Do not create spatial indexes in output database\n"
                 << "  -d, --debug                - Enable debugging output\n"
                 << "  -f, --overwrite            - Overwrite output files if they already exist\n"
+                << "  -l, --output-lines         - Output coastlines as lines to database file\n"
                 << "  -m, --max-points           - Split polygons with more than this many points\n"
                 << "                               (0 - disable splitting)\n"
                 << "  -p, --no-polygons          - Do not create polygons\n"

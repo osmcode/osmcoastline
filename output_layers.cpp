@@ -280,3 +280,32 @@ void LayerPolygons::add(OGRPolygon* polygon) {
     OGRFeature::DestroyFeature(feature);
 }
 
+/***************************************************************/
+
+LayerLines::LayerLines(OGRDataSource* data_source, const char** options) :
+    Layer()
+{
+    m_layer = data_source->CreateLayer("lines", srs.out(), wkbLineString, const_cast<char**>(options));
+    if (m_layer == NULL) {
+        std::cerr << "Creating layer 'lines' failed.\n";
+        exit(return_code_fatal);
+    }
+
+    m_layer->StartTransaction();
+}
+
+void LayerLines::add(OGRLineString* linestring) {
+    srs.transform(linestring);
+
+    OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
+
+    feature->SetGeometryDirectly(linestring);
+
+    if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
+        std::cerr << "Failed to create feature in layer 'lines'.\n";
+        exit(return_code_fatal);
+    }
+
+    OGRFeature::DestroyFeature(feature);
+}
+

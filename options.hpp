@@ -68,6 +68,9 @@ public:
     /// Should the rings output table be populated?
     bool output_rings;
 
+    /// Should the lines output table be populated?
+    bool output_lines;
+
     /// EPSG code of output SRS.
     int epsg;
 

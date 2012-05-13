@@ -39,7 +39,8 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_layer_error_points(NULL),
     m_layer_error_lines(NULL),
     m_layer_rings(NULL),
-    m_layer_polygons(NULL)
+    m_layer_polygons(NULL),
+    m_layer_lines(NULL)
 {
     OGRRegisterAll();
 
@@ -61,6 +62,7 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_layer_error_lines = new LayerErrorLines(m_data_source, layer_options());
     m_layer_rings = new LayerRings(m_data_source, layer_options());
     m_layer_polygons = new LayerPolygons(m_data_source, layer_options());
+    m_layer_lines = new LayerLines(m_data_source, layer_options());
 
     exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER, water INTEGER)");
     exec("CREATE TABLE meta ("
@@ -123,6 +125,7 @@ OutputDatabase::~OutputDatabase() {
 }
 
 void OutputDatabase::commit() {
+    m_layer_lines->commit();
     m_layer_polygons->commit();
     m_layer_rings->commit();
     m_layer_error_lines->commit();
@@ -143,6 +146,10 @@ void OutputDatabase::add_ring(OGRPolygon* polygon, int id, int nways, int npoint
 
 void OutputDatabase::add_polygon(OGRPolygon* polygon) {
     layer_polygons()->add(polygon);
+}
+
+void OutputDatabase::add_line(OGRLineString* linestring) {
+    layer_lines()->add(linestring);
 }
 
 const char** OutputDatabase::layer_options() const {

@@ -231,6 +231,39 @@ void CoastlinePolygons::output_land_polygons() {
     }
 }
 
+void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, OGRLinearRing* ring) {
+    int num = ring->getNumPoints();
+    if (num <= max_points) {
+        m_output.add_line(static_cast<OGRLinearRing*>(ring->clone()));
+    } else {
+        OGRPoint* point = new OGRPoint;
+        bool last = false;
+        for (int i=0; i < num && last == false; --i) {
+            OGRLineString* line = new OGRLineString;
+            for (int n=0; n < max_points; ++n, ++i) {
+                ring->getPoint(i, point);
+                line->addPoint(point);
+                if (i == num-1) {
+                    last = true;
+                    break;
+                }
+            }
+            line->setCoordinateDimension(2);
+            m_output.add_line(line);
+        }
+        delete point;
+    }
+}
+
+void CoastlinePolygons::output_lines(int max_points) {
+    for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
+        output_polygon_ring_as_lines(max_points, (*it)->getExteriorRing());
+        for (int i=0; i < (*it)->getNumInteriorRings(); ++i) {
+            output_polygon_ring_as_lines(max_points, (*it)->getInteriorRing(i));
+        }
+    }
+}
+
 void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v) {
 //    std::cerr << "envelope = (" << e.MinX << ", " << e.MinY << "), (" << e.MaxX << ", " << e.MaxY << ") v.size()=" << v->size() << "\n";
     if (v->size() < 100) {

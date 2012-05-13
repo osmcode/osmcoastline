@@ -71,6 +71,8 @@ class CoastlinePolygons {
     void split_polygon(OGRPolygon* polygon, int level);
     void split_bbox(OGREnvelope e, polygon_vector_t* v);
 
+    void output_polygon_ring_as_lines(int max_points, OGRLinearRing* ring);
+
 public:
 
     CoastlinePolygons(polygon_vector_t* polygons, OutputDatabase& output, double expand, unsigned int max_points_in_polygon) :
@@ -110,6 +112,9 @@ public:
 
     /// Write all water polygons to the output database.
     void output_water_polygons();
+
+    /// Write all coastlines to the output database (as lines).
+    void output_lines(int max_points);
 
 };
 

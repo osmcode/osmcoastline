@@ -104,4 +104,17 @@ public:
 
 };
 
+/**
+ * Layer for coastlines generated from completed polygons.
+ * Lines containt at most max-points points.
+ */
+class LayerLines : public Layer {
+
+public:
+
+    LayerLines(OGRDataSource* data_source, const char** options);
+    void add(OGRLineString* lines);
+
+};
+
 #endif // OUTPUT_LAYER_HPP

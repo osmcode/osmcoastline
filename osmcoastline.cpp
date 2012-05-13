@@ -291,6 +291,13 @@ int main(int argc, char *argv[]) {
         }
 #endif // EXPERIMENTAL
 
+        if (options.output_lines) {
+            vout << "Writing coastlines as lines... (Because you used --output-lines/-l)\n";
+            coastline_polygons.output_lines(options.max_points_in_polygon);
+        } else {
+            vout << "Not writing coastlines as lines (Use --output-lines/-l if you want this).\n";
+        }
+
         if (options.split_large_polygons || options.water) {
             vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
             vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
