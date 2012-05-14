@@ -249,6 +249,7 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, OGRLinearRi
                 }
             }
             line->setCoordinateDimension(2);
+            line->assignSpatialReference(ring->getSpatialReference());
             m_output.add_line(line);
         }
         delete point;
