@@ -253,12 +253,13 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
 
 /***************************************************************/
 
-LayerPolygons::LayerPolygons(OGRDataSource* data_source, const char** options) :
-    Layer()
+LayerPolygons::LayerPolygons(OGRDataSource* data_source, const char** options, const char* name) :
+    Layer(),
+    m_name(name)
 {
-    m_layer = data_source->CreateLayer("polygons", srs.out(), wkbPolygon, const_cast<char**>(options));
+    m_layer = data_source->CreateLayer(name, srs.out(), wkbPolygon, const_cast<char**>(options));
     if (m_layer == NULL) {
-        std::cerr << "Creating layer 'polygons' failed.\n";
+        std::cerr << "Creating layer '" << name << "' failed.\n";
         exit(return_code_fatal);
     }
 
@@ -273,7 +274,7 @@ void LayerPolygons::add(OGRPolygon* polygon) {
     feature->SetGeometryDirectly(polygon);
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
-        std::cerr << "Failed to create feature in layer 'polygons'.\n";
+        std::cerr << "Failed to create feature in layer '" << m_name << "'.\n";
         exit(return_code_fatal);
     }
 

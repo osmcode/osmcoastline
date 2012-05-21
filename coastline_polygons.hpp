@@ -108,7 +108,7 @@ public:
     void split();
 
     /// Write all land polygons to the output database.
-    void output_land_polygons();
+    void output_land_polygons(bool make_copy);
 
     /// Write all water polygons to the output database.
     void output_water_polygons();

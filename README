@@ -5,9 +5,6 @@ OSMCoastline
 OSMCoastline extracts the coastline from an OSM planet file and assembles all
 the pieces into polygons for use in map renderers etc.
 
-This is a preliminary version that needs more work.
-
-
 PREREQUISITES
 -------------
 
@@ -81,11 +78,17 @@ The output is a spatialite database with the following tables:
 * error_points
   Problematic points such as intersections.
 
-* polygons
+* land_polygons
   Finished assembled land polygons.
+
+* water_polygons
+  Finished assembled water polygons.
 
 * rings
   Coastline rings as linestrings.
+
+Depending on the command line options some or all of these tables might be
+filled with data.
 
 By default all output is in WGS84. You can use the option -s/--srs=3857 to
 create output in "Google mercator". (Other projections are curently not
@@ -131,7 +134,7 @@ OSMCOASTLINE_EXTRACT
 The program "osmcoastline_extract" can be used to extract from an OSM planet
 file all nodes and ways needed for building the coastlines and writing them out
 in OSM format. This file will be a lot smaller (less than 1%) than the original
-planet file, but contain everything needed to assemble the coastline polygons.
+planet file, but it contains everything needed to assemble the coastline polygons.
 If you are playing around or want to run "osmcoastline" several times with
 different parameters, run "osmcoastline_extract" once first and use its output
 as the input for "osmcoastline".

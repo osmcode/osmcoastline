@@ -22,6 +22,13 @@
 
 */
 
+enum output_polygon_t {
+    none  = 0,
+    land  = 1,
+    water = 2,
+    both  = 3
+};
+
 /**
  * This class encapsulates the command line parsing.
  */
@@ -56,8 +63,8 @@ public:
     /// Should large polygons be split?
     bool split_large_polygons;
 
-    /// Should the polygons output table be populated?
-    bool output_polygons;
+    /// What polygons should be written out?
+    output_polygon_t output_polygons;
 
     /// Output Spatialite database file name.
     std::string output_database;
@@ -82,9 +89,6 @@ public:
 
     /// Verbose output?
     bool verbose;
-
-    /// Output water polygons instead of land polygons?
-    bool water;
 
     Options(int argc, char* argv[]);
 

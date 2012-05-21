@@ -37,7 +37,7 @@ Options::Options(int argc, char* argv[]) :
     debug(false),
     max_points_in_polygon(1000),
     split_large_polygons(true),
-    output_polygons(true),
+    output_polygons(land),
     output_database(),
     overwrite_output(false),
     output_rings(false),
@@ -45,8 +45,7 @@ Options::Options(int argc, char* argv[]) :
     epsg(4326),
     simplify(false),
     tolerance(0),
-    verbose(false),
-    water(false)
+    verbose(false)
 {
     static struct option long_options[] = {
         {"bbox-overlap",    required_argument, 0, 'b'},
@@ -56,8 +55,8 @@ Options::Options(int argc, char* argv[]) :
         {"help",                  no_argument, 0, 'h'},
         {"output-lines",          no_argument, 0, 'l'},
         {"max-points",      required_argument, 0, 'm'},
-        {"no-polygons",           no_argument, 0, 'p'},
         {"output-database", required_argument, 0, 'o'},
+        {"output-polygons", required_argument, 0, 'p'},
         {"output-rings",          no_argument, 0, 'r'},
         {"overwrite",             no_argument, 0, 'f'},
         {"srs",             required_argument, 0, 's'},
@@ -65,12 +64,11 @@ Options::Options(int argc, char* argv[]) :
         {"simplify",        required_argument, 0, 'S'},
 #endif
         {"verbose",               no_argument, 0, 'v'},
-        {"water",                 no_argument, 0, 'w'},
         {0, 0, 0, 0}
     };
 
     while (1) {
-        int c = getopt_long(argc, argv, "b:c:idhlm:po:rfs:S:vw", long_options, 0);
+        int c = getopt_long(argc, argv, "b:c:idhlm:o:p:rfs:S:v", long_options, 0);
         if (c == -1)
             break;
 
@@ -104,7 +102,18 @@ Options::Options(int argc, char* argv[]) :
                 }
                 break;
             case 'p':
-                output_polygons = false;
+                if (!strcmp(optarg, "none")) {
+                    output_polygons = none;
+                } else if (!strcmp(optarg, "land")) {
+                    output_polygons = land;
+                } else if (!strcmp(optarg, "water")) {
+                    output_polygons = water;
+                } else if (!strcmp(optarg, "both")) {
+                    output_polygons = both;
+                } else {
+                    std::cerr << "Unknown argument '" << optarg << "' for -p/--output-polygon option\n";
+                    exit(return_code_cmdline);
+                }
                 break;
             case 'o':
                 output_database = optarg;
@@ -127,16 +136,13 @@ Options::Options(int argc, char* argv[]) :
             case 'v':
                 verbose = true;
                 break;
-            case 'w':
-                water = true;
-                break;
             default:
                 exit(return_code_cmdline);
         }
     }
 
-    if (!split_large_polygons && water) {
-        std::cerr << "Options -w/--water and -m/--max-points=0 are mutually exclusive\n";
+    if (!split_large_polygons && (output_polygons == water || output_polygons == both)) {
+        std::cerr << "Can not use -m/--max-points=0 when writing out water polygons\n";
         exit(return_code_cmdline);
     }
 
@@ -187,17 +193,17 @@ void Options::print_help() const {
                 << "  -d, --debug                - Enable debugging output\n"
                 << "  -f, --overwrite            - Overwrite output files if they already exist\n"
                 << "  -l, --output-lines         - Output coastlines as lines to database file\n"
-                << "  -m, --max-points           - Split polygons with more than this many points\n"
+                << "  -m, --max-points           - Split lines/polygons with more than this many points\n"
                 << "                               (0 - disable splitting)\n"
-                << "  -p, --no-polygons          - Do not create polygons\n"
                 << "  -o, --output-database=FILE - Spatialite database file for output\n"
+                << "  -p, --output-polygons=land|water|both|none\n"
+                << "                             - Which polygons to write out (default: land)\n"
                 << "  -r, --output-rings         - Output rings to database file\n"
                 << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
 #ifdef EXPERIMENTAL
                 << "  -S, --simplify=TOLERANCE   - Simplify coastline with given tolerance\n"
 #endif
                 << "  -v, --verbose              - Verbose output\n"
-                << "  -w, --water                - Create water polygons instead of land polygons\n"
                 << "\n";
 }
 

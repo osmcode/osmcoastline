@@ -39,7 +39,8 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_layer_error_points(NULL),
     m_layer_error_lines(NULL),
     m_layer_rings(NULL),
-    m_layer_polygons(NULL),
+    m_layer_land_polygons(NULL),
+    m_layer_water_polygons(NULL),
     m_layer_lines(NULL)
 {
     OGRRegisterAll();
@@ -61,10 +62,11 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_layer_error_points = new LayerErrorPoints(m_data_source, layer_options());
     m_layer_error_lines = new LayerErrorLines(m_data_source, layer_options());
     m_layer_rings = new LayerRings(m_data_source, layer_options());
-    m_layer_polygons = new LayerPolygons(m_data_source, layer_options());
+    m_layer_land_polygons = new LayerPolygons(m_data_source, layer_options(), "land_polygons");
+    m_layer_water_polygons = new LayerPolygons(m_data_source, layer_options(), "water_polygons");
     m_layer_lines = new LayerLines(m_data_source, layer_options());
 
-    exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER, water INTEGER)");
+    exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER)");
     exec("CREATE TABLE meta ("
          "timestamp                      TEXT, "
          "runtime                        INTEGER, "
@@ -82,7 +84,7 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
 void OutputDatabase::set_options(const Options& options) {
     std::ostringstream sql;
 
-    sql << "INSERT INTO options (overlap, close_distance, max_points_in_polygons, split_large_polygons, water) VALUES ("
+    sql << "INSERT INTO options (overlap, close_distance, max_points_in_polygons, split_large_polygons) VALUES ("
         << options.bbox_overlap << ", ";
 
     if (options.close_distance==0) {
@@ -92,8 +94,7 @@ void OutputDatabase::set_options(const Options& options) {
     }
 
     sql << options.max_points_in_polygon << ", "
-        << (options.split_large_polygons ? 1 : 0) << ", "
-        << (options.water ? 1 : 0)
+        << (options.split_large_polygons ? 1 : 0)
         << ")";
 
     exec(sql.str().c_str());
@@ -126,7 +127,8 @@ OutputDatabase::~OutputDatabase() {
 
 void OutputDatabase::commit() {
     m_layer_lines->commit();
-    m_layer_polygons->commit();
+    m_layer_water_polygons->commit();
+    m_layer_land_polygons->commit();
     m_layer_rings->commit();
     m_layer_error_lines->commit();
     m_layer_error_points->commit();
@@ -144,8 +146,12 @@ void OutputDatabase::add_ring(OGRPolygon* polygon, int id, int nways, int npoint
     layer_rings()->add(polygon, id, nways, npoints, fixed, layer_error_points());
 }
 
-void OutputDatabase::add_polygon(OGRPolygon* polygon) {
-    layer_polygons()->add(polygon);
+void OutputDatabase::add_land_polygon(OGRPolygon* polygon) {
+    layer_land_polygons()->add(polygon);
+}
+
+void OutputDatabase::add_water_polygon(OGRPolygon* polygon) {
+    layer_water_polygons()->add(polygon);
 }
 
 void OutputDatabase::add_line(OGRLineString* linestring) {

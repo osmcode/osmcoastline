@@ -97,9 +97,11 @@ public:
  */
 class LayerPolygons : public Layer {
 
+    const char* m_name;
+
 public:
 
-    LayerPolygons(OGRDataSource* data_source, const char** options);
+    LayerPolygons(OGRDataSource* data_source, const char** options, const char* name);
     void add(OGRPolygon* polygon);
 
 };

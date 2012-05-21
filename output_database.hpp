@@ -58,7 +58,8 @@ class OutputDatabase {
     LayerErrorPoints* m_layer_error_points;
     LayerErrorLines*  m_layer_error_lines;
     LayerRings*       m_layer_rings;
-    LayerPolygons*    m_layer_polygons;
+    LayerPolygons*    m_layer_land_polygons;
+    LayerPolygons*    m_layer_water_polygons;
     LayerLines*       m_layer_lines;
 
     const char** layer_options() const;
@@ -75,19 +76,22 @@ public:
     void create_layer_error_points();
     void create_layer_error_lines();
     void create_layer_rings();
-    void create_layer_polygons();
+    void create_layer_land_polygons();
+    void create_layer_water_polygons();
     void create_layer_lines();
 
-    LayerErrorPoints* layer_error_points() const { return m_layer_error_points; }
-    LayerErrorLines*  layer_error_lines()  const { return m_layer_error_lines; }
-    LayerRings*       layer_rings()        const { return m_layer_rings; }
-    LayerPolygons*    layer_polygons()     const { return m_layer_polygons; }
-    LayerLines*       layer_lines()        const { return m_layer_lines; }
+    LayerErrorPoints* layer_error_points()   const { return m_layer_error_points; }
+    LayerErrorLines*  layer_error_lines()    const { return m_layer_error_lines; }
+    LayerRings*       layer_rings()          const { return m_layer_rings; }
+    LayerPolygons*    layer_land_polygons()  const { return m_layer_land_polygons; }
+    LayerPolygons*    layer_water_polygons() const { return m_layer_water_polygons; }
+    LayerLines*       layer_lines()          const { return m_layer_lines; }
 
     void add_error_point(OGRPoint* point, const char* error, osm_object_id_t id=0);
     void add_error_line(OGRLineString* linestring, const char* error, osm_object_id_t id=0);
     void add_ring(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed);
-    void add_polygon(OGRPolygon* polygon);
+    void add_land_polygon(OGRPolygon* polygon);
+    void add_water_polygon(OGRPolygon* polygon);
     void add_line(OGRLineString* linestring);
 
     void set_options(const Options& options);

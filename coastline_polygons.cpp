@@ -225,9 +225,16 @@ void CoastlinePolygons::split() {
     delete v;
 }
 
-void CoastlinePolygons::output_land_polygons() {
-    for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
-        m_output.add_polygon(*it);
+void CoastlinePolygons::output_land_polygons(bool make_copy) {
+    if (make_copy) {
+        // because adding to a layer destroys the geometry, we need to copy it if it is needed later
+        for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
+            m_output.add_land_polygon(static_cast<OGRPolygon*>((*it)->clone()));
+        }
+    } else {
+        for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
+            m_output.add_land_polygon(*it);
+        }
     }
 }
 
@@ -281,14 +288,14 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v) {
             if (geom) {
                 switch (geom->getGeometryType()) {
                     case wkbPolygon:
-                        m_output.add_polygon(static_cast<OGRPolygon*>(geom));
+                        m_output.add_water_polygon(static_cast<OGRPolygon*>(geom));
                         break;
                     case wkbMultiPolygon:
                         for (int i=static_cast<OGRMultiPolygon*>(geom)->getNumGeometries() - 1; i >= 0; --i) {
                             OGRPolygon* p = static_cast<OGRPolygon*>(static_cast<OGRMultiPolygon*>(geom)->getGeometryRef(i));
                             p->assignSpatialReference(geom->getSpatialReference());
                             static_cast<OGRMultiPolygon*>(geom)->removeGeometry(i, FALSE);
-                            m_output.add_polygon(p);
+                            m_output.add_water_polygon(p);
                         }
                         delete geom;
                         break;
