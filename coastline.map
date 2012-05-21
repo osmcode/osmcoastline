@@ -13,7 +13,7 @@ MAP
         STATUS ON
         CONNECTIONTYPE OGR
         CONNECTION "coastline-mapserver.db"
-        DATA "polygons"
+        DATA "land_polygons"
         CLASS
             STYLE
                 COLOR 0 0 0
