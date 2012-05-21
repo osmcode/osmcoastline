@@ -42,7 +42,7 @@ protected:
     /// OGRLayer implementing this output layer.
     OGRLayer* m_layer;
 
-    Layer() {}
+    Layer() : m_layer(NULL) {}
 
 public:
 
