@@ -25,16 +25,16 @@ LIB_GEOS     = $(shell geos-config --libs) -l geos_c
 LIB_OGR      = $(shell gdal-config --libs)
 LIB_XML2     = $(shell xml2-config --libs)
 
-PROGRAMS = osmcoastline_extract osmcoastline_ways osmcoastline
+PROGRAMS = osmcoastline_filter osmcoastline_ways osmcoastline
 
 .PHONY: all clean
 
 all: $(PROGRAMS)
 
-osmcoastline_extract.o: osmcoastline_extract.cpp osmcoastline.hpp
+osmcoastline_filter.o: osmcoastline_filter.cpp osmcoastline.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) -o $@ $<
 
-osmcoastline_extract: osmcoastline_extract.o
+osmcoastline_filter: osmcoastline_filter.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PROTOBUF) $(LIB_XML2)
 
 osmcoastline_ways.o: osmcoastline_ways.cpp osmcoastline.hpp

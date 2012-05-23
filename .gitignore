@@ -1,6 +1,5 @@
 osmcoastline
-osmcoastline_extract
-osmcoastline_intersections
+osmcoastline_filter
 osmcoastline_ways
 core
 doc

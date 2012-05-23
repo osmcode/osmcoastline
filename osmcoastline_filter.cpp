@@ -31,14 +31,14 @@ typedef std::set<osm_object_id_t> idset;
  * Handler for first pass. Find all ways tagged with natural=coastline
  * and write them out. Also remember all nodes needed for those ways.
  */
-class CoastlineExtractHandler1 : public Osmium::Handler::Base {
+class CoastlineFilterHandler1 : public Osmium::Handler::Base {
 
     Osmium::Output::Base* m_output;
     idset& m_ids;
 
 public:
 
-    CoastlineExtractHandler1(Osmium::Output::Base* output, idset& ids) :
+    CoastlineFilterHandler1(Osmium::Output::Base* output, idset& ids) :
         m_output(output),
         m_ids(ids) {
     }
@@ -75,14 +75,14 @@ public:
  * natural=coastline or that we need for the ways we found in the first
  * pass.
  */
-class CoastlineExtractHandler2 : public Osmium::Handler::Base {
+class CoastlineFilterHandler2 : public Osmium::Handler::Base {
 
     Osmium::Output::Base* m_output;
     idset& m_ids;
 
 public:
 
-    CoastlineExtractHandler2(Osmium::Output::Base* output, idset& ids) :
+    CoastlineFilterHandler2(Osmium::Output::Base* output, idset& ids) :
         m_output(output),
         m_ids(ids) {
     }
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
     Osmium::init(false);
 
     if (argc != 3) {
-        std::cerr << "Usage: osmcoastline_extract INFILE OUTFILE\n";
+        std::cerr << "Usage: osmcoastline_filter INFILE OUTFILE\n";
         exit(return_code_cmdline);
     }
 
@@ -121,9 +121,9 @@ int main(int argc, char* argv[]) {
 
     idset ids;
     Osmium::OSMFile infile(argv[1]);
-    CoastlineExtractHandler1 handler1(output, ids);
+    CoastlineFilterHandler1 handler1(output, ids);
     infile.read(handler1);
-    CoastlineExtractHandler2 handler2(output, ids);
+    CoastlineFilterHandler2 handler2(output, ids);
     infile.read(handler2);
 
     delete output;

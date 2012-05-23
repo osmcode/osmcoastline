@@ -39,7 +39,7 @@ BUILDING
 
 You'll need all the prerequisites including Osmium installed.
 
-Run "make" to build the "osmcoastline" and "osmcoastline_extract" programs.
+Run "make" to build the "osmcoastline" and "osmcoastline_filter" programs.
 
 Run "make clean" to clean up.
 
@@ -128,19 +128,20 @@ RETURN CODES
 4 - Error parsing command line arguments
 
 
-OSMCOASTLINE_EXTRACT
---------------------
+OSMCOASTLINE_FILTER
+-------------------
 
-The program "osmcoastline_extract" can be used to extract from an OSM planet
+The program "osmcoastline_filter" can be used to filter from an OSM planet
 file all nodes and ways needed for building the coastlines and writing them out
 in OSM format. This file will be a lot smaller (less than 1%) than the original
 planet file, but it contains everything needed to assemble the coastline polygons.
+
 If you are playing around or want to run "osmcoastline" several times with
-different parameters, run "osmcoastline_extract" once first and use its output
+different parameters, run "osmcoastline_filter" once first and use its output
 as the input for "osmcoastline".
 
 Run it as follows:
-  osmcoastline_extract INFILE OUTFILE
+  osmcoastline_filter INFILE OUTFILE
 
 
 LICENSE
