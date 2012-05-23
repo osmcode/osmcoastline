@@ -141,7 +141,7 @@ different parameters, run "osmcoastline_filter" once first and use its output
 as the input for "osmcoastline".
 
 Run it as follows:
-  osmcoastline_filter INFILE OUTFILE
+  osmcoastline_filter -o OUTFILE INFILE
 
 
 LICENSE

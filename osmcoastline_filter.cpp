@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <set>
+#include <getopt.h>
 #include <osmium.hpp>
 
 #include "osmcoastline.hpp"
@@ -108,24 +109,78 @@ public:
 
 };
 
-int main(int argc, char* argv[]) {
-    Osmium::init(false);
+void print_help() {
+    std::cout << "osmcoastline_filter [OPTIONS] OSMFILE\n"
+              << "\nOptions:\n"
+              << "  -h, --help           - This help message\n"
+              << "  -d, --debug          - Enable debugging output\n"
+              << "  -o, --output=OSMFILE - Where to write output (default: none)\n"
+              << "\n";
+}
 
-    if (argc != 3) {
-        std::cerr << "Usage: osmcoastline_filter INFILE OUTFILE\n";
-        exit(return_code_cmdline);
+int main(int argc, char* argv[]) {
+    bool debug = false;
+    std::string output_filename;
+
+    static struct option long_options[] = {
+        {"debug",        no_argument, 0, 'd'},
+        {"help",         no_argument, 0, 'h'},
+        {"output", required_argument, 0, 'o'},
+        {0, 0, 0, 0}
+    };
+
+    while (1) {
+        int c = getopt_long(argc, argv, "dho:", long_options, 0);
+        if (c == -1)
+            break;
+
+        switch (c) {
+            case 'd':
+                debug = true;
+                break;
+            case 'h':
+                print_help();
+                exit(0);
+            case 'o':
+                output_filename = optarg;
+                break;
+            default:
+                exit(1);
+        }
     }
 
-    Osmium::OSMFile outfile(argv[2]);
-    Osmium::Output::Base* output = outfile.create_output_file();
+    if (output_filename.empty()) {
+        std::cerr << "Missing -o/--output=OSMFILE option\n";
+        exit(1);
+    }
 
-    idset ids;
-    Osmium::OSMFile infile(argv[1]);
-    CoastlineFilterHandler1 handler1(output, ids);
-    infile.read(handler1);
-    CoastlineFilterHandler2 handler2(output, ids);
-    infile.read(handler2);
+    Osmium::init(debug);
 
-    delete output;
+    if (optind != argc - 1) {
+        std::cerr << "Usage: osmcoastline_filter [OPTIONS] OSMFILE\n";
+        exit(1);
+    }
+
+    try {
+        Osmium::OSMFile outfile(output_filename);
+        Osmium::Output::Base* output = outfile.create_output_file();
+
+        idset ids;
+        try {
+            Osmium::OSMFile infile(argv[optind]);
+            CoastlineFilterHandler1 handler1(output, ids);
+            infile.read(handler1);
+            CoastlineFilterHandler2 handler2(output, ids);
+            infile.read(handler2);
+        } catch (Osmium::OSMFile::IOError) {
+            std::cerr << "Can not open input file '" << argv[optind] << "'\n";
+            exit(1);
+        }
+
+        delete output;
+    } catch (Osmium::OSMFile::IOError) {
+        std::cerr << "Can not open output file '" << output_filename << "'\n";
+        exit(1);
+    }
 }
 
