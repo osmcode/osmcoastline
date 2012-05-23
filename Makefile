@@ -1,6 +1,6 @@
 #------------------------------------------------------------------------------
 #
-#  Makefile for osmcoastline
+#  Makefile for OSMCoastline
 #
 #------------------------------------------------------------------------------
 
@@ -25,7 +25,8 @@ LIB_GEOS     = $(shell geos-config --libs) -l geos_c
 LIB_OGR      = $(shell gdal-config --libs)
 LIB_XML2     = $(shell xml2-config --libs)
 
-PROGRAMS = osmcoastline_filter osmcoastline_ways osmcoastline
+PROGRAMS = osmcoastline_filter osmcoastline
+ALLPROGRAMS = osmcoastline_ways $(PROGRAMS)
 
 .PHONY: all clean
 
@@ -79,5 +80,5 @@ check:
 	cppcheck --enable=all *.cpp
 
 clean:
-	rm -f *.o core $(PROGRAMS)
+	rm -f *.o core $(ALLPROGRAMS)
 

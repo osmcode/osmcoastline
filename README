@@ -5,6 +5,10 @@ OSMCoastline
 OSMCoastline extracts the coastline from an OSM planet file and assembles all
 the pieces into polygons for use in map renderers etc.
 
+http://wiki.openstreetmap.org/wiki/OSMCoastline
+https://github.com/joto/osmcoastline
+
+
 PREREQUISITES
 -------------
 
@@ -29,7 +33,7 @@ GDAL (for OGR support)
     https://wiki.ubuntu.com/UbuntuGIS when using Ubuntu to get newer
     versions of GIS libraries.)
 
-GEOS (for assembling multipolygons etc.)
+GEOS
     http://trac.osgeo.org/geos/
     Debian/Ubuntu: libgeos-dev
 
@@ -40,6 +44,7 @@ BUILDING
 You'll need all the prerequisites including Osmium installed.
 
 Run "make" to build the "osmcoastline" and "osmcoastline_filter" programs.
+"osmcoastline_ways" is usually not needed and not built by default.
 
 Run "make clean" to clean up.
 
@@ -57,20 +62,26 @@ output with QGIS.
 RUNNING
 -------
 
+Note that you might want to run osmcoastline_filter first, see below.
+
 Run:
   osmcoastline -o DBFILE PLANET-FILE
 
 For example:
   osmcoastline -o coastline.db planet.osm.pbf
 
-This will create DBFILE spatialite database and write several tables with the
-output into it.
+This will create a spatialite database name DBFILE and write several tables
+with the output into it.
+
+Use --verbose to see whats going on. Start with --help to see other options.
 
 
 OUTPUT
 ------
 
-The output is a spatialite database with the following tables:
+The output is a spatialite database with the following tables. All tables are
+always created but depending on the command line options only some of them
+might contain anything.
 
 * error_lines
   Lines that have errors (for instance not closed rings or self-intersections).
@@ -78,21 +89,42 @@ The output is a spatialite database with the following tables:
 * error_points
   Problematic points such as intersections.
 
+* rings
+  Coastline rings as linestrings. The table is not populated by default,
+  because this is only needed for finding errors in the coastline. Use the
+  command line option "--output-rings" to populate this table.
+
 * land_polygons
-  Finished assembled land polygons.
+  Finished assembled land polygons. Depending on -m/--max-points options this
+  will contain complete or split polygons. Only filled if the option
+  --output-polygons=land (thats the default) or =both has been given.
 
 * water_polygons
-  Finished assembled water polygons.
+  Finished assembled water polygons. Only filled if option
+  --output-polygons=water or =both has been given.
 
-* rings
-  Coastline rings as linestrings.
-
-Depending on the command line options some or all of these tables might be
-filled with data.
+* lines
+  Coastlines as linestrings. Depending on -m/--max-points options this
+  will contain complete or split linestrings. Only filled if the option
+  --output-lines has been given.
 
 By default all output is in WGS84. You can use the option -s/--srs=3857 to
-create output in "Google mercator". (Other projections are curently not
+create output in "Google Mercator". (Other projections are curently not
 supported.)
+
+OSMCoastline always creates only this one database. If you need shapefiles
+use ogr2ogr to convert the data:
+
+  ogr2ogr -f "ESRI Shapefile" land_polygons.shp coastline.db land_polygons
+
+By default geometry indexes are created for all tables. This makes the database
+larger, but faster to use. You can use the option -i/--no-index to suppress
+this, for instance if you never use the data directly anyway but want to
+transform it into something else.
+
+The database table "options" and "meta" contain the command line options
+used to create the database and some metadata. You can use the script
+"osmcoastline_readmeta.sh" to look at it.
 
 
 STEPS
@@ -103,14 +135,18 @@ In most cases you will only be interested in the end result but preliminary
 results are supplied for debugging or other special uses.
 
 Step 1: Filter out all nodes and ways tagged natural=coastline and all nodes
-        needed by those ways.
+        needed by those ways. (This can also be done with the
+        osmcoastline_filter program, see below)
 
-Step 2: Assemble all coastline ways into rings.
+Step 2: Assemble all coastline ways into rings. Rings that are not closed
+        in the OSM data will be closed depending on the -c/--close-distance
+        option.
 
 Step 3: Assemble polygons from the rings, possibly including holes for
         water areas.
 
-Step 4: Split up large polygons into smaller ones.
+Step 4: Split up large polygons into smaller ones. The options -m/--max-points
+        and -b/--bbox-overlap are used here.
 
 Step 5: Create water polygons as the "inverse" of the land polygons.
 
@@ -118,14 +154,64 @@ The errors encountered in each step are written to the error_points and
 error_lines tables.
 
 
+OPTIONS
+-------
+
+-c, --close-distance=DISTANCE
+    OSMCoastline assembles ways tagged natural=coastline into rings. Sometimes
+    there is a gap in the coastline in the OSM data. OSMCoastline will close
+    this gap if it is smaller than DISTANCE.
+    Use 0 to disable this feature.
+
+-b, --bbox-overlap=OVERLAP
+    Polygons that are too large are split into two halves (recursively if need
+    be). Where the polygons touch the OVERLAP is added, because two polygons
+    just touching often lead to rendering problems. The value is given in the
+    units used for the projection (for WGS84 (4326) this is in degrees, for
+    Mercator (3857) this is in meters). If this is set too small you might
+    get rendering artefacts where polygons touch. The larger you set this the
+    larger the output polygons will be. The best values depend on the map scale
+    or zoom level you are preparing the data for.
+    Disable the overlap by setting it to 0.
+    Default is 0.0001 for WGS84 and 10 for Mercator.
+
+-m, --max-points=NUM
+    Set this to 0 to prevent splitting of large polygons and linestrings.
+    If set to any other positive integer osmcoastline will try to split
+    polygons/linestrings to not have more than this many points. Depending on
+    the overlap defined with -b and the shape of the polygons it is sometimes
+    not possible to get the polygons small enough. Osmcoastline will warn you
+    on stderr if this is the case.
+    Default is 1000.
+
+-s, --srs=EPSGCODE
+    Set spatial reference system/projection. Use 4326 for WGS84 or 3857 for
+    "Google Mercator". If you want to use the data for the usual tiled web
+    maps, 3857 is probably right. For other uses, especially if you want to
+    re-project to some other projection, 4326 is probably right.
+    Other projections are curently not supported.
+    Default is 4326.
+
+-v, --verbose
+    Gives you detailed information on what osmcoastline is doing, including
+    timing.
+
+Run osmcoastline with --help to see all options.
+
+
 RETURN CODES
 ------------
+
+osmcoastline uses the following return codes:
 
 0 - OK
 1 - Warning (some geometries with errors were detected and probably fixed)
 2 - Error (some geometry errors were detected that could not be fixed)
 3 - Fatal error (output file could not be opened etc.)
 4 - Error parsing command line arguments
+
+CAUTION! This currently doesn't work properly. Errors are reported as warnings
+only!
 
 
 OSMCOASTLINE_FILTER
