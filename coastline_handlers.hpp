@@ -48,7 +48,7 @@ public:
 
     void after_ways() const {
         // We only need to read ways in this pass.
-        throw Osmium::Input::StopReading();
+        throw Osmium::Handler::StopReading();
     }
 
 };
@@ -100,7 +100,7 @@ public:
 
     void after_nodes() const {
         // We only need to read nodes in this pass.
-        throw Osmium::Input::StopReading();
+        throw Osmium::Handler::StopReading();
     }
 
 };

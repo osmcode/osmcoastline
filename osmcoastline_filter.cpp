@@ -66,7 +66,7 @@ public:
         m_output->after_ways();
 
         // We only need to read ways on the first pass
-        throw Osmium::Input::StopReading();
+        throw Osmium::Handler::StopReading();
     }
 
 };
@@ -104,7 +104,7 @@ public:
         m_output->final();
 
         // We only need to read nodes on the second pass
-        throw Osmium::Input::StopReading();
+        throw Osmium::Handler::StopReading();
     }
 
 };
