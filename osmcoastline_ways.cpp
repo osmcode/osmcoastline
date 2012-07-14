@@ -158,8 +158,6 @@ public:
 };
 
 int main(int argc, char* argv[]) {
-    Osmium::init(false);
-
     if (argc != 2) {
         std::cerr << "Usage: osmcoastline_ways OSMFILE\n";
         exit(return_code_cmdline);

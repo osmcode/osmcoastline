@@ -193,8 +193,6 @@ int main(int argc, char *argv[]) {
     // The running time will be prepended to output lines.
     VerboseOutput vout(options.verbose);
 
-    // Initialize Osmium.
-    Osmium::init(options.debug);
     debug = options.debug;
 
     vout << "Using SRS " << options.epsg << " for output. (Change with the --srs/s option.)\n";

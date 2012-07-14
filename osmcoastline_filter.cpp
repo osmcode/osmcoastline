@@ -154,8 +154,6 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    Osmium::init(debug);
-
     if (optind != argc - 1) {
         std::cerr << "Usage: osmcoastline_filter [OPTIONS] OSMFILE\n";
         exit(1);
