@@ -27,6 +27,10 @@
 #include <osmium/osm/way.hpp>
 #include <osmium/osm/undirected_segment.hpp>
 
+class OGRPoint;
+class OGRLineString;
+class OGRPolygon;
+
 typedef std::multimap<osm_object_id_t, Osmium::OSM::Position*> posmap_t;
 
 /**

@@ -19,6 +19,8 @@
 
 */
 
+#include <ogr_geometry.h>
+
 #include "coastline_ring_collection.hpp"
 #include "output_database.hpp"
 #include "srs.hpp"

@@ -34,6 +34,7 @@ using boost::make_shared;
 
 #include "coastline_ring.hpp"
 
+class OGRGeometry;
 class OGRPolygon;
 class OutputDatabase;
 

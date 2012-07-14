@@ -28,6 +28,7 @@
 #include <osmium/storage/byid/sparsetable.hpp>
 #include <osmium/handler/coordinates_for_ways.hpp>
 #include <osmium/geometry/haversine.hpp>
+#include <osmium/geometry/ogr.hpp>
 
 #include "osmcoastline.hpp"
 
@@ -128,7 +129,7 @@ public:
             Osmium::Geometry::LineString linestring(*way);
 
             OGRFeature* feature = OGRFeature::CreateFeature(m_layer_ways->GetLayerDefn());
-            OGRLineString* ogrlinestring = linestring.create_ogr_geometry();
+            OGRLineString* ogrlinestring = Osmium::Geometry::create_ogr_geometry(linestring);
             feature->SetGeometry(ogrlinestring);
             feature->SetField("way_id", way->id());
             feature->SetField("name", way->tags().get_tag_by_key("name"));

@@ -21,6 +21,7 @@
 
 #include <osmium/geometry/polygon.hpp>
 #include <osmium/geometry/linestring.hpp>
+#include <osmium/geometry/ogr.hpp>
 
 #include "coastline_ring.hpp"
 
@@ -75,12 +76,12 @@ void CoastlineRing::close_ring() {
 
 OGRPolygon* CoastlineRing::ogr_polygon(bool reverse) const {
     const Osmium::Geometry::Polygon geom(m_way_node_list, reverse);
-    return geom.create_ogr_geometry();
+    return Osmium::Geometry::create_ogr_geometry(geom);
 }
 
 OGRLineString* CoastlineRing::ogr_linestring(bool reverse) const {
     const Osmium::Geometry::LineString geom(m_way_node_list, reverse);
-    return geom.create_ogr_geometry();
+    return Osmium::Geometry::create_ogr_geometry(geom);
 }
 
 OGRPoint* CoastlineRing::ogr_first_point() const {

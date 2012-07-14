@@ -22,6 +22,7 @@
 
 */
 
+class OGRLinearRing;
 class OGRPolygon;
 class OGRMultiPolygon;
 class OGREnvelope;

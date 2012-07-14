@@ -22,6 +22,8 @@
 
 */
 
+#include <osmium/geometry/ogr.hpp>
+
 /**
  * Osmium handler for the first pass over the input file in which
  * all ways tagged with 'natural=coastline' are read and CoastlineRings
@@ -86,7 +88,7 @@ public:
         if (natural && !strcmp(natural, "coastline")) {
             try {
                 Osmium::Geometry::Point point(*node);
-                m_output.add_error_point(point.create_ogr_geometry(), "tagged_node", node->id());
+                m_output.add_error_point(Osmium::Geometry::create_ogr_geometry(point), "tagged_node", node->id());
             } catch (Osmium::Exception::IllegalGeometry) {
                 std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
             }
