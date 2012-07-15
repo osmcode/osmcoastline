@@ -24,6 +24,9 @@
 #include <time.h>
 #include <unistd.h>
 
+#define OSMIUM_WITH_PBF_INPUT
+#define OSMIUM_WITH_XML_INPUT
+
 #include <osmium.hpp>
 #include <osmium/geometry/point.hpp>
 
@@ -226,7 +229,7 @@ int main(int argc, char *argv[]) {
 
         vout << "Reading ways (1st pass through input file)...\n";
         CoastlineHandlerPass1 handler_pass1(coastline_rings);
-        infile.read(handler_pass1);
+        Osmium::Input::read(infile, handler_pass1);
         stats.ways = coastline_rings.num_ways();
         stats.unconnected_nodes = coastline_rings.num_unconnected_nodes();
         stats.rings = coastline_rings.size();
@@ -239,7 +242,7 @@ int main(int argc, char *argv[]) {
 
         vout << "Reading nodes (2nd pass through input file)...\n";
         CoastlineHandlerPass2 handler_pass2(coastline_rings, output_database);
-        infile.read(handler_pass2);
+        Osmium::Input::read(infile, handler_pass2);
     }
 
     vout << memory_usage();

@@ -22,6 +22,12 @@
 #include <iostream>
 #include <set>
 #include <getopt.h>
+
+#define OSMIUM_WITH_PBF_INPUT
+#define OSMIUM_WITH_XML_INPUT
+#define OSMIUM_WITH_PBF_OUTPUT
+#define OSMIUM_WITH_XML_OUTPUT
+
 #include <osmium.hpp>
 
 #include "osmcoastline.hpp"
@@ -161,15 +167,15 @@ int main(int argc, char* argv[]) {
 
     try {
         Osmium::OSMFile outfile(output_filename);
-        Osmium::Output::Base* output = outfile.create_output_file();
+        Osmium::Output::Base* output = Osmium::Output::open(outfile);
 
         idset ids;
         try {
             Osmium::OSMFile infile(argv[optind]);
             CoastlineFilterHandler1 handler1(output, ids);
-            infile.read(handler1);
+            Osmium::Input::read(infile, handler1);
             CoastlineFilterHandler2 handler2(output, ids);
-            infile.read(handler2);
+            Osmium::Input::read(infile, handler2);
         } catch (Osmium::OSMFile::IOError) {
             std::cerr << "Can not open input file '" << argv[optind] << "'\n";
             exit(1);

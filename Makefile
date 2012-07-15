@@ -14,16 +14,16 @@ CXXFLAGS += -Wall -Wextra -Wredundant-decls -Wdisabled-optimization -pedantic -W
 
 CXXFLAGS_GEOS = -DOSMIUM_WITH_GEOS $(shell geos-config --cflags)
 CXXFLAGS_OGR  = $(shell gdal-config --cflags)
-CXXFLAGS_LIBXML2 = -DOSMIUM_WITH_OUTPUT_OSM_XML $(shell xml2-config --cflags)
+CXXFLAGS_XML2 = $(shell xml2-config --cflags)
 
 CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
-LDFLAGS = -L/usr/local/lib -lexpat -lpthread
+LDFLAGS = -L/usr/local/lib -lexpat
 
-LIB_PROTOBUF = -lz -lprotobuf-lite -losmpbf
-LIB_GEOS     = $(shell geos-config --libs) -l geos_c
-LIB_OGR      = $(shell gdal-config --libs)
-LIB_XML2     = $(shell xml2-config --libs)
+LIB_PBF  = -lz -lpthread -lprotobuf-lite -losmpbf
+LIB_GEOS = $(shell geos-config --libs) -l geos_c
+LIB_OGR  = $(shell gdal-config --libs)
+LIB_XML2 = $(shell xml2-config --libs)
 
 PROGRAMS = osmcoastline_filter osmcoastline
 ALLPROGRAMS = osmcoastline_ways $(PROGRAMS)
@@ -33,19 +33,19 @@ ALLPROGRAMS = osmcoastline_ways $(PROGRAMS)
 all: $(PROGRAMS)
 
 osmcoastline_filter.o: osmcoastline_filter.cpp osmcoastline.hpp
-	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_XML2) -o $@ $<
 
 osmcoastline_filter: osmcoastline_filter.o
-	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PROTOBUF) $(LIB_XML2)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PBF) $(LIB_XML2)
 
 osmcoastline_ways.o: osmcoastline_ways.cpp osmcoastline.hpp
-	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) $(CXXFLAGS_OGR) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
 osmcoastline_ways: osmcoastline_ways.o
-	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PROTOBUF) $(LIB_OGR) $(LIB_GEOS) $(LIB_XML2)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PBF) $(LIB_OGR) $(LIB_GEOS)
 
 osmcoastline.o: osmcoastline.cpp osmcoastline.hpp coastline_ring.hpp coastline_ring_collection.hpp output_database.hpp output_layers.hpp options.hpp coastline_handlers.hpp coastline_polygons.hpp stats.hpp
-	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_LIBXML2) $(CXXFLAGS_OGR) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
 srs.o: srs.cpp srs.hpp
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
@@ -69,7 +69,7 @@ coastline_polygons.o: coastline_polygons.cpp coastline_polygons.hpp output_datab
 	$(CXX) -c $(CXXFLAGS) $(CXXFLAGS_OGR) -o $@ $<
 
 osmcoastline: osmcoastline.o coastline_ring.o coastline_ring_collection.o coastline_polygons.o output_database.o output_layers.o srs.o options.o
-	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PROTOBUF) $(LIB_OGR) $(LIB_GEOS) $(LIB_XML2)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_PBF) $(LIB_OGR) $(LIB_GEOS)
 
 doc: doc/html/files.html
 

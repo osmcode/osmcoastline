@@ -24,6 +24,9 @@
 
 #include <ogrsf_frmts.h>
 
+#define OSMIUM_WITH_PBF_INPUT
+#define OSMIUM_WITH_XML_INPUT
+
 #include <osmium.hpp>
 #include <osmium/storage/byid/sparsetable.hpp>
 #include <osmium/handler/coordinates_for_ways.hpp>
@@ -169,9 +172,9 @@ int main(int argc, char* argv[]) {
 
     Osmium::OSMFile infile(argv[1]);
     CoastlineWaysHandler1 handler1(handler_cfw);
-    infile.read(handler1);
+    Osmium::Input::read(infile, handler1);
     CoastlineWaysHandler2 handler2(handler_cfw);
-    infile.read(handler2);
+    Osmium::Input::read(infile, handler2);
 
     std::cerr << "Sum of way lengths: " << handler2.sum_length() << "m\n";
 }
