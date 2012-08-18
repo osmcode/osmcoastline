@@ -26,7 +26,6 @@
 #define OSMIUM_WITH_PBF_INPUT
 #define OSMIUM_WITH_XML_INPUT
 #define OSMIUM_WITH_PBF_OUTPUT
-#define OSMIUM_WITH_XML_OUTPUT
 
 #include <osmium.hpp>
 
