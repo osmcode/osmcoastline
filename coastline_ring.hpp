@@ -82,7 +82,7 @@ public:
      * Create CoastlineRing from a way.
      */
     CoastlineRing(const shared_ptr<Osmium::OSM::Way>& way) :
-        m_way_node_list(way->is_closed() ? way->node_count() : 1000),
+        m_way_node_list(way->is_closed() ? way->nodes().size() : 1000),
         m_ring_id(way->id()),
         m_nways(1),
         m_fixed(false)
