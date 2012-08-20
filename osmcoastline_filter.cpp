@@ -25,9 +25,9 @@
 
 #define OSMIUM_WITH_PBF_INPUT
 #define OSMIUM_WITH_XML_INPUT
-#define OSMIUM_WITH_PBF_OUTPUT
 
 #include <osmium.hpp>
+#include <osmium/output/pbf.hpp>
 
 #include "osmcoastline.hpp"
 
@@ -39,28 +39,28 @@ typedef std::set<osm_object_id_t> idset;
  */
 class CoastlineFilterHandler1 : public Osmium::Handler::Base {
 
-    Osmium::Output::Base* m_output;
+    Osmium::Output::Handler& m_output;
     idset& m_ids;
 
 public:
 
-    CoastlineFilterHandler1(Osmium::Output::Base* output, idset& ids) :
+    CoastlineFilterHandler1(Osmium::Output::Handler& output, idset& ids) :
         m_output(output),
         m_ids(ids) {
     }
 
     void init(Osmium::OSM::Meta& meta) {
-        m_output->init(meta);
+        m_output.init(meta);
     }
 
     void before_ways() const {
-        m_output->before_ways();
+        m_output.before_ways();
     }
 
-    void way(const shared_ptr<Osmium::OSM::Way const>& way) const {
+    void way(const shared_ptr<Osmium::OSM::Way>& way) const {
         const char* natural = way->tags().get_tag_by_key("natural");
         if (natural && !strcmp(natural, "coastline")) {
-            m_output->way(way);
+            m_output.way(way);
             for (Osmium::OSM::WayNodeList::const_iterator it = way->nodes().begin(); it != way->nodes().end(); ++it) {
                 m_ids.insert(it->ref());
             }
@@ -68,7 +68,7 @@ public:
     }
 
     void after_ways() const {
-        m_output->after_ways();
+        m_output.after_ways();
 
         // We only need to read ways on the first pass
         throw Osmium::Handler::StopReading();
@@ -83,30 +83,30 @@ public:
  */
 class CoastlineFilterHandler2 : public Osmium::Handler::Base {
 
-    Osmium::Output::Base* m_output;
+    Osmium::Output::Handler& m_output;
     idset& m_ids;
 
 public:
 
-    CoastlineFilterHandler2(Osmium::Output::Base* output, idset& ids) :
+    CoastlineFilterHandler2(Osmium::Output::Handler& output, idset& ids) :
         m_output(output),
         m_ids(ids) {
     }
 
     void before_nodes() const {
-        m_output->before_nodes();
+        m_output.before_nodes();
     }
 
-    void node(const shared_ptr<Osmium::OSM::Node const>& node) const {
+    void node(const shared_ptr<Osmium::OSM::Node>& node) const {
         const char* natural = node->tags().get_tag_by_key("natural");
         if ((m_ids.find(node->id()) != m_ids.end()) || (natural && !strcmp(natural, "coastline"))) {
-            m_output->node(node);
+            m_output.node(node);
         }
     }
 
     void after_nodes() const {
-        m_output->after_nodes();
-        m_output->final();
+        m_output.after_nodes();
+        m_output.final();
 
         // We only need to read nodes on the second pass
         throw Osmium::Handler::StopReading();
@@ -166,7 +166,7 @@ int main(int argc, char* argv[]) {
 
     try {
         Osmium::OSMFile outfile(output_filename);
-        Osmium::Output::Base* output = Osmium::Output::open(outfile);
+        Osmium::Output::Handler output(outfile);
 
         idset ids;
         try {
@@ -179,8 +179,6 @@ int main(int argc, char* argv[]) {
             std::cerr << "Can not open input file '" << argv[optind] << "'\n";
             exit(1);
         }
-
-        delete output;
     } catch (Osmium::OSMFile::IOError) {
         std::cerr << "Can not open output file '" << output_filename << "'\n";
         exit(1);
