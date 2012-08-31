@@ -135,8 +135,8 @@ public:
             OGRLineString* ogrlinestring = Osmium::Geometry::create_ogr_geometry(linestring);
             feature->SetGeometry(ogrlinestring);
             feature->SetField("way_id", way->id());
-            feature->SetField("name", way->tags().get_tag_by_key("name"));
-            feature->SetField("source", way->tags().get_tag_by_key("source"));
+            feature->SetField("name", way->tags().get_value_by_key("name"));
+            feature->SetField("source", way->tags().get_value_by_key("source"));
 
             if (m_layer_ways->CreateFeature(feature) != OGRERR_NONE) {
                 std::cerr << "Failed to create feature.\n";

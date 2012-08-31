@@ -42,7 +42,7 @@ public:
 
     void way(const shared_ptr<Osmium::OSM::Way>& way) {
         // We are only interested in ways tagged with natural=coastline.
-        const char* natural = way->tags().get_tag_by_key("natural");
+        const char* natural = way->tags().get_value_by_key("natural");
         if (natural && !strcmp(natural, "coastline")) {
             m_coastline_rings.add_way(way);
         }
@@ -84,7 +84,7 @@ public:
     }
 
     void node(const shared_ptr<Osmium::OSM::Node const>& node) {
-        const char* natural = node->tags().get_tag_by_key("natural");
+        const char* natural = node->tags().get_value_by_key("natural");
         if (natural && !strcmp(natural, "coastline")) {
             try {
                 Osmium::Geometry::Point point(*node);

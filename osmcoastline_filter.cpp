@@ -58,7 +58,7 @@ public:
     }
 
     void way(const shared_ptr<Osmium::OSM::Way>& way) const {
-        const char* natural = way->tags().get_tag_by_key("natural");
+        const char* natural = way->tags().get_value_by_key("natural");
         if (natural && !strcmp(natural, "coastline")) {
             m_output.way(way);
             for (Osmium::OSM::WayNodeList::const_iterator it = way->nodes().begin(); it != way->nodes().end(); ++it) {
@@ -98,7 +98,7 @@ public:
     }
 
     void node(const shared_ptr<Osmium::OSM::Node>& node) const {
-        const char* natural = node->tags().get_tag_by_key("natural");
+        const char* natural = node->tags().get_value_by_key("natural");
         if ((m_ids.find(node->id()) != m_ids.end()) || (natural && !strcmp(natural, "coastline"))) {
             m_output.node(node);
         }
