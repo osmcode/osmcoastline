@@ -28,7 +28,7 @@
 #define OSMIUM_WITH_XML_INPUT
 
 #include <osmium.hpp>
-#include <osmium/storage/byid/sparsetable.hpp>
+#include <osmium/storage/byid/sparse_table.hpp>
 #include <osmium/handler/coordinates_for_ways.hpp>
 #include <osmium/geometry/haversine.hpp>
 #include <osmium/geometry/ogr.hpp>
@@ -53,7 +53,7 @@ public:
     }
 
     void after_nodes() const {
-        throw Osmium::Input::StopReading();
+        throw Osmium::Handler::StopReading();
     }
 
 };
@@ -145,13 +145,13 @@ public:
 
             OGRFeature::DestroyFeature(feature);
             delete ogrlinestring;
-        } catch (Osmium::Exception::IllegalGeometry) {
+        } catch (Osmium::Geometry::IllegalGeometry) {
             std::cerr << "Ignoring illegal geometry for way " << way->id() << ".\n";
         }
     }
 
     void after_ways() const {
-        throw Osmium::Input::StopReading();
+        throw Osmium::Handler::StopReading();
     }
 
     double sum_length() const {
