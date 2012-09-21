@@ -22,6 +22,9 @@
 
 */
 
+#include <vector>
+
+class OGRGeometry;
 class OGRLinearRing;
 class OGRPolygon;
 class OGRMultiPolygon;
@@ -91,6 +94,14 @@ public:
     /// Number of polygons
     int num_polygons() const { return m_polygons->size(); }
 
+    polygon_vector_t::const_iterator begin() const {
+        return m_polygons->begin();
+    }
+    
+    polygon_vector_t::const_iterator end() const {
+        return m_polygons->end();
+    }
+    
     /// Turn polygons with wrong winding order around.
     unsigned int fix_direction();
 

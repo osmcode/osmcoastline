@@ -22,7 +22,11 @@
 
 */
 
+#include <osmium/handler.hpp>
 #include <osmium/geometry/ogr.hpp>
+
+#include "coastline_ring_collection.hpp"
+#include "output_database.hpp"
 
 /**
  * Osmium handler for the first pass over the input file in which

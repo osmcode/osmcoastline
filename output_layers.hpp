@@ -22,6 +22,8 @@
 
 */
 
+#include <osmium/osm/types.hpp>
+
 #include "srs.hpp"
 
 extern SRS srs;

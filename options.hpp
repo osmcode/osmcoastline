@@ -22,6 +22,8 @@
 
 */
 
+#include <string>
+
 enum output_polygon_t {
     none  = 0,
     land  = 1,

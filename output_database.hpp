@@ -37,6 +37,7 @@ class OGRDataSource;
 class OGRCoordinateTransformation;
 class OGRPoint;
 class OGRLineString;
+class OGRPolygon;
 
 class Options;
 class Stats;
