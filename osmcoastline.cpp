@@ -299,6 +299,8 @@ int main(int argc, char *argv[]) {
             vout << "Not writing coastlines as lines (Use --output-lines/-l if you want this).\n";
         }
 
+        coastline_rings.output_questionable(coastline_polygons, output_database);
+
         if (options.split_large_polygons) {
             vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
             vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";

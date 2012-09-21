@@ -83,7 +83,8 @@
                     <category symbol="3" value="added_line" label="added_line"/>
                     <category symbol="4" value="invalid" label="invalid"/>
                     <category symbol="5" value="overlap" label="overlap"/>
-                    <category symbol="6" value="" label="(unknown)"/>
+                    <category symbol="6" value="questionable" label="questionable"/>
+                    <category symbol="7" value="" label="(unknown)"/>
                 </categories>
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
@@ -181,6 +182,18 @@
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="line" name="6">
+                        <layer pass="0" class="SimpleLine" locked="0">
+                            <prop k="capstyle" v="square"/>
+                            <prop k="color" v="0,0,127,255"/>
+                            <prop k="customdash" v="5;2"/>
+                            <prop k="joinstyle" v="bevel"/>
+                            <prop k="offset" v="0"/>
+                            <prop k="penstyle" v="dot"/>
+                            <prop k="use_custom_dash" v="0"/>
+                            <prop k="width" v="0.5"/>
+                        </layer>
+                    </symbol>
+                    <symbol outputUnit="MM" alpha="1" type="line" name="7">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="square"/>
                             <prop k="color" v="255,0,0,255"/>
@@ -778,9 +791,9 @@
             <edittypes>
                 <edittype type="0" name="OGC_FID"/>
             </edittypes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
-            <annotationform></annotationform>
+            <annotationform>.</annotationform>
             <attributeactions/>
         </maplayer>
     </projectlayers>

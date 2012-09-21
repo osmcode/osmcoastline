@@ -76,6 +76,9 @@ class CoastlineRing {
     /// Ring was fixed because of missing/wrong OSM data.
     bool m_fixed;
 
+    /// Is this an outer ring?
+    bool m_outer;
+
 public:
 
     /**
@@ -85,9 +88,18 @@ public:
         m_way_node_list(way->is_closed() ? way->nodes().size() : 1000),
         m_ring_id(way->id()),
         m_nways(1),
-        m_fixed(false)
+        m_fixed(false),
+        m_outer(false)
     {
         m_way_node_list.insert(m_way_node_list.begin(), way->nodes().begin(), way->nodes().end());
+    }
+
+    bool is_outer() const {
+        return m_outer;
+    }
+
+    void set_outer() {
+        m_outer = true;
     }
 
     /// ID of first node in the ring.
@@ -207,6 +219,11 @@ public:
     void add_segments_to_vector(std::vector<Osmium::OSM::UndirectedSegment>& segments) const;
 
     friend std::ostream& operator<<(std::ostream& out, const CoastlineRing& cp);
+
 };
+
+inline bool operator<(const CoastlineRing& lhs, const CoastlineRing& rhs) {
+    return lhs.first_position() < rhs.first_position();
+}
 
 #endif // COASTLINE_RING_HPP

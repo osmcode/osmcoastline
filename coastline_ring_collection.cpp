@@ -22,6 +22,7 @@
 #include <iostream>
 #include <ogr_geometry.h>
 
+#include "coastline_polygons.hpp"
 #include "coastline_ring_collection.hpp"
 #include "output_database.hpp"
 #include "srs.hpp"
@@ -337,5 +338,49 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
             }
         }
     }
+}
+
+/**
+ * Finds some questionably polygons. This will find
+ * a) some polygons touching another polygon in a single point
+ * b) holes inside land (those should usually be tagged as water, riverbank, or so, not as coastline)
+ *    very large such objects will not be reported, this excludes the Great Lakes etc.
+ * c) holes inside holes (those are definitely wrong)
+ */
+void CoastlineRingCollection::output_questionable(const CoastlinePolygons& polygons, OutputDatabase& output) {
+    const unsigned int max_nodes_to_be_considered_questionable = 1000;
+
+    typedef std::pair<Osmium::OSM::Position, CoastlineRing*> pos_ring_ptr_t;
+    std::vector<pos_ring_ptr_t> rings;
+    rings.reserve(m_list.size());
+
+    // put all rings in a vector...
+    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
+        rings.push_back(std::make_pair<Osmium::OSM::Position, CoastlineRing*>((*it)->first_position(), it->get()));
+    }
+
+    // ... and sort it by position of the first node in the ring (this allows binary search in it)
+    std::sort(rings.begin(), rings.end());
+
+    // go through all the polygons that have been created before and mark the outer rings
+    for (polygon_vector_t::const_iterator it = polygons.begin(); it != polygons.end(); ++it) {
+        OGRLinearRing* exterior_ring = (*it)->getExteriorRing();
+        Osmium::OSM::Position pos(exterior_ring->getX(0), exterior_ring->getY(0));
+        std::vector<pos_ring_ptr_t>::iterator rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<Osmium::OSM::Position, CoastlineRing*>(pos, NULL));
+        if (rings_it != rings.end()) {
+            rings_it->second->set_outer();
+        }
+    }
+
+    // find all rings not marked as outer and output them to the error_lines table
+    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
+        if (!(*it)->is_outer()) {
+            CoastlineRing& ring = **it;
+            if (ring.is_closed() && ring.npoints() > 3 && ring.npoints() < max_nodes_to_be_considered_questionable) {
+                output.add_error_line(ring.ogr_linestring(false), "questionable", ring.ring_id());
+            }
+        }
+    }
+
 }
 

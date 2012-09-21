@@ -37,6 +37,7 @@ using boost::make_shared;
 class OGRGeometry;
 class OGRPolygon;
 class OutputDatabase;
+class CoastlinePolygons;
 
 typedef std::list< shared_ptr<CoastlineRing> > coastline_rings_list_t;
 typedef std::map<osm_object_id_t, coastline_rings_list_t::iterator> idmap_t;
@@ -99,6 +100,8 @@ public:
     void check_for_intersections(OutputDatabase& output);
 
     void close_rings(OutputDatabase& output, bool debug, double max_distance);
+
+    void output_questionable(const CoastlinePolygons& polygons, OutputDatabase& output);
 
 private:
 
