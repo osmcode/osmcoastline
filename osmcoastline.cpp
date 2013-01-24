@@ -87,11 +87,11 @@ polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, Outpu
             if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
                 buf0->assignSpatialReference(srs.wgs84());
                 polygons->push_back(static_cast<OGRPolygon*>(buf0));
-                *warnings++;
+                (*warnings)++;
             } else {
                 std::cerr << "Ignoring invalid polygon geometry.\n";
                 delete buf0;
-                *errors++;
+                (*errors)++;
             }
             delete p;
         }
