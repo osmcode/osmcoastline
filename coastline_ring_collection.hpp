@@ -101,7 +101,7 @@ public:
 
     void close_rings(OutputDatabase& output, bool debug, double max_distance);
 
-    void output_questionable(const CoastlinePolygons& polygons, OutputDatabase& output);
+    unsigned int output_questionable(const CoastlinePolygons& polygons, OutputDatabase& output);
 
 private:
 

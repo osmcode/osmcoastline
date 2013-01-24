@@ -227,9 +227,11 @@ OGRLineString* create_ogr_linestring(const Osmium::OSM::Segment& segment) {
 
 /**
  * Checks if there are intersections between any coastline segments.
- * Returns the number of intersections.
+ * Returns the number of intersections and overlaps.
  */
 unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& output) {
+    unsigned int overlaps = 0;
+
     std::vector<Osmium::OSM::UndirectedSegment> segments;
     if (debug) std::cerr << "Setting up segments...\n";
     for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
@@ -248,6 +250,7 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
             if (s1 == s2) {
                 OGRLineString* line = create_ogr_linestring(s1);
                 output.add_error_line(line, "overlap");
+                overlaps++;
             } else {
                 if (outside_x_range(s2, s1)) {
                     break;
@@ -267,7 +270,7 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
         output.add_error_point(point, "intersection");
     }
 
-    return intersections.size();
+    return intersections.size() + overlaps;
 }
 
 void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, double max_distance) {
@@ -352,9 +355,12 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
  * b) holes inside land (those should usually be tagged as water, riverbank, or so, not as coastline)
  *    very large such objects will not be reported, this excludes the Great Lakes etc.
  * c) holes inside holes (those are definitely wrong)
+ *
+ * Returns the number of warnings.
  */
-void CoastlineRingCollection::output_questionable(const CoastlinePolygons& polygons, OutputDatabase& output) {
+unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygons& polygons, OutputDatabase& output) {
     const unsigned int max_nodes_to_be_considered_questionable = 1000;
+    unsigned int warnings = 0;
 
     typedef std::pair<Osmium::OSM::Position, CoastlineRing*> pos_ring_ptr_t;
     std::vector<pos_ring_ptr_t> rings;
@@ -384,9 +390,11 @@ void CoastlineRingCollection::output_questionable(const CoastlinePolygons& polyg
             CoastlineRing& ring = **it;
             if (ring.is_closed() && ring.npoints() > 3 && ring.npoints() < max_nodes_to_be_considered_questionable) {
                 output.add_error_line(ring.ogr_linestring(false), "questionable", ring.ring_id());
+                warnings++;
             }
         }
     }
 
+    return warnings;
 }
 

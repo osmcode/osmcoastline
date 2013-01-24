@@ -54,7 +54,7 @@ bool debug;
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, OutputDatabase& output) {
+polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, OutputDatabase& output, unsigned int* warnings, unsigned int* errors) {
     std::vector<OGRGeometry*> all_polygons;
     coastline_rings.add_polygons_to_vector(all_polygons);
 
@@ -84,9 +84,11 @@ polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, Outpu
             if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
                 buf0->assignSpatialReference(srs.wgs84());
                 polygons->push_back(static_cast<OGRPolygon*>(buf0));
+                *warnings++;
             } else {
                 std::cerr << "Ignoring invalid polygon geometry.\n";
                 delete buf0;
+                *errors++;
             }
             delete p;
         }
@@ -257,8 +259,10 @@ int main(int argc, char *argv[]) {
         vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
         coastline_rings.close_rings(output_database, options.debug, options.close_distance);
         stats.rings_fixed = coastline_rings.num_fixed_rings();
+        warnings += coastline_rings.num_fixed_rings();
         vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
             << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
+        errors += coastline_rings.num_unconnected_nodes();
     } else {
         vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";
     }
@@ -272,7 +276,7 @@ int main(int argc, char *argv[]) {
 
     if (options.output_polygons != none) {
         vout << "Create polygons...\n";
-        CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database), output_database, options.bbox_overlap, options.max_points_in_polygon);
+        CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database, &warnings, &errors), output_database, options.bbox_overlap, options.max_points_in_polygon);
         stats.land_polygons_before_split = coastline_polygons.num_polygons();
 
         vout << "Fixing coastlines going the wrong way...\n";
@@ -292,7 +296,7 @@ int main(int argc, char *argv[]) {
             vout << "Not writing coastlines as lines (Use --output-lines/-l if you want this).\n";
         }
 
-        coastline_rings.output_questionable(coastline_polygons, output_database);
+        warnings += coastline_rings.output_questionable(coastline_polygons, output_database);
 
         if (options.split_large_polygons) {
             vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";

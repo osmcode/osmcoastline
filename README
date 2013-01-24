@@ -205,13 +205,20 @@ RETURN CODES
 osmcoastline uses the following return codes:
 
 0 - OK
-1 - Warning (some geometries with errors were detected and probably fixed)
-2 - Error (some geometry errors were detected that could not be fixed)
+1 - Warning
+2 - Error
 3 - Fatal error (output file could not be opened etc.)
 4 - Error parsing command line arguments
 
-CAUTION! This currently doesn't work properly. Errors are reported as warnings
-only!
+The difference between warnings and errors is somewhat muddy. Warnings are
+geometry problems that have either been fixed automatically or seem to be
+small. Errors are larger problems that couldn't be fixed. If there were errors
+you probably do not want to use the generated data but fix the OSM data first.
+If there were warnings the data might be okay, but there still could be data
+missing or geometry problems such as self-intersections in the coastline. But
+the classification of problems into warnings and errors is difficult, so to be
+on the safe side you might only want to use the data if there are no warnings
+and no errors at all.
 
 
 OSMCOASTLINE_FILTER
