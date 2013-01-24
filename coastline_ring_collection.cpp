@@ -225,7 +225,11 @@ OGRLineString* create_ogr_linestring(const Osmium::OSM::Segment& segment) {
     return line;
 }
 
-void CoastlineRingCollection::check_for_intersections(OutputDatabase& output) {
+/**
+ * Checks if there are intersections between any coastline segments.
+ * Returns the number of intersections.
+ */
+unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& output) {
     std::vector<Osmium::OSM::UndirectedSegment> segments;
     if (debug) std::cerr << "Setting up segments...\n";
     for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
@@ -262,6 +266,8 @@ void CoastlineRingCollection::check_for_intersections(OutputDatabase& output) {
         OGRPoint* point = new OGRPoint(it->lon(), it->lat());
         output.add_error_point(point, "intersection");
     }
+
+    return intersections.size();
 }
 
 void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, double max_distance) {
