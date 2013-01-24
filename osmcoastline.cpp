@@ -285,13 +285,6 @@ int main(int argc, char *argv[]) {
             coastline_polygons.transform();
         }
 
-#ifdef EXPERIMENTAL
-        if (options.simplify) {
-            vout << "Simplifying polygons with tolerance " << options.tolerance << " (because you used --simplify/-S).\n";
-            coastline_polygons.simplify(options.tolerance);
-        }
-#endif // EXPERIMENTAL
-
         if (options.output_lines) {
             vout << "Writing coastlines as lines... (Because you used --output-lines/-l)\n";
             coastline_polygons.output_lines(options.max_points_in_polygon);

@@ -60,9 +60,6 @@ Options::Options(int argc, char* argv[]) :
         {"output-rings",          no_argument, 0, 'r'},
         {"overwrite",             no_argument, 0, 'f'},
         {"srs",             required_argument, 0, 's'},
-#ifdef EXPERIMENTAL
-        {"simplify",        required_argument, 0, 'S'},
-#endif
         {"verbose",               no_argument, 0, 'v'},
         {0, 0, 0, 0}
     };
@@ -127,12 +124,6 @@ Options::Options(int argc, char* argv[]) :
             case 's':
                 epsg = get_epsg(optarg);
                 break;
-#ifdef EXPERIMENTAL
-            case 'S':
-                simplify = true;
-                tolerance = atof(optarg);
-                break;
-#endif
             case 'v':
                 verbose = true;
                 break;
@@ -200,9 +191,6 @@ void Options::print_help() const {
                 << "                             - Which polygons to write out (default: land)\n"
                 << "  -r, --output-rings         - Output rings to database file\n"
                 << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
-#ifdef EXPERIMENTAL
-                << "  -S, --simplify=TOLERANCE   - Simplify coastline with given tolerance\n"
-#endif
                 << "  -v, --verbose              - Verbose output\n"
                 << "\n";
 }
