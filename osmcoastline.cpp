@@ -49,6 +49,9 @@ SRS srs;
 // Global debug marker
 bool debug;
 
+// If there are more than this many warnings, the program exit code will indicate an error.
+const unsigned int max_warnings = 500;
+
 /* ================================================== */
 
 /**
@@ -327,7 +330,7 @@ int main(int argc, char *argv[]) {
     vout << "There were " << warnings << " warnings.\n";
     vout << "There were " << errors << " errors.\n";
 
-    if (errors) {
+    if (errors || warnings > max_warnings) {
         return return_code_error;
     } else if (warnings) {
         return return_code_warning;
