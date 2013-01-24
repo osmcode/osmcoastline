@@ -24,6 +24,8 @@
 
 #include <ogrsf_frmts.h>
 
+#include <boost/lexical_cast.hpp>
+
 #define OSMIUM_WITH_PBF_INPUT
 #define OSMIUM_WITH_XML_INPUT
 
@@ -134,7 +136,7 @@ public:
             OGRFeature* feature = OGRFeature::CreateFeature(m_layer_ways->GetLayerDefn());
             OGRLineString* ogrlinestring = Osmium::Geometry::create_ogr_geometry(linestring);
             feature->SetGeometry(ogrlinestring);
-            feature->SetField("way_id", way->id());
+            feature->SetField("way_id", boost::lexical_cast<std::string>(way->id()).c_str());
             feature->SetField("name", way->tags().get_value_by_key("name"));
             feature->SetField("source", way->tags().get_value_by_key("source"));
 
