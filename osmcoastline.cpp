@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
 
     output_database.set_options(options);
 
-    vout << "Check line segements for intersections and overlaps...\n";
+    vout << "Check line segments for intersections and overlaps...\n";
     warnings += coastline_rings.check_for_intersections(output_database);
 
     if (options.close_rings) {
@@ -327,8 +327,8 @@ int main(int argc, char *argv[]) {
     vout << "All done.\n";
     vout << memory_usage();
 
-    vout << "There were " << warnings << " warnings.\n";
-    vout << "There were " << errors << " errors.\n";
+    std::cout << "There were " << warnings << " warnings.\n";
+    std::cout << "There were " << errors << " errors.\n";
 
     if (errors || warnings > max_warnings) {
         return return_code_error;
