@@ -331,6 +331,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
                 // connect to other ring
                 e->join_over_gap(*s);
 
+                m_list.erase(sit->second);
                 if (e->first_position() == e->last_position()) {
                     output.add_error_point(e->ogr_first_point(), "double_node", e->first_node_id());
                     m_start_nodes.erase(e->first_node_id());
@@ -343,7 +344,6 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
                     m_end_nodes.erase(eit);
                     m_start_nodes.erase(sit);
                 }
-                m_list.erase(sit->second);
             }
         }
     }
@@ -397,4 +397,3 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
 
     return warnings;
 }
-
