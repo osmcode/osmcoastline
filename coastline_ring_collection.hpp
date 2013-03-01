@@ -3,7 +3,7 @@
 
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2013 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -98,6 +98,8 @@ public:
     unsigned int output_rings(OutputDatabase& output);
 
     unsigned int check_for_intersections(OutputDatabase& output);
+
+    bool close_antarctica_ring(int epsg);
 
     void close_rings(OutputDatabase& output, bool debug, double max_distance);
 

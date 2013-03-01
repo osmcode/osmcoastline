@@ -1,6 +1,6 @@
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2013 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -271,6 +271,23 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
     }
 
     return intersections.size() + overlaps;
+}
+
+bool CoastlineRingCollection::close_antarctica_ring(int epsg) {
+    for (coastline_rings_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it) {
+        Osmium::OSM::Position fpos = (*it)->first_position();
+        Osmium::OSM::Position lpos = (*it)->last_position();
+        if (fpos.lon() > 179.99 && lpos.lon() < -179.99 &&
+            fpos.lat() <  -77.0 && fpos.lat() >  -78.0 &&
+            lpos.lat() <  -77.0 && lpos.lat() >  -78.0) {
+
+            m_end_nodes.erase((*it)->last_node_id());
+            m_start_nodes.erase((*it)->first_node_id());
+            (*it)->close_antarctica_ring(epsg);
+            return true;
+        }
+    }
+    return false;
 }
 
 void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, double max_distance) {

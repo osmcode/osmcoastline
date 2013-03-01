@@ -1,6 +1,6 @@
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2013 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -71,6 +71,25 @@ void CoastlineRing::close_ring() {
     if (first_position() != last_position()) {
         m_way_node_list.add(m_way_node_list.front());
     }
+    m_fixed = true;
+}
+
+void CoastlineRing::close_antarctica_ring(int epsg) {
+    double min = epsg == 4326 ? -90.0 : -85.0511;
+
+    for (double lat = -78.0; lat > min; --lat) {
+        m_way_node_list.add(Osmium::OSM::WayNode(0, Osmium::OSM::Position(-179.99999, static_cast<double>(lat))));
+    }
+
+    for (int lon = -180; lon < 180; ++lon) {
+        m_way_node_list.add(Osmium::OSM::WayNode(0, Osmium::OSM::Position(static_cast<double>(lon), min)));
+    }
+
+    for (double lat = min; lat < -78.0; ++lat) {
+        m_way_node_list.add(Osmium::OSM::WayNode(0, Osmium::OSM::Position(179.99999, static_cast<double>(lat))));
+    }
+
+    m_way_node_list.add(m_way_node_list.front());
     m_fixed = true;
 }
 

@@ -3,7 +3,7 @@
 
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2013 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -181,6 +181,11 @@ public:
      * ring is already closed it is not changed.
      */
     void close_ring();
+
+    /**
+     * Close Antarctica ring by adding some nodes.
+     */
+    void close_antarctica_ring(int epsg);
 
     /**
      * Create OGRPolygon for this ring.

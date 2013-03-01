@@ -221,6 +221,17 @@ on the safe side you might only want to use the data if there are no warnings
 and no errors at all.
 
 
+ANTARCTICA
+----------
+
+OSMCoastline has special code for the coastline of Antarctica. This is the only
+coastline that can remain open. The coastline starts somewhere around 180° East,
+77° South and ends around 180° West and 77° South. OSMCoastline will find those
+open ends and connect them by adding several "nodes" forming a proper polygon.
+Depending on the output projection (EPSG:4326 or EPSG:3857) this polygon will
+either go to the South Pole or to the 85.0511° line.
+
+
 OSMCOASTLINE_FILTER
 -------------------
 

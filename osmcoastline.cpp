@@ -257,6 +257,13 @@ int main(int argc, char *argv[]) {
     vout << "Check line segments for intersections and overlaps...\n";
     warnings += coastline_rings.check_for_intersections(output_database);
 
+    vout << "Trying to close Antarctica ring...\n";
+    if (coastline_rings.close_antarctica_ring(options.epsg)) {
+        vout << "  Closed Antarctica ring.\n";
+    } else {
+        vout << "  Did not find open Antarctica ring.\n";
+    }
+
     if (options.close_rings) {
         vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
         vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
@@ -299,7 +306,14 @@ int main(int argc, char *argv[]) {
             vout << "Not writing coastlines as lines (Use --output-lines/-l if you want this).\n";
         }
 
-        warnings += coastline_rings.output_questionable(coastline_polygons, output_database);
+        if (options.epsg == 4326) {
+            vout << "Checking for questionable input data...\n";
+            unsigned int questionable = coastline_rings.output_questionable(coastline_polygons, output_database);
+            warnings += questionable;
+            vout << "  Found " << questionable << " rings in input data.\n";
+        } else {
+            vout << "Not performing check for questionable input data, because it only works in EPSG:4326...\n";
+        }
 
         if (options.split_large_polygons) {
             vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
