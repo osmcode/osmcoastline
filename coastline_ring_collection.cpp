@@ -376,7 +376,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
  * Returns the number of warnings.
  */
 unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygons& polygons, OutputDatabase& output) {
-    const unsigned int max_nodes_to_be_considered_questionable = 1000;
+    const unsigned int max_nodes_to_be_considered_questionable = 10000;
     unsigned int warnings = 0;
 
     typedef std::pair<Osmium::OSM::Position, CoastlineRing*> pos_ring_ptr_t;
