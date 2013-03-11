@@ -40,7 +40,7 @@ class OGRLineString;
 class OGRPolygon;
 
 class Options;
-class Stats;
+struct Stats;
 
 /**
  * Handle output to an sqlite database (via OGR).
