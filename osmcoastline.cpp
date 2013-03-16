@@ -335,7 +335,7 @@ int main(int argc, char *argv[]) {
 
     vout << memory_usage();
 
-    vout << "Commiting database transactions...\n";
+    vout << "Committing database transactions...\n";
     output_database.set_meta(vout.runtime(), get_memory_usage().second, stats);
     output_database.commit();
     vout << "All done.\n";
