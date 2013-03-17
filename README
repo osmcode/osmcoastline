@@ -122,6 +122,9 @@ larger, but faster to use. You can use the option -i/--no-index to suppress
 this, for instance if you never use the data directly anyway but want to
 transform it into something else.
 
+Coastlines and polygons are never simplified, but contain the full detail.
+See "simplify.sql" for a way to simplify polygons.
+
 The database table "options" and "meta" contain the command line options
 used to create the database and some metadata. You can use the script
 "osmcoastline_readmeta.sh" to look at it.
