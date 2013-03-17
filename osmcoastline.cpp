@@ -30,6 +30,8 @@
 #include <osmium.hpp>
 #include <osmium/geometry/point.hpp>
 
+#include <ogrsf_frmts.h>
+
 #include "osmcoastline.hpp"
 #include "coastline_ring.hpp"
 #include "coastline_ring_collection.hpp"
@@ -203,6 +205,7 @@ int main(int argc, char *argv[]) {
 
     debug = options.debug;
 
+    CPLSetConfigOption("OGR_ENABLE_PARTIAL_REPROJECTION", "TRUE");
     vout << "Using SRS " << options.epsg << " for output. (Change with the --srs/s option.)\n";
     if (!srs.set_output(options.epsg)) {
         std::cerr << "Setting up output transformation failed\n";
