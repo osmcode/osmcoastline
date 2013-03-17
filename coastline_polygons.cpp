@@ -214,29 +214,70 @@ void CoastlinePolygons::output_land_polygons(bool make_copy) {
     }
 }
 
+bool CoastlinePolygons::add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2) {
+    // segments along southern edge of the map are not added to line output
+    if (point1->getY() < srs.min_y() && point2->getY() < srs.min_y()) {
+        if (debug) {
+            std::cerr << "Suppressing segment (" << point1->getX() << " " << point1->getY() << ", " << point2->getX() << " " << point2->getY() << ") near southern edge of map.\n";
+        }
+        return false;
+    }
+
+    // segments along antimeridian are not added to line output
+    if ((point1->getX() > srs.max_x() && point2->getX() > srs.max_x()) ||
+        (point1->getX() < srs.min_x() && point2->getX() < srs.min_x())) {
+        if (debug) {
+            std::cerr << "Suppressing segment (" << point1->getX() << " " << point1->getY() << ", " << point2->getX() << " " << point2->getY() << ") near antimeridian.\n";
+        }
+        return false;
+    }
+
+    if (line->getNumPoints() == 0) {
+        line->addPoint(point1);
+    }
+    line->addPoint(point2);
+    return true;
+}
+
+// Add a coastline ring as LineString to output. Segments in this line that are
+// near the southern edge of the map or near the antimeridian are suppressed.
 void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, OGRLinearRing* ring) {
     int num = ring->getNumPoints();
-    if (num <= max_points) {
-        m_output.add_line(static_cast<OGRLinearRing*>(ring->clone()));
-    } else {
-        OGRPoint* point = new OGRPoint;
-        bool last = false;
-        for (int i=0; i < num && last == false; --i) {
-            OGRLineString* line = new OGRLineString;
-            for (int n=0; n < max_points; ++n, ++i) {
-                ring->getPoint(i, point);
-                line->addPoint(point);
-                if (i == num-1) {
-                    last = true;
-                    break;
-                }
+    assert(num > 2);
+
+    OGRPoint* point1 = new OGRPoint;
+    OGRPoint* point2 = new OGRPoint;
+    OGRLineString* line = new OGRLineString;
+
+    ring->getPoint(0, point1);
+    for (int i=1; i < num; ++i) {
+        ring->getPoint(i, point2);
+
+        bool added = add_segment_to_line(line, point1, point2);
+
+        if (line->getNumPoints() >= max_points || !added) {
+            if (line->getNumPoints() >= 2) {
+                line->setCoordinateDimension(2);
+                line->assignSpatialReference(ring->getSpatialReference());
+                m_output.add_line(line);
+                line = new OGRLineString;
             }
-            line->setCoordinateDimension(2);
-            line->assignSpatialReference(ring->getSpatialReference());
-            m_output.add_line(line);
         }
-        delete point;
+
+        point1->setX(point2->getX());
+        point1->setY(point2->getY());
     }
+
+    if (line->getNumPoints() >= 2) {
+        line->setCoordinateDimension(2);
+        line->assignSpatialReference(ring->getSpatialReference());
+        m_output.add_line(line);
+    } else {
+        delete line;
+    }
+
+    delete point2;
+    delete point1;
 }
 
 void CoastlinePolygons::output_lines(int max_points) {
