@@ -48,6 +48,10 @@ public:
         // We are only interested in ways tagged with natural=coastline.
         const char* natural = way->tags().get_value_by_key("natural");
         if (natural && !strcmp(natural, "coastline")) {
+            const char* bogus = way->tags().get_value_by_key("coastline");
+            if (bogus && !strcmp(bogus, "bogus")) {
+                return; // ignore bogus coastline in Antarctica
+            }
             m_coastline_rings.add_way(way);
         }
     }
