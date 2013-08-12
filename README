@@ -28,14 +28,18 @@ zlib (for PBF support)
 GDAL (for OGR support)
     http://gdal.org/
     Debian/Ubuntu: libgdal1-dev
-    (Must be built with GEOS support which is the true for Debian/Ubuntu
-    packages. You need GDAL 1.7.0 or greater, consider using
+    (Must be built with Spatialite and GEOS support which is the true for
+    Debian/Ubuntu packages. You need GDAL 1.7.0 or greater, consider using
     https://wiki.ubuntu.com/UbuntuGIS when using Ubuntu to get newer
     versions of GIS libraries.)
 
 GEOS
     http://trac.osgeo.org/geos/
     Debian/Ubuntu: libgeos-dev
+
+Sqlite/Spatialite
+    http://www.gaia-gis.it/gaia-sins/
+    Debian/Ubuntu: sqlite3 
 
 
 BUILDING
