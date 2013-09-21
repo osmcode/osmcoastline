@@ -1,0 +1,95 @@
+
+HOW TO SIMPLIFY AND SPLIT LAND/WATER POLYGONS
+=============================================
+
+The osmcoastline program already has built-in support for splitting land and
+water polygons created from the coastline. But it is fairly limited in what it
+can do. This is fine for many use cases, but if you want something different
+here are some tips and code that helps you with polygon simplification (for
+lower zoom levels) and with doing different kinds of splits using a
+PostgreSQL/PostGIS database. You should be somewhat familiar with PostGIS
+before attempting this.
+
+Note that the polygon simplification described here is done simply to make the
+geometries smaller and the polygon therefore faster to render. For proper
+generalization to create nice cartography, this is not the right process. See
+http://www.imagico.de/map/coastline_en.php for more about this.
+
+The different *.sql files in this directory run different steps of the process
+and they can be parameterized in different ways. Depending on what you want to
+do you have to run some or all of these SQL scripts, some maybe several times
+with different parameters. The *.sql files all have some documentation at the
+top, read it.
+
+Note that some of these steps can take a long time!
+
+Here is a step-by-step guide with an example. You can change the zoom levels,
+tolerances, etc.:
+
+1. Create PostgreSQL database with PostGIS extensions, this description assumes
+   the database is called "coastlines".
+
+2. Create complete (non-split) land polygons in Mercator (3857) projection
+   with osmcoastline or download them from
+   http://data.openstreetmapdata.com/land-polygons-complete-3857.zip .
+   The following assumes you have downloaded this file.
+
+3. Load data into PostGIS database:
+
+   # unzip land-polygons-complete-3857.zip
+   # cd land-polygons-complete-3857
+   # shp2pgsql -s 3857 -S -I land_polygons.shp | psql -d coastlines
+
+4. Prepare some tables:
+
+   # psql -d coastlines -f setup_tables.sql
+
+5. For every zoom level you want, you have to prepare tile tables:
+
+   # psql -d coastlines -v zoom=3 setup_bbox_tiles.sql
+   # psql -d coastlines -v zoom=5 setup_bbox_tiles.sql
+   # psql -d coastlines -v zoom=6 setup_bbox_tiles.sql
+
+6. For every simplification step you need, do the simplification:
+
+   # psql -d coastlines -v tolerance=3000 -v min_area=3000000 -f simplify_land_polygons.sql
+   # psql -d coastlines -v tolerance=300  -v min_area=300000  -f simplify_land_polygons.sql
+
+7. For every zoom level and simplification step you need you can create the
+   final split land polygons:
+
+   # psql -d coastlines -v tolerance=3000 -v min_area=3000000 -v zoom=3 -f split_land_polygons.sql
+   # psql -d coastlines -v tolerance=300  -v min_area=300000  -v zoom=5 -f split_land_polygons.sql
+
+   Instead of splitting the non-split polygons for each zoom level, you can use
+   the already split polygons for smaller zoom levels and split them again for
+   larger zoom levels. This is probably faster than always starting from the
+   non-split polygons:
+
+   # psql -d coastlines -v tolerance=300 -v min_area=300000 -v from_zoom=5 -v to_zoom=6 -f split_tiles.sql
+
+8. After all split polygons for land areas are created you can call create the
+   water polygons from them. Unlike the other scripts, this doesn't take any
+   parameters, it will just create a water polygon for every split land polygon
+   regardless of how the land polygon was created.
+
+   # psql -d coastlines -f create_water_polygons.sql
+
+Note that splitting Polygons can lead to MultiPolygons, so some tables use
+MultiPolygon geometries. It is probably better for rendering to split
+multipolygons into polygons again. You can use the function ST_Dump() for this.
+
+Also note that sometimes splitting (Multi)Polygons can lead to non-polygon
+geometry types such as lines or points, this code will just remove those
+cases.
+
+The tables and SQL queries in these files are crafted in a way that allows any
+number of different simplification parameters and any number of different
+splittings based on different zoom levels in the same tables. The parameters
+"tolerance", "min_area" and "zoom" will appear in all tables as columns to
+allow you to distinguish which geometry belongs to which. In addition the "x"
+and "y" columns give you the tile numbers a specific geometry is for. This may
+or may not be the most efficient way of doing this, so you might want to
+optimize data layout and especially index creation for your use case, but it is
+a flexible starting point for your own experiments.
+
