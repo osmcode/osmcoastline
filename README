@@ -28,7 +28,7 @@ zlib (for PBF support)
 GDAL (for OGR support)
     http://gdal.org/
     Debian/Ubuntu: libgdal1-dev
-    (Must be built with Spatialite and GEOS support which is the true for
+    (Must be built with Spatialite and GEOS support which is true for
     Debian/Ubuntu packages. You need GDAL 1.7.0 or greater, consider using
     https://wiki.ubuntu.com/UbuntuGIS when using Ubuntu to get newer
     versions of GIS libraries.)
@@ -58,6 +58,13 @@ TESTING
 
 Run the script "runtest.sh". It will read the supplied "testdata.osm" and
 create output in the testdata.db spatialite database.
+
+It is normal for this program to create errors and warnings, because it is
+testing a rather broken input file. You will get messages such as "Closing
+ring between node -84 and node -74" and "Warning 1: Self-intersection
+at or near point 7.48488 53.8169". At the end it should print:
+There were 37 warnings.
+There were 1 errors.
 
 You can use the supplied "coastline_sqlite.qgs" QGIS project file to open the
 output with QGIS.
