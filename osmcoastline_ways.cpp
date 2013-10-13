@@ -119,6 +119,13 @@ public:
             exit(return_code_fatal);
         }
 
+        OGRFieldDefn field_bogus("bogus", OFTString);
+        field_bogus.SetWidth(1);
+        if (m_layer_ways->CreateField(&field_bogus) != OGRERR_NONE ) {
+            std::cerr << "Creating field 'bogus' on 'ways' layer failed.\n";
+            exit(return_code_fatal);
+        }
+
         m_layer_ways->StartTransaction();
     }
 
@@ -139,6 +146,9 @@ public:
             feature->SetField("way_id", boost::lexical_cast<std::string>(way->id()).c_str());
             feature->SetField("name", way->tags().get_value_by_key("name"));
             feature->SetField("source", way->tags().get_value_by_key("source"));
+
+            const char* coastline = way->tags().get_value_by_key("coastline");
+            feature->SetField("bogus", (coastline && !strcmp(coastline, "bogus")) ? "t" : "f");
 
             if (m_layer_ways->CreateFeature(feature) != OGRERR_NONE) {
                 std::cerr << "Failed to create feature.\n";
