@@ -395,8 +395,13 @@ void CoastlinePolygons::output_water_polygons() {
         if (p->IsValid()) {
             v->push_back(p);
         } else {
-            std::cerr << "invalid, using buffer(0)\n";
-            v->push_back(static_cast<OGRPolygon*>(p->Buffer(0)));
+            std::cerr << "Invalid polygon, trying buffer(0).\n";
+            OGRGeometry* buffered_polygon = p->Buffer(0);
+            if (buffered_polygon && buffered_polygon->getGeometryType() == wkbPolygon) {
+                v->push_back(static_cast<OGRPolygon*>(buffered_polygon));
+            } else {
+                std::cerr << "Buffer(0) failed, ignoring this polygon. Output data might be invalid!\n";
+            }
         }
     }
     split_bbox(srs.max_extent(), v);
