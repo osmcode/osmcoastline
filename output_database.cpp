@@ -52,7 +52,7 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
         exit(return_code_fatal);
     }
 
-    const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", NULL };
+    const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no", NULL };
     m_data_source = driver->CreateDataSource(outdb.c_str(), const_cast<char**>(options));
     if (m_data_source == NULL) {
         std::cerr << "Creation of output file failed.\n";
