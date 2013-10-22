@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <assert.h>
 
@@ -39,8 +40,10 @@ extern SRS srs;
 
 /***************************************************************/
 
-OGRErr Layer::commit() {
-    return m_layer->CommitTransaction();
+void Layer::commit() {
+    if (m_layer->CommitTransaction() != OGRERR_NONE) {
+        throw std::runtime_error("Layer commit failed");
+    }
 }
 
 /***************************************************************/

@@ -49,7 +49,7 @@ protected:
 public:
 
     /// Commit transaction on this layer.
-    OGRErr commit();
+    void commit();
 
 };
 
