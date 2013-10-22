@@ -63,7 +63,7 @@ It is normal for this program to create errors and warnings, because it is
 testing a rather broken input file. You will get messages such as "Closing
 ring between node -84 and node -74" and "Warning 1: Self-intersection
 at or near point 7.48488 53.8169". At the end it should print:
-There were 37 warnings.
+There were 35 warnings.
 There were 1 errors.
 
 You can use the supplied "coastline_sqlite.qgs" QGIS project file to open the

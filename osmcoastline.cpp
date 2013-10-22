@@ -330,7 +330,7 @@ int main(int argc, char *argv[]) {
         }
         if (options.output_polygons == water || options.output_polygons == both) {
             vout << "Writing out water polygons...\n";
-            coastline_polygons.output_water_polygons();
+            warnings += coastline_polygons.output_water_polygons();
         }
     } else {
         vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";

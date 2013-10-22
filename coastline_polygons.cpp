@@ -388,7 +388,8 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v) {
 }
 
 
-void CoastlinePolygons::output_water_polygons() {
+unsigned int CoastlinePolygons::output_water_polygons() {
+    unsigned int warnings = 0;
     polygon_vector_t* v = new polygon_vector_t;
     for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
         OGRPolygon* p = *it;
@@ -396,6 +397,7 @@ void CoastlinePolygons::output_water_polygons() {
             v->push_back(p);
         } else {
             std::cerr << "Invalid polygon, trying buffer(0).\n";
+            ++warnings;
             OGRGeometry* buffered_polygon = p->Buffer(0);
             if (buffered_polygon && buffered_polygon->getGeometryType() == wkbPolygon) {
                 v->push_back(static_cast<OGRPolygon*>(buffered_polygon));
@@ -405,5 +407,6 @@ void CoastlinePolygons::output_water_polygons() {
         }
     }
     split_bbox(srs.max_extent(), v);
+    return warnings;
 }
 

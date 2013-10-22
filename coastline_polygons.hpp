@@ -116,7 +116,7 @@ public:
     void output_land_polygons(bool make_copy);
 
     /// Write all water polygons to the output database.
-    void output_water_polygons();
+    unsigned int output_water_polygons();
 
     /// Write all coastlines to the output database (as lines).
     void output_lines(int max_points);
