@@ -114,6 +114,16 @@ void CoastlineRingCollection::setup_positions(posmap_t& posmap) {
     }
 }
 
+unsigned int CoastlineRingCollection::check_positions(bool output_missing) {
+    unsigned int missing_positions = 0;
+
+    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
+        missing_positions += (*it)->check_positions(output_missing);
+    }
+
+    return missing_positions;
+}
+
 void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& vector) {
     vector.reserve(m_list.size());
 

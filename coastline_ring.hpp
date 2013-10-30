@@ -156,6 +156,13 @@ public:
      */
     void setup_positions(posmap_t& posmap);
 
+    /**
+     * Check whether all positions for the ways are there. This
+     * can happen if the input data is missing a node needed for a
+     * way. The function returns the number of missing positions.
+     */
+    unsigned int check_positions(bool output_missing);
+
     /// Add a new way to the front of this ring.
     void add_at_front(const shared_ptr<Osmium::OSM::Way>& way);
 

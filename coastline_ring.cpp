@@ -31,6 +31,21 @@ void CoastlineRing::setup_positions(posmap_t& posmap) {
     }
 }
 
+unsigned int CoastlineRing::check_positions(bool output_missing) {
+    unsigned int missing_positions = 0;
+
+    for (Osmium::OSM::WayNodeList::iterator it = m_way_node_list.begin(); it != m_way_node_list.end(); ++it) {
+        if (!it->position().defined()) {
+            ++missing_positions;
+            if (output_missing) {
+                std::cerr << "Missing position of node " << it->ref() << "\n";
+            }
+        }
+    }
+
+    return missing_positions;
+}
+
 void CoastlineRing::add_at_front(const shared_ptr<Osmium::OSM::Way>& way) {
     assert(first_node_id() == way->get_last_node_id());
     m_way_node_list.insert(m_way_node_list.begin(), way->nodes().begin(), way->nodes().end()-1);

@@ -93,6 +93,8 @@ public:
 
     void setup_positions(posmap_t& posmap);
 
+    unsigned int check_positions(bool output_missing);
+
     void add_polygons_to_vector(std::vector<OGRGeometry*>& vector);
 
     unsigned int output_rings(OutputDatabase& output);
