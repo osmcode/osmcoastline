@@ -118,31 +118,25 @@ void print_help() {
     std::cout << "osmcoastline_filter [OPTIONS] OSMFILE\n"
               << "\nOptions:\n"
               << "  -h, --help           - This help message\n"
-              << "  -d, --debug          - Enable debugging output\n"
               << "  -o, --output=OSMFILE - Where to write output (default: none)\n"
               << "\n";
 }
 
 int main(int argc, char* argv[]) {
-    bool debug = false;
     std::string output_filename;
 
     static struct option long_options[] = {
-        {"debug",        no_argument, 0, 'd'},
         {"help",         no_argument, 0, 'h'},
         {"output", required_argument, 0, 'o'},
         {0, 0, 0, 0}
     };
 
     while (1) {
-        int c = getopt_long(argc, argv, "dho:", long_options, 0);
+        int c = getopt_long(argc, argv, "ho:", long_options, 0);
         if (c == -1)
             break;
 
         switch (c) {
-            case 'd':
-                debug = true;
-                break;
             case 'h':
                 print_help();
                 exit(0);
