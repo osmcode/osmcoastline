@@ -19,6 +19,8 @@
 
 */
 
+#include <iostream>
+
 #include <osmium/geometry/polygon.hpp>
 #include <osmium/geometry/linestring.hpp>
 #include <osmium/geometry/ogr.hpp>
