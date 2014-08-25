@@ -26,6 +26,7 @@
 #include <assert.h>
 
 #include <ogrsf_frmts.h>
+#include <gdal_version.h>
 #include <geos_c.h>
 
 #include <boost/lexical_cast.hpp>
@@ -224,7 +225,13 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
            function from the GEOS C interface to get to the reason.
         */
 
+#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR <= 10
         std::string reason = GEOSisValidReason(polygon->exportToGEOS());
+#else
+        GEOSContextHandle_t contextHandle = OGRGeometry::createGEOSContext();
+        std::string reason = GEOSisValidReason(polygon->exportToGEOS(contextHandle));
+        OGRGeometry::freeGEOSContext(contextHandle);
+#endif
         size_t left_bracket = reason.find('[');
         size_t right_bracket = reason.find(']');
 
