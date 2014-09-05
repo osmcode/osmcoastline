@@ -1,6 +1,6 @@
 {
     "data_format": 1,
-    "data_url": "",
+    "data_url": "https://raw.githubusercontent.com/joto/osmcoastline/master/taginfo.json",
     "project": {
         "name": "OSMCoastline",
         "description": "Program that assembles continuous coastlines from OSM data and creates land and water polygons.",
