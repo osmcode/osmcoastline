@@ -16,11 +16,13 @@
         {
             "key": "natural",
             "value": "coastline",
-            "description": "Coastline tagged on ways."
+            "object_types": [ "way" ],
+            "description": "The coastline."
         },
         {
             "key": "coastline",
             "value": "bogus",
+            "object_types": [ "way" ],
             "description": "Pseudo-coastline in Antarctica tagged for technical reasons."
         }
     ]
