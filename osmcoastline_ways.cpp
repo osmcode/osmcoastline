@@ -1,6 +1,6 @@
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -26,21 +26,19 @@
 
 #include <boost/lexical_cast.hpp>
 
-#define OSMIUM_WITH_PBF_INPUT
-#define OSMIUM_WITH_XML_INPUT
-
-#include <osmium.hpp>
-#include <osmium/storage/byid/sparse_table.hpp>
-#include <osmium/handler/coordinates_for_ways.hpp>
-#include <osmium/geometry/haversine.hpp>
-#include <osmium/geometry/ogr.hpp>
+#include <osmium/geom/haversine.hpp>
+#include <osmium/geom/ogr.hpp>
+#include <osmium/handler/node_locations_for_ways.hpp>
+#include <osmium/index/map/sparse_table.hpp>
+#include <osmium/io/any_input.hpp>
+#include <osmium/visitor.hpp>
 
 #include "osmcoastline.hpp"
 
-typedef Osmium::Storage::ById::SparseTable<Osmium::OSM::Position> storage_sparsetable_t;
-typedef Osmium::Handler::CoordinatesForWays<storage_sparsetable_t, storage_sparsetable_t> cfw_handler_t;
+typedef osmium::index::map::SparseTable<osmium::unsigned_object_id_type, osmium::Location> storage_sparsetable_t;
+typedef osmium::handler::NodeLocationsForWays<storage_sparsetable_t, storage_sparsetable_t> cfw_handler_t;
 
-class CoastlineWaysHandler1 : public Osmium::Handler::Base {
+class CoastlineWaysHandler1 : public osmium::handler::Handler {
 
     cfw_handler_t& m_cfw;
 
@@ -50,23 +48,21 @@ public:
         m_cfw(cfw) {
     }
 
-    void node(const shared_ptr<Osmium::OSM::Node const>& node) {
+    void node(const osmium::Node& node) {
         m_cfw.node(node);
-    }
-
-    void after_nodes() const {
-        throw Osmium::Handler::StopReading();
     }
 
 };
 
-class CoastlineWaysHandler2 : public Osmium::Handler::Base {
+class CoastlineWaysHandler2 : public osmium::handler::Handler {
 
     cfw_handler_t& m_cfw;
     double m_length;
 
     OGRDataSource* m_data_source;
     OGRLayer* m_layer_ways;
+
+    osmium::geom::OGRFactory<> m_factory;
 
 public:
 
@@ -134,20 +130,18 @@ public:
         OGRDataSource::DestroyDataSource(m_data_source);
     }
 
-    void way(const shared_ptr<Osmium::OSM::Way>& way) {
+    void way(osmium::Way& way) {
         m_cfw.way(way);
-        m_length += Osmium::Geometry::Haversine::distance(way->nodes());
+        m_length += osmium::geom::haversine::distance(way.nodes());
         try {
-            Osmium::Geometry::LineString linestring(*way);
-
             OGRFeature* feature = OGRFeature::CreateFeature(m_layer_ways->GetLayerDefn());
-            OGRLineString* ogrlinestring = Osmium::Geometry::create_ogr_geometry(linestring);
+            OGRLineString* ogrlinestring = m_factory.create_linestring(way).release();
             feature->SetGeometry(ogrlinestring);
-            feature->SetField("way_id", boost::lexical_cast<std::string>(way->id()).c_str());
-            feature->SetField("name", way->tags().get_value_by_key("name"));
-            feature->SetField("source", way->tags().get_value_by_key("source"));
+            feature->SetField("way_id", boost::lexical_cast<std::string>(way.id()).c_str());
+            feature->SetField("name", way.tags().get_value_by_key("name"));
+            feature->SetField("source", way.tags().get_value_by_key("source"));
 
-            const char* coastline = way->tags().get_value_by_key("coastline");
+            const char* coastline = way.tags().get_value_by_key("coastline");
             feature->SetField("bogus", (coastline && !strcmp(coastline, "bogus")) ? "t" : "f");
 
             if (m_layer_ways->CreateFeature(feature) != OGRERR_NONE) {
@@ -157,13 +151,9 @@ public:
 
             OGRFeature::DestroyFeature(feature);
             delete ogrlinestring;
-        } catch (Osmium::Geometry::IllegalGeometry) {
-            std::cerr << "Ignoring illegal geometry for way " << way->id() << ".\n";
+        } catch (osmium::geometry_error&) {
+            std::cerr << "Ignoring illegal geometry for way " << way.id() << ".\n";
         }
-    }
-
-    void after_ways() const {
-        throw Osmium::Handler::StopReading();
     }
 
     double sum_length() const {
@@ -182,11 +172,13 @@ int main(int argc, char* argv[]) {
     storage_sparsetable_t store_neg;
     cfw_handler_t handler_cfw(store_pos, store_neg);
 
-    Osmium::OSMFile infile(argv[1]);
+    osmium::io::File infile(argv[1]);
     CoastlineWaysHandler1 handler1(handler_cfw);
-    Osmium::Input::read(infile, handler1);
+    osmium::io::Reader reader1(infile, osmium::osm_entity_bits::node);
+    osmium::apply(reader1, handler1);
     CoastlineWaysHandler2 handler2(handler_cfw);
-    Osmium::Input::read(infile, handler2);
+    osmium::io::Reader reader2(infile, osmium::osm_entity_bits::way);
+    osmium::apply(reader2, handler2);
 
     std::cerr << "Sum of way lengths: " << handler2.sum_length() << "m\n";
 }

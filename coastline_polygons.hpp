@@ -3,7 +3,7 @@
 
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -98,11 +98,11 @@ public:
     polygon_vector_t::const_iterator begin() const {
         return m_polygons->begin();
     }
-    
+
     polygon_vector_t::const_iterator end() const {
         return m_polygons->end();
     }
-    
+
     /// Turn polygons with wrong winding order around.
     unsigned int fix_direction();
 

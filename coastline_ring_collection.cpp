@@ -1,6 +1,6 @@
 /*
 
-  Copyright 2013 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -46,17 +46,17 @@ CoastlineRingCollection::CoastlineRingCollection() :
  * to and add it to that ring. If there is none, we'll create a new
  * CoastlineRing for it and add that to the collection.
  */
-void CoastlineRingCollection::add_partial_ring(const shared_ptr<Osmium::OSM::Way>& way) {
-    idmap_t::iterator mprev = m_end_nodes.find(way->get_first_node_id());
-    idmap_t::iterator mnext = m_start_nodes.find(way->get_last_node_id());
+void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
+    idmap_t::iterator mprev = m_end_nodes.find(way.nodes().front().ref());
+    idmap_t::iterator mnext = m_start_nodes.find(way.nodes().back().ref());
 
     // There is no CoastlineRing yet where this way could fit. So we
     // create one and add it to the collection.
     if (mprev == m_end_nodes.end() &&
         mnext == m_start_nodes.end()) {
         coastline_rings_list_t::iterator added = m_list.insert(m_list.end(), make_shared<CoastlineRing>(way));
-        m_start_nodes[way->get_first_node_id()] = added;
-        m_end_nodes[way->get_last_node_id()] = added;
+        m_start_nodes[way.nodes().front().ref()] = added;
+        m_end_nodes[way.nodes().back().ref()] = added;
         return;
     }
 
@@ -130,10 +130,10 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
     for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
         CoastlineRing& cp = **it;
         if (cp.is_closed() && cp.npoints() > 3) { // everything that doesn't match here is bad beyond repair and reported elsewhere
-            OGRPolygon* p = cp.ogr_polygon(true);
+            std::unique_ptr<OGRPolygon> p = cp.ogr_polygon(true);
             if (p->IsValid()) {
                 p->assignSpatialReference(srs.wgs84());
-                vector.push_back(p);
+                vector.push_back(p.release());
             } else {
                 OGRGeometry* geom = p->Buffer(0);
                 if (geom && (geom->getGeometryType() == wkbPolygon) && (static_cast<OGRPolygon*>(geom)->getExteriorRing()->getNumPoints() > 3) && (static_cast<OGRPolygon*>(geom)->getNumInteriorRings() == 0) && geom->IsValid()) {
@@ -143,7 +143,6 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
                     std::cerr << "Ignoring invalid polygon geometry (ring_id=" << cp.ring_id() << ").\n";
                     delete geom;
                 }
-                delete p;
             }
         }
     }
@@ -156,18 +155,18 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
         CoastlineRing& cp = **it;
         if (cp.is_closed()) {
             if (cp.npoints() > 3) {
-                output.add_ring(cp.ogr_polygon(true), cp.ring_id(), cp.nways(), cp.npoints(), cp.is_fixed());
+                output.add_ring(cp.ogr_polygon(true).release(), cp.ring_id(), cp.nways(), cp.npoints(), cp.is_fixed());
             } else if (cp.npoints() == 1) {
                 output.add_error_point(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
                 warnings++;
             } else { // cp.npoints() == 2 or 3
-                output.add_error_line(cp.ogr_linestring(true), "not_a_ring", cp.ring_id());
+                output.add_error_line(cp.ogr_linestring(true).release(), "not_a_ring", cp.ring_id());
                 output.add_error_point(cp.ogr_first_point(), "not_a_ring", cp.first_node_id());
                 output.add_error_point(cp.ogr_last_point(), "not_a_ring", cp.last_node_id());
                 warnings++;
             }
         } else {
-            output.add_error_line(cp.ogr_linestring(true), "not_closed", cp.ring_id());
+            output.add_error_line(cp.ogr_linestring(true).release(), "not_closed", cp.ring_id());
             output.add_error_point(cp.ogr_first_point(), "end_point", cp.first_node_id());
             output.add_error_point(cp.ogr_last_point(), "end_point", cp.last_node_id());
             warnings++;
@@ -177,12 +176,12 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     return warnings;
 }
 
-Osmium::OSM::Position intersection(const Osmium::OSM::Segment& s1, const Osmium::OSM::Segment&s2) {
+osmium::Location intersection(const osmium::Segment& s1, const osmium::Segment&s2) {
     if (s1.first()  == s2.first()  ||
         s1.first()  == s2.second() ||
         s1.second() == s2.first()  ||
         s1.second() == s2.second()) {
-        return Osmium::OSM::Position();
+        return osmium::Location();
     }
 
     double denom = ((s2.second().lat() - s2.first().lat())*(s1.second().lon() - s1.first().lon())) -
@@ -200,21 +199,21 @@ Osmium::OSM::Position intersection(const Osmium::OSM::Segment& s1, const Osmium:
             double ua = nume_a / denom;
             double ix = s1.first().lon() + ua*(s1.second().lon() - s1.first().lon());
             double iy = s1.first().lat() + ua*(s1.second().lat() - s1.first().lat());
-            return Osmium::OSM::Position(ix, iy);
+            return osmium::Location(ix, iy);
         }
     }
 
-    return Osmium::OSM::Position();
+    return osmium::Location();
 }
 
-bool outside_x_range(const Osmium::OSM::UndirectedSegment& s1, const Osmium::OSM::UndirectedSegment& s2) {
+bool outside_x_range(const osmium::UndirectedSegment& s1, const osmium::UndirectedSegment& s2) {
     if (s1.first().x() > s2.second().x()) {
         return true;
     }
     return false;
 }
 
-bool y_range_overlap(const Osmium::OSM::UndirectedSegment& s1, const Osmium::OSM::UndirectedSegment& s2) {
+bool y_range_overlap(const osmium::UndirectedSegment& s1, const osmium::UndirectedSegment& s2) {
     int tmin = s1.first().y() < s1.second().y() ? s1.first().y( ) : s1.second().y();
     int tmax = s1.first().y() < s1.second().y() ? s1.second().y() : s1.first().y();
     int omin = s2.first().y() < s2.second().y() ? s2.first().y()  : s2.second().y();
@@ -225,7 +224,7 @@ bool y_range_overlap(const Osmium::OSM::UndirectedSegment& s1, const Osmium::OSM
     return true;
 }
 
-OGRLineString* create_ogr_linestring(const Osmium::OSM::Segment& segment) {
+OGRLineString* create_ogr_linestring(const osmium::Segment& segment) {
     OGRLineString* line = new OGRLineString;
     line->setNumPoints(2);
     line->setPoint(0, segment.first().lon(), segment.first().lat());
@@ -242,7 +241,7 @@ OGRLineString* create_ogr_linestring(const Osmium::OSM::Segment& segment) {
 unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& output) {
     unsigned int overlaps = 0;
 
-    std::vector<Osmium::OSM::UndirectedSegment> segments;
+    std::vector<osmium::UndirectedSegment> segments;
     if (debug) std::cerr << "Setting up segments...\n";
     for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
         it->get()->add_segments_to_vector(segments);
@@ -252,11 +251,11 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
     std::sort(segments.begin(), segments.end());
 
     if (debug) std::cerr << "Finding intersections...\n";
-    std::vector<Osmium::OSM::Position> intersections;
-    for (std::vector<Osmium::OSM::UndirectedSegment>::const_iterator it1 = segments.begin(); it1 != segments.end()-1; ++it1) {
-        const Osmium::OSM::UndirectedSegment& s1 = *it1;
-        for (std::vector<Osmium::OSM::UndirectedSegment>::const_iterator it2 = it1+1; it2 != segments.end(); ++it2) {
-            const Osmium::OSM::UndirectedSegment& s2 = *it2;
+    std::vector<osmium::Location> intersections;
+    for (std::vector<osmium::UndirectedSegment>::const_iterator it1 = segments.begin(); it1 != segments.end()-1; ++it1) {
+        const osmium::UndirectedSegment& s1 = *it1;
+        for (std::vector<osmium::UndirectedSegment>::const_iterator it2 = it1+1; it2 != segments.end(); ++it2) {
+            const osmium::UndirectedSegment& s2 = *it2;
             if (s1 == s2) {
                 OGRLineString* line = create_ogr_linestring(s1);
                 output.add_error_line(line, "overlap");
@@ -266,8 +265,8 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
                     break;
                 }
                 if (y_range_overlap(s1, s2)) {
-                    Osmium::OSM::Position i = intersection(s1, s2);
-                    if (i.defined()) {
+                    osmium::Location i = intersection(s1, s2);
+                    if (i) {
                         intersections.push_back(i);
                     }
                 }
@@ -275,7 +274,7 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
         }
     }
 
-    for (std::vector<Osmium::OSM::Position>::const_iterator it = intersections.begin(); it != intersections.end(); ++it) {
+    for (std::vector<osmium::Location>::const_iterator it = intersections.begin(); it != intersections.end(); ++it) {
         OGRPoint* point = new OGRPoint(it->lon(), it->lat());
         output.add_error_point(point, "intersection");
     }
@@ -285,8 +284,8 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
 
 bool CoastlineRingCollection::close_antarctica_ring(int epsg) {
     for (coastline_rings_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        Osmium::OSM::Position fpos = (*it)->first_position();
-        Osmium::OSM::Position lpos = (*it)->last_position();
+        osmium::Location fpos = (*it)->first_position();
+        osmium::Location lpos = (*it)->last_position();
         if (fpos.lon() > 179.99 && lpos.lon() < -179.99 &&
             fpos.lat() <  -77.0 && fpos.lat() >  -78.0 &&
             lpos.lat() <  -77.0 && lpos.lat() >  -78.0) {
@@ -389,13 +388,13 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     const unsigned int max_nodes_to_be_considered_questionable = 10000;
     unsigned int warnings = 0;
 
-    typedef std::pair<Osmium::OSM::Position, CoastlineRing*> pos_ring_ptr_t;
+    typedef std::pair<osmium::Location, CoastlineRing*> pos_ring_ptr_t;
     std::vector<pos_ring_ptr_t> rings;
     rings.reserve(m_list.size());
 
     // put all rings in a vector...
     for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        rings.push_back(std::make_pair<Osmium::OSM::Position, CoastlineRing*>((*it)->first_position(), it->get()));
+        rings.push_back(std::make_pair<osmium::Location, CoastlineRing*>((*it)->first_position(), it->get()));
     }
 
     // ... and sort it by position of the first node in the ring (this allows binary search in it)
@@ -404,8 +403,8 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     // go through all the polygons that have been created before and mark the outer rings
     for (polygon_vector_t::const_iterator it = polygons.begin(); it != polygons.end(); ++it) {
         OGRLinearRing* exterior_ring = (*it)->getExteriorRing();
-        Osmium::OSM::Position pos(exterior_ring->getX(0), exterior_ring->getY(0));
-        std::vector<pos_ring_ptr_t>::iterator rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<Osmium::OSM::Position, CoastlineRing*>(pos, NULL));
+        osmium::Location pos(exterior_ring->getX(0), exterior_ring->getY(0));
+        std::vector<pos_ring_ptr_t>::iterator rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<osmium::Location, CoastlineRing*>(std::move(pos), NULL));
         if (rings_it != rings.end()) {
             rings_it->second->set_outer();
         }

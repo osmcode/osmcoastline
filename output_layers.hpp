@@ -3,7 +3,7 @@
 
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -61,7 +61,7 @@ class LayerErrorPoints : public Layer {
 public:
 
     LayerErrorPoints(OGRDataSource* data_source, const char** options);
-    void add(OGRPoint* point, const char* error, osm_object_id_t id);
+    void add(OGRPoint* point, const char* error, osmium::object_id_type id);
 
 };
 
@@ -73,7 +73,7 @@ class LayerErrorLines : public Layer {
 public:
 
     LayerErrorLines(OGRDataSource* data_source, const char** options);
-    void add(OGRLineString* linestring, const char* error, osm_object_id_t id);
+    void add(OGRLineString* linestring, const char* error, osmium::object_id_type id);
 
 };
 

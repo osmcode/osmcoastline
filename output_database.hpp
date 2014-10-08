@@ -3,7 +3,7 @@
 
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -22,6 +22,7 @@
 
 */
 
+#include <memory>
 #include <string>
 
 #include <osmium/osm/types.hpp>
@@ -88,8 +89,11 @@ public:
     LayerPolygons*    layer_water_polygons() const { return m_layer_water_polygons; }
     LayerLines*       layer_lines()          const { return m_layer_lines; }
 
-    void add_error_point(OGRPoint* point, const char* error, osm_object_id_t id=0);
-    void add_error_line(OGRLineString* linestring, const char* error, osm_object_id_t id=0);
+    void add_error_point(std::unique_ptr<OGRPoint> point, const char* error, osmium::object_id_type id=0);
+    void add_error_point(OGRPoint* point, const char* error, osmium::object_id_type id=0);
+    void add_error_line(std::unique_ptr<OGRLineString> linestring, const char* error, osmium::object_id_type id=0);
+    void add_error_line(OGRLineString* linestring, const char* error, osmium::object_id_type id=0);
+    void add_ring(std::unique_ptr<OGRPolygon> polygon, int id, int nways, int npoints, bool fixed);
     void add_ring(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed);
     void add_land_polygon(OGRPolygon* polygon);
     void add_water_polygon(OGRPolygon* polygon);

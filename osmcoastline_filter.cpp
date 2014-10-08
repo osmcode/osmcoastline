@@ -1,6 +1,6 @@
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -23,96 +23,12 @@
 #include <set>
 #include <getopt.h>
 
-#define OSMIUM_WITH_PBF_INPUT
-#define OSMIUM_WITH_XML_INPUT
-
-#include <osmium.hpp>
-#include <osmium/output/pbf.hpp>
+#include <osmium/io/any_input.hpp>
+#include <osmium/io/pbf_output.hpp>
+#include <osmium/handler.hpp>
+#include <osmium/osm/entity_bits.hpp>
 
 #include "osmcoastline.hpp"
-
-typedef std::set<osm_object_id_t> idset;
-
-/**
- * Handler for first pass. Find all ways tagged with natural=coastline
- * and write them out. Also remember all nodes needed for those ways.
- */
-class CoastlineFilterHandler1 : public Osmium::Handler::Base {
-
-    Osmium::Output::Handler& m_output;
-    idset& m_ids;
-
-public:
-
-    CoastlineFilterHandler1(Osmium::Output::Handler& output, idset& ids) :
-        m_output(output),
-        m_ids(ids) {
-    }
-
-    void init(Osmium::OSM::Meta& meta) {
-        m_output.init(meta);
-    }
-
-    void before_ways() const {
-        m_output.before_ways();
-    }
-
-    void way(const shared_ptr<Osmium::OSM::Way>& way) const {
-        const char* natural = way->tags().get_value_by_key("natural");
-        if (natural && !strcmp(natural, "coastline")) {
-            m_output.way(way);
-            for (Osmium::OSM::WayNodeList::const_iterator it = way->nodes().begin(); it != way->nodes().end(); ++it) {
-                m_ids.insert(it->ref());
-            }
-        }
-    }
-
-    void after_ways() const {
-        m_output.after_ways();
-
-        // We only need to read ways on the first pass
-        throw Osmium::Handler::StopReading();
-    }
-
-};
-
-/**
- * Handler for the second pass. Write out all nodes that are tagged
- * natural=coastline or that we need for the ways we found in the first
- * pass.
- */
-class CoastlineFilterHandler2 : public Osmium::Handler::Base {
-
-    Osmium::Output::Handler& m_output;
-    idset& m_ids;
-
-public:
-
-    CoastlineFilterHandler2(Osmium::Output::Handler& output, idset& ids) :
-        m_output(output),
-        m_ids(ids) {
-    }
-
-    void before_nodes() const {
-        m_output.before_nodes();
-    }
-
-    void node(const shared_ptr<Osmium::OSM::Node>& node) const {
-        const char* natural = node->tags().get_value_by_key("natural");
-        if ((m_ids.find(node->id()) != m_ids.end()) || (natural && !strcmp(natural, "coastline"))) {
-            m_output.node(node);
-        }
-    }
-
-    void after_nodes() const {
-        m_output.after_nodes();
-        m_output.final();
-
-        // We only need to read nodes on the second pass
-        throw Osmium::Handler::StopReading();
-    }
-
-};
 
 void print_help() {
     std::cout << "osmcoastline_filter [OPTIONS] OSMFILE\n"
@@ -139,43 +55,85 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                exit(0);
+                exit(return_code_ok);
             case 'o':
                 output_filename = optarg;
                 break;
             default:
-                exit(1);
+                exit(return_code_fatal);
         }
     }
 
     if (output_filename.empty()) {
         std::cerr << "Missing -o/--output=OSMFILE option\n";
-        exit(1);
+        exit(return_code_cmdline);
     }
 
     if (optind != argc - 1) {
         std::cerr << "Usage: osmcoastline_filter [OPTIONS] OSMFILE\n";
-        exit(1);
+        exit(return_code_cmdline);
     }
 
-    try {
-        Osmium::OSMFile outfile(output_filename);
-        Osmium::Output::Handler output(outfile);
+    osmium::io::Header header;
+    header.set("generator", "osmcoastline_filter");
 
-        idset ids;
-        try {
-            Osmium::OSMFile infile(argv[optind]);
-            CoastlineFilterHandler1 handler1(output, ids);
-            Osmium::Input::read(infile, handler1);
-            CoastlineFilterHandler2 handler2(output, ids);
-            Osmium::Input::read(infile, handler2);
-        } catch (Osmium::OSMFile::IOError) {
-            std::cerr << "Can not open input file '" << argv[optind] << "'\n";
-            exit(1);
+    osmium::io::File infile(argv[optind]);
+
+    try {
+        osmium::io::Writer writer(output_filename, header);
+
+        std::set<osmium::object_id_type> ids;
+        osmium::memory::Buffer output_buffer(10240);
+
+        {
+            osmium::io::Reader reader(infile, osmium::osm_entity_bits::way);
+            while (auto input_buffer = reader.read()) {
+                for (auto it = input_buffer.begin<const osmium::Way>(); it != input_buffer.end<const osmium::Way>(); ++it) {
+                    const char* natural = it->get_value_by_key("natural");
+                    if (natural && !strcmp(natural, "coastline")) {
+                        output_buffer.add_item(*it);
+                        output_buffer.commit();
+                        if (output_buffer.committed() >= 10240) {
+                            osmium::memory::Buffer new_buffer(10240);
+                            std::swap(output_buffer, new_buffer);
+                            writer(std::move(new_buffer));
+                        }
+                        for (const auto& nr : it->nodes()) {
+                            ids.insert(nr.ref());
+                        }
+                    }
+                }
+            }
+            reader.close();
         }
-    } catch (Osmium::OSMFile::IOError) {
-        std::cerr << "Can not open output file '" << output_filename << "'\n";
-        exit(1);
+
+        {
+            osmium::io::Reader reader(infile, osmium::osm_entity_bits::node);
+            while (auto input_buffer = reader.read()) {
+                for (auto it = input_buffer.begin<const osmium::Node>(); it != input_buffer.end<const osmium::Node>(); ++it) {
+                    const char* natural = it->get_value_by_key("natural");
+                    if ((ids.find(it->id()) != ids.end()) || (natural && !strcmp(natural, "coastline"))) {
+                        output_buffer.add_item(*it);
+                        output_buffer.commit();
+                        if (output_buffer.committed() >= 10240) {
+                            osmium::memory::Buffer new_buffer(10240);
+                            std::swap(output_buffer, new_buffer);
+                            writer(std::move(new_buffer));
+                        }
+                    }
+                }
+            }
+            reader.close();
+        }
+
+        if (output_buffer.committed() > 0) {
+            writer(std::move(output_buffer));
+        }
+
+        writer.close();
+    } catch (osmium::io_error& e) {
+        std::cerr << "io error: " << e.what() << "'\n";
+        exit(return_code_fatal);
     }
 }
 

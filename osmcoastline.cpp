@@ -1,6 +1,6 @@
 /*
 
-  Copyright 2013 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -24,11 +24,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#define OSMIUM_WITH_PBF_INPUT
-#define OSMIUM_WITH_XML_INPUT
-
-#include <osmium.hpp>
-#include <osmium/geometry/point.hpp>
+#include <osmium/io/any_input.hpp>
+#include <osmium/visitor.hpp>
 
 #include <ogrsf_frmts.h>
 
@@ -188,11 +185,13 @@ int main(int argc, char *argv[]) {
         // This is in an extra scope so that the considerable amounts of memory
         // held by the handlers is recovered after we don't need them any more.
         vout << "Reading from file '" << options.inputfile << "'.\n";
-        Osmium::OSMFile infile(options.inputfile);
+        osmium::io::File infile(options.inputfile);
 
         vout << "Reading ways (1st pass through input file)...\n";
         CoastlineHandlerPass1 handler_pass1(coastline_rings);
-        Osmium::Input::read(infile, handler_pass1);
+        osmium::io::Reader reader1(infile, osmium::osm_entity_bits::way);
+        osmium::apply(reader1, handler_pass1);
+        reader1.close();
         stats.ways = coastline_rings.num_ways();
         stats.unconnected_nodes = coastline_rings.num_unconnected_nodes();
         stats.rings = coastline_rings.size();
@@ -205,7 +204,9 @@ int main(int argc, char *argv[]) {
 
         vout << "Reading nodes (2nd pass through input file)...\n";
         CoastlineHandlerPass2 handler_pass2(coastline_rings, output_database);
-        Osmium::Input::read(infile, handler_pass2);
+        osmium::io::Reader reader2(infile, osmium::osm_entity_bits::node);
+        osmium::apply(reader2, handler_pass2);
+        reader2.close();
     }
 
     vout << "Checking for missing positions...\n";

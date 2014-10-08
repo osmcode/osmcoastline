@@ -3,7 +3,7 @@
 
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -23,7 +23,7 @@
 */
 
 #include <osmium/handler.hpp>
-#include <osmium/geometry/ogr.hpp>
+#include <osmium/geom/ogr.hpp>
 
 #include "coastline_ring_collection.hpp"
 #include "output_database.hpp"
@@ -33,7 +33,7 @@
  * all ways tagged with 'natural=coastline' are read and CoastlineRings
  * are created.
  */
-class CoastlineHandlerPass1 : public Osmium::Handler::Base {
+class CoastlineHandlerPass1 : public osmium::handler::Handler {
 
     CoastlineRingCollection& m_coastline_rings;
 
@@ -44,21 +44,16 @@ public:
     {
     }
 
-    void way(const shared_ptr<Osmium::OSM::Way>& way) {
+    void way(const osmium::Way& way) {
         // We are only interested in ways tagged with natural=coastline.
-        const char* natural = way->tags().get_value_by_key("natural");
+        const char* natural = way.tags().get_value_by_key("natural");
         if (natural && !strcmp(natural, "coastline")) {
-            const char* bogus = way->tags().get_value_by_key("coastline");
+            const char* bogus = way.tags().get_value_by_key("coastline");
             if (bogus && !strcmp(bogus, "bogus")) {
                 return; // ignore bogus coastline in Antarctica
             }
             m_coastline_rings.add_way(way);
         }
-    }
-
-    void after_ways() const {
-        // We only need to read ways in this pass.
-        throw Osmium::Handler::StopReading();
     }
 
 };
@@ -67,7 +62,7 @@ public:
  * Osmium handler for the second pass over the input file in which
  * node coordinates are added to the CoastlineRings.
  */
-class CoastlineHandlerPass2 : public Osmium::Handler::Base {
+class CoastlineHandlerPass2 : public osmium::handler::Handler {
 
     CoastlineRingCollection& m_coastline_rings;
 
@@ -80,6 +75,7 @@ class CoastlineHandlerPass2 : public Osmium::Handler::Base {
      */
     posmap_t m_posmap;
     OutputDatabase& m_output;
+    osmium::geom::OGRFactory<> m_factory;
 
 public:
 
@@ -91,26 +87,21 @@ public:
         m_coastline_rings.setup_positions(m_posmap);
     }
 
-    void node(const shared_ptr<Osmium::OSM::Node const>& node) {
-        const char* natural = node->tags().get_value_by_key("natural");
+    void node(const osmium::Node& node) {
+        const char* natural = node.tags().get_value_by_key("natural");
         if (natural && !strcmp(natural, "coastline")) {
             try {
-                Osmium::Geometry::Point point(*node);
-                m_output.add_error_point(Osmium::Geometry::create_ogr_geometry(point), "tagged_node", node->id());
-            } catch (Osmium::Geometry::IllegalGeometry) {
-                std::cerr << "Ignoring illegal geometry for node " << node->id() << ".\n";
+                std::unique_ptr<OGRPoint> ogr_point = m_factory.create_point(node);
+                m_output.add_error_point(std::move(ogr_point), "tagged_node", node.id());
+            } catch (osmium::geometry_error&) {
+                std::cerr << "Ignoring illegal geometry for node " << node.id() << ".\n";
             }
         }
 
-        std::pair<posmap_t::iterator, posmap_t::iterator> ret = m_posmap.equal_range(node->id());
+        std::pair<posmap_t::iterator, posmap_t::iterator> ret = m_posmap.equal_range(node.id());
         for (posmap_t::iterator it=ret.first; it != ret.second; ++it) {
-            *(it->second) = node->position();
+            *(it->second) = node.location();
         }
-    }
-
-    void after_nodes() const {
-        // We only need to read nodes in this pass.
-        throw Osmium::Handler::StopReading();
     }
 
 };

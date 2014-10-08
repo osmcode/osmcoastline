@@ -1,6 +1,6 @@
 /*
 
-  Copyright 2012 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -134,12 +134,24 @@ void OutputDatabase::commit() {
     m_layer_error_points->commit();
 }
 
-void OutputDatabase::add_error_point(OGRPoint* point, const char* error, osm_object_id_t id) {
+void OutputDatabase::add_error_point(std::unique_ptr<OGRPoint> point, const char* error, osmium::object_id_type id) {
+    m_layer_error_points->add(point.release(), error, id);
+}
+
+void OutputDatabase::add_error_point(OGRPoint* point, const char* error, osmium::object_id_type id) {
     m_layer_error_points->add(point, error, id);
 }
 
-void OutputDatabase::add_error_line(OGRLineString* linestring, const char* error, osm_object_id_t id) {
+void OutputDatabase::add_error_line(std::unique_ptr<OGRLineString> linestring, const char* error, osmium::object_id_type id) {
+    m_layer_error_lines->add(linestring.release(), error, id);
+}
+
+void OutputDatabase::add_error_line(OGRLineString* linestring, const char* error, osmium::object_id_type id) {
     m_layer_error_lines->add(linestring, error, id);
+}
+
+void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon> polygon, int id, int nways, int npoints, bool fixed) {
+    layer_rings()->add(polygon.release(), id, nways, npoints, fixed, layer_error_points());
 }
 
 void OutputDatabase::add_ring(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed) {

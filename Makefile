@@ -4,8 +4,8 @@
 #
 #------------------------------------------------------------------------------
 
-#CXXFLAGS = -g
-CXXFLAGS = -O3 -g
+CXXFLAGS = -std=c++11 -O3
+CXXFLAGS += -g -fno-omit-frame-pointer
 
 CXXFLAGS += -Wall -Wextra -Wredundant-decls -Wdisabled-optimization -pedantic -Wctor-dtor-privacy -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo -Wno-long-long
 
@@ -14,7 +14,7 @@ CXXFLAGS_OGR  = $(shell gdal-config --cflags)
 
 CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
-LIB_EXPAT = -lexpat
+LIB_EXPAT = -lexpat -lbz2 -lz
 LIB_PBF   = -lz -lpthread -lprotobuf-lite -losmpbf
 LIB_GEOS  = $(shell geos-config --libs) -l geos_c
 LIB_OGR   = $(shell gdal-config --libs)

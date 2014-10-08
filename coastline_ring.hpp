@@ -3,7 +3,7 @@
 
 /*
 
-  Copyright 2013 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -31,7 +31,7 @@ class OGRPoint;
 class OGRLineString;
 class OGRPolygon;
 
-typedef std::multimap<osm_object_id_t, Osmium::OSM::Position*> posmap_t;
+typedef std::multimap<osmium::object_id_type, osmium::Location*> posmap_t;
 
 /**
  * The CoastlineRing class models a (possibly unfinished) ring of
@@ -59,13 +59,13 @@ typedef std::multimap<osm_object_id_t, Osmium::OSM::Position*> posmap_t;
  */
 class CoastlineRing {
 
-    Osmium::OSM::WayNodeList m_way_node_list;
+    std::vector<osmium::NodeRef> m_way_node_list;
 
     /**
      * Smallest ID of all the ways making up the ring. Can be used as somewhat
      * stable unique ID for the ring.
      */
-    osm_object_id_t m_ring_id;
+    osmium::object_id_type m_ring_id;
 
     /**
      * The number of ways making up this ring. This is not actually needed for
@@ -84,14 +84,15 @@ public:
     /**
      * Create CoastlineRing from a way.
      */
-    CoastlineRing(const shared_ptr<Osmium::OSM::Way>& way) :
-        m_way_node_list(way->is_closed() ? way->nodes().size() : 1000),
-        m_ring_id(way->id()),
+    CoastlineRing(const osmium::Way& way) :
+        m_way_node_list(),
+        m_ring_id(way.id()),
         m_nways(1),
         m_fixed(false),
         m_outer(false)
     {
-        m_way_node_list.insert(m_way_node_list.begin(), way->nodes().begin(), way->nodes().end());
+        m_way_node_list.reserve(way.is_closed() ? way.nodes().size() : 1000);
+        m_way_node_list.insert(m_way_node_list.begin(), way.nodes().begin(), way.nodes().end());
     }
 
     bool is_outer() const {
@@ -103,25 +104,25 @@ public:
     }
 
     /// ID of first node in the ring.
-    osm_object_id_t first_node_id() const { return m_way_node_list.front().ref(); }
+    osmium::object_id_type first_node_id() const { return m_way_node_list.front().ref(); }
 
     /// ID of last node in the ring.
-    osm_object_id_t last_node_id() const { return m_way_node_list.back().ref(); }
+    osmium::object_id_type last_node_id() const { return m_way_node_list.back().ref(); }
 
     /// Position of the first node in the ring.
-    Osmium::OSM::Position first_position() const { return m_way_node_list.front().position(); }
+    osmium::Location first_position() const { return m_way_node_list.front().location(); }
 
     /// Position of the last node in the ring.
-    Osmium::OSM::Position last_position() const { return m_way_node_list.back().position(); }
+    osmium::Location last_position() const { return m_way_node_list.back().location(); }
 
     /// Return ID of this ring (defined as smallest ID of the ways making up the ring).
-    osm_object_id_t ring_id() const { return m_ring_id; }
+    osmium::object_id_type ring_id() const { return m_ring_id; }
 
     /**
      * Set ring ID. The ring will only get the new ID if it is smaller than the
      * old one.
      */
-    void update_ring_id(osm_object_id_t new_id) {
+    void update_ring_id(osmium::object_id_type new_id) {
         if (new_id < m_ring_id) {
             m_ring_id = new_id;
         }
@@ -147,7 +148,9 @@ public:
      * last node in the ring to be the same as the first. This
      * method does this.
      */
-    void fake_close() { m_way_node_list.back().ref(first_node_id()); }
+    void fake_close() {
+        m_way_node_list.back().set_ref(first_node_id());
+    }
 
     /**
      * Add pointers to the node positions to the given posmap. The
@@ -164,10 +167,10 @@ public:
     unsigned int check_positions(bool output_missing);
 
     /// Add a new way to the front of this ring.
-    void add_at_front(const shared_ptr<Osmium::OSM::Way>& way);
+    void add_at_front(const osmium::Way& way);
 
     /// Add a new way to the end of this ring.
-    void add_at_end(const shared_ptr<Osmium::OSM::Way>& way);
+    void add_at_end(const osmium::Way& way);
 
     /**
      * Join the other ring to this one. The first node ID of the
@@ -201,7 +204,7 @@ public:
      *
      * @param reverse Reverse the ring when creating the geometry.
      */
-    OGRPolygon* ogr_polygon(bool reverse) const;
+    std::unique_ptr<OGRPolygon> ogr_polygon(bool reverse) const;
 
     /**
      * Create OGRLineString for this ring.
@@ -210,25 +213,25 @@ public:
      *
      * @param reverse Reverse the ring when creating the geometry.
      */
-    OGRLineString* ogr_linestring(bool reverse) const;
+    std::unique_ptr<OGRLineString> ogr_linestring(bool reverse) const;
 
     /**
      * Create OGRPoint for the first point in this ring.
      *
      * Caller takes ownership of created object.
      */
-    OGRPoint* ogr_first_point() const;
+    std::unique_ptr<OGRPoint> ogr_first_point() const;
 
     /**
      * Create OGRPoint for the last point in this ring.
-     *
+     loca*
      * Caller takes ownership of created object.
      */
-    OGRPoint* ogr_last_point() const;
+    std::unique_ptr<OGRPoint> ogr_last_point() const;
 
-    double distance_to_start_position(Osmium::OSM::Position pos) const;
+    double distance_to_start_position(osmium::Location pos) const;
 
-    void add_segments_to_vector(std::vector<Osmium::OSM::UndirectedSegment>& segments) const;
+    void add_segments_to_vector(std::vector<osmium::UndirectedSegment>& segments) const;
 
     friend std::ostream& operator<<(std::ostream& out, const CoastlineRing& cp);
 

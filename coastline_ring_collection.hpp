@@ -3,7 +3,7 @@
 
 /*
 
-  Copyright 2013 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2014 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -40,7 +40,7 @@ class OutputDatabase;
 class CoastlinePolygons;
 
 typedef std::list< shared_ptr<CoastlineRing> > coastline_rings_list_t;
-typedef std::map<osm_object_id_t, coastline_rings_list_t::iterator> idmap_t;
+typedef std::map<osmium::object_id_type, coastline_rings_list_t::iterator> idmap_t;
 
 /**
  * A collection of CoastlineRing objects. Keeps a list of all start and end
@@ -58,7 +58,7 @@ class CoastlineRingCollection {
     unsigned int m_rings_from_single_way;
     unsigned int m_fixed_rings;
 
-    void add_partial_ring(const shared_ptr<Osmium::OSM::Way>& way);
+    void add_partial_ring(const osmium::Way& way);
 
 public:
 
@@ -73,9 +73,9 @@ public:
      * Add way to collection. A new CoastlineRing will be created for the way
      * or it will be joined to an existing CoastlineRing.
      */
-    void add_way(const shared_ptr<Osmium::OSM::Way>& way) {
+    void add_way(const osmium::Way& way) {
         m_ways++;
-        if (way->is_closed()) {
+        if (way.is_closed()) {
             m_rings_from_single_way++;
             m_list.push_back(make_shared<CoastlineRing>(way));
         } else {
@@ -112,10 +112,10 @@ private:
     struct Connection {
 
         double distance;
-        osm_object_id_t start_id;
-        osm_object_id_t end_id;
+        osmium::object_id_type start_id;
+        osmium::object_id_type end_id;
 
-        Connection(double d, osm_object_id_t s, osm_object_id_t e) : distance(d), start_id(s), end_id(e) { }
+        Connection(double d, osmium::object_id_type s, osmium::object_id_type e) : distance(d), start_id(s), end_id(e) { }
 
         /**
         * Returns true if start or end ID of this connection is the same as the
