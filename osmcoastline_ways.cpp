@@ -35,28 +35,11 @@
 
 #include "osmcoastline.hpp"
 
-typedef osmium::index::map::SparseTable<osmium::unsigned_object_id_type, osmium::Location> storage_sparsetable_t;
-typedef osmium::handler::NodeLocationsForWays<storage_sparsetable_t, storage_sparsetable_t> cfw_handler_t;
+typedef osmium::index::map::SparseTable<osmium::unsigned_object_id_type, osmium::Location> index_type;
+typedef osmium::handler::NodeLocationsForWays<index_type> node_location_handler_type;
 
-class CoastlineWaysHandler1 : public osmium::handler::Handler {
+class CoastlineWaysHandler : public osmium::handler::Handler {
 
-    cfw_handler_t& m_cfw;
-
-public:
-
-    CoastlineWaysHandler1(cfw_handler_t& cfw) :
-        m_cfw(cfw) {
-    }
-
-    void node(const osmium::Node& node) {
-        m_cfw.node(node);
-    }
-
-};
-
-class CoastlineWaysHandler2 : public osmium::handler::Handler {
-
-    cfw_handler_t& m_cfw;
     double m_length;
 
     OGRDataSource* m_data_source;
@@ -66,8 +49,7 @@ class CoastlineWaysHandler2 : public osmium::handler::Handler {
 
 public:
 
-    CoastlineWaysHandler2(cfw_handler_t& cfw) :
-        m_cfw(cfw),
+    CoastlineWaysHandler() :
         m_length(0.0) {
         OGRRegisterAll();
 
@@ -125,13 +107,12 @@ public:
         m_layer_ways->StartTransaction();
     }
 
-    ~CoastlineWaysHandler2() {
+    ~CoastlineWaysHandler() {
         m_layer_ways->CommitTransaction();
         OGRDataSource::DestroyDataSource(m_data_source);
     }
 
     void way(osmium::Way& way) {
-        m_cfw.way(way);
         m_length += osmium::geom::haversine::distance(way.nodes());
         try {
             OGRFeature* feature = OGRFeature::CreateFeature(m_layer_ways->GetLayerDefn());
@@ -168,18 +149,19 @@ int main(int argc, char* argv[]) {
         exit(return_code_cmdline);
     }
 
-    storage_sparsetable_t store_pos;
-    storage_sparsetable_t store_neg;
-    cfw_handler_t handler_cfw(store_pos, store_neg);
+    index_type store_pos;
+    node_location_handler_type location_handler(store_pos);
 
     osmium::io::File infile(argv[1]);
-    CoastlineWaysHandler1 handler1(handler_cfw);
     osmium::io::Reader reader1(infile, osmium::osm_entity_bits::node);
-    osmium::apply(reader1, handler1);
-    CoastlineWaysHandler2 handler2(handler_cfw);
-    osmium::io::Reader reader2(infile, osmium::osm_entity_bits::way);
-    osmium::apply(reader2, handler2);
+    osmium::apply(reader1, location_handler);
+    reader1.close();
 
-    std::cerr << "Sum of way lengths: " << std::fixed << (handler2.sum_length() / 1000) << "km\n";
+    CoastlineWaysHandler coastline_ways_handler;
+    osmium::io::Reader reader2(infile, osmium::osm_entity_bits::way);
+    osmium::apply(reader2, location_handler, coastline_ways_handler);
+    reader2.close();
+
+    std::cerr << "Sum of way lengths: " << std::fixed << (coastline_ways_handler.sum_length() / 1000) << "km\n";
 }
 
