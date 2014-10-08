@@ -12,14 +12,9 @@ https://github.com/joto/osmcoastline
 PREREQUISITES
 -------------
 
-Osmium
-    http://github.com/joto/osmium
-    http://wiki.openstreetmap.org/wiki/Osmium
-    (Do not use the Osmium coming with Ubuntu 12.04, it is too old.)
-
-boost (several libraries)
-    http://www.boost.org/
-    Debian/Ubuntu: libboost-dev
+Libosmium
+    http://github.com/osmcode/libosmium
+    http://osmcode.org/libosmium
 
 zlib (for PBF support)
     http://www.zlib.net/
@@ -45,10 +40,10 @@ Sqlite/Spatialite
 BUILDING
 --------
 
-You'll need all the prerequisites including Osmium installed.
+You'll need all the prerequisites including Libosmium installed.
 
-Run "make" to build the "osmcoastline" and "osmcoastline_filter" programs.
-"osmcoastline_ways" is usually not needed and not built by default.
+Run "make" to build the "osmcoastline", "osmcoastline_filter", and
+"osmcoastline_ways" programs.
 
 Run "make clean" to clean up.
 
