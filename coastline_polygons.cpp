@@ -62,16 +62,16 @@ OGRPolygon* CoastlinePolygons::create_rectangular_polygon(double x1, double y1, 
 unsigned int CoastlinePolygons::fix_direction() {
     unsigned int warnings = 0;
 
-    for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
-        OGRLinearRing* er = (*it)->getExteriorRing();
+    for (const auto& polygon : *m_polygons) {
+        OGRLinearRing* er = polygon->getExteriorRing();
         if (!er->isClockwise()) {
             er->reverseWindingOrder();
             // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
             er->setCoordinateDimension(2);
-            for (int i=0; i < (*it)->getNumInteriorRings(); ++i) {
-                (*it)->getInteriorRing(i)->reverseWindingOrder();
+            for (int i=0; i < polygon->getNumInteriorRings(); ++i) {
+                polygon->getInteriorRing(i)->reverseWindingOrder();
                 // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
-                (*it)->getInteriorRing(i)->setCoordinateDimension(2);
+                polygon->getInteriorRing(i)->setCoordinateDimension(2);
             }
             m_output.add_error_line(static_cast<OGRLineString*>(er->clone()), "direction");
             warnings++;
@@ -82,8 +82,8 @@ unsigned int CoastlinePolygons::fix_direction() {
 }
 
 void CoastlinePolygons::transform() {
-    for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
-        srs.transform(*it);
+    for (const auto& polygon : *m_polygons) {
+        srs.transform(polygon);
     }
 }
 
@@ -195,8 +195,8 @@ void CoastlinePolygons::split() {
     polygon_vector_t* v = m_polygons;
     m_polygons = new polygon_vector_t;
     m_polygons->reserve(v->size());
-    for (polygon_vector_t::iterator it = v->begin(); it != v->end(); ++it) {
-        split_polygon(*it, 0);
+    for (const auto& polygon : *v) {
+        split_polygon(polygon, 0);
     }
     delete v;
 }
@@ -204,12 +204,12 @@ void CoastlinePolygons::split() {
 void CoastlinePolygons::output_land_polygons(bool make_copy) {
     if (make_copy) {
         // because adding to a layer destroys the geometry, we need to copy it if it is needed later
-        for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
-            m_output.add_land_polygon(static_cast<OGRPolygon*>((*it)->clone()));
+        for (const auto& polygon : *m_polygons) {
+            m_output.add_land_polygon(static_cast<OGRPolygon*>(polygon->clone()));
         }
     } else {
-        for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
-            m_output.add_land_polygon(*it);
+        for (const auto& polygon : *m_polygons) {
+            m_output.add_land_polygon(polygon);
         }
     }
 }
@@ -281,10 +281,10 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, OGRLinearRi
 }
 
 void CoastlinePolygons::output_lines(int max_points) {
-    for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
-        output_polygon_ring_as_lines(max_points, (*it)->getExteriorRing());
-        for (int i=0; i < (*it)->getNumInteriorRings(); ++i) {
-            output_polygon_ring_as_lines(max_points, (*it)->getInteriorRing(i));
+    for (const auto& polygon : *m_polygons) {
+        output_polygon_ring_as_lines(max_points, polygon->getExteriorRing());
+        for (int i=0; i < polygon->getNumInteriorRings(); ++i) {
+            output_polygon_ring_as_lines(max_points, polygon->getInteriorRing(i));
         }
     }
 }
@@ -295,8 +295,8 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v) {
         try {
             OGRGeometry* geom = create_rectangular_polygon(e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand);
             assert(geom->getSpatialReference() != NULL);
-            for (polygon_vector_t::const_iterator it = v->begin(); it != v->end(); ++it) {
-                OGRGeometry* diff = geom->Difference(*it);
+            for (const auto& polygon : *v) {
+                OGRGeometry* diff = geom->Difference(polygon);
                 // for some reason there is sometimes no srs on the geometries, so we add them on
                 diff->assignSpatialReference(srs.out());
                 delete geom;
@@ -366,19 +366,19 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v) {
 
         polygon_vector_t* v1 = new polygon_vector_t;
         polygon_vector_t* v2 = new polygon_vector_t;
-        for (polygon_vector_t::const_iterator it = v->begin(); it != v->end(); ++it) {
+        for (const auto& polygon : *v) {
 
             /* You might think re-computing the envelope of all those polygons
             again and again might take a lot of time, but I benchmarked it and
             it has no measurable impact. */
             OGREnvelope e;
-            (*it)->getEnvelope(&e);
+            polygon->getEnvelope(&e);
             if (e1.Intersects(e)) {
-                v1->push_back(*it);
+                v1->push_back(polygon);
             }
 
             if (e2.Intersects(e)) {
-                v2->push_back(*it);
+                v2->push_back(polygon);
             }
         }
         delete v;
@@ -391,14 +391,13 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v) {
 unsigned int CoastlinePolygons::output_water_polygons() {
     unsigned int warnings = 0;
     polygon_vector_t* v = new polygon_vector_t;
-    for (polygon_vector_t::iterator it = m_polygons->begin(); it != m_polygons->end(); ++it) {
-        OGRPolygon* p = *it;
-        if (p->IsValid()) {
-            v->push_back(p);
+    for (const auto& polygon : *m_polygons) {
+        if (polygon->IsValid()) {
+            v->push_back(polygon);
         } else {
             std::cerr << "Invalid polygon, trying buffer(0).\n";
             ++warnings;
-            OGRGeometry* buffered_polygon = p->Buffer(0);
+            OGRGeometry* buffered_polygon = polygon->Buffer(0);
             if (buffered_polygon && buffered_polygon->getGeometryType() == wkbPolygon) {
                 v->push_back(static_cast<OGRPolygon*>(buffered_polygon));
             } else {

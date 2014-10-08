@@ -111,16 +111,16 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
 }
 
 void CoastlineRingCollection::setup_positions(posmap_type& posmap) {
-    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        (*it)->setup_positions(posmap);
+    for (const auto& ring : m_list) {
+        ring->setup_positions(posmap);
     }
 }
 
 unsigned int CoastlineRingCollection::check_positions(bool output_missing) {
     unsigned int missing_positions = 0;
 
-    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        missing_positions += (*it)->check_positions(output_missing);
+    for (const auto& ring : m_list) {
+        missing_positions += ring->check_positions(output_missing);
     }
 
     return missing_positions;
@@ -129,10 +129,9 @@ unsigned int CoastlineRingCollection::check_positions(bool output_missing) {
 void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& vector) {
     vector.reserve(m_list.size());
 
-    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        CoastlineRing& cp = **it;
-        if (cp.is_closed() && cp.npoints() > 3) { // everything that doesn't match here is bad beyond repair and reported elsewhere
-            std::unique_ptr<OGRPolygon> p = cp.ogr_polygon(true);
+    for (const auto& ring : m_list) {
+        if (ring->is_closed() && ring->npoints() > 3) { // everything that doesn't match here is bad beyond repair and reported elsewhere
+            std::unique_ptr<OGRPolygon> p = ring->ogr_polygon(true);
             if (p->IsValid()) {
                 p->assignSpatialReference(srs.wgs84());
                 vector.push_back(p.release());
@@ -142,7 +141,7 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
                     geom->assignSpatialReference(srs.wgs84());
                     vector.push_back(static_cast<OGRPolygon*>(geom));
                 } else {
-                    std::cerr << "Ignoring invalid polygon geometry (ring_id=" << cp.ring_id() << ").\n";
+                    std::cerr << "Ignoring invalid polygon geometry (ring_id=" << ring->ring_id() << ").\n";
                     delete geom;
                 }
             }
@@ -153,24 +152,23 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
 unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     unsigned int warnings = 0;
 
-    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        CoastlineRing& cp = **it;
-        if (cp.is_closed()) {
-            if (cp.npoints() > 3) {
-                output.add_ring(cp.ogr_polygon(true).release(), cp.ring_id(), cp.nways(), cp.npoints(), cp.is_fixed());
-            } else if (cp.npoints() == 1) {
-                output.add_error_point(cp.ogr_first_point(), "single_point_in_ring", cp.first_node_id());
+    for (const auto& ring : m_list) {
+        if (ring->is_closed()) {
+            if (ring->npoints() > 3) {
+                output.add_ring(ring->ogr_polygon(true).release(), ring->ring_id(), ring->nways(), ring->npoints(), ring->is_fixed());
+            } else if (ring->npoints() == 1) {
+                output.add_error_point(ring->ogr_first_point(), "single_point_in_ring", ring->first_node_id());
                 warnings++;
-            } else { // cp.npoints() == 2 or 3
-                output.add_error_line(cp.ogr_linestring(true).release(), "not_a_ring", cp.ring_id());
-                output.add_error_point(cp.ogr_first_point(), "not_a_ring", cp.first_node_id());
-                output.add_error_point(cp.ogr_last_point(), "not_a_ring", cp.last_node_id());
+            } else { // ring->npoints() == 2 or 3
+                output.add_error_line(ring->ogr_linestring(true).release(), "not_a_ring", ring->ring_id());
+                output.add_error_point(ring->ogr_first_point(), "not_a_ring", ring->first_node_id());
+                output.add_error_point(ring->ogr_last_point(), "not_a_ring", ring->last_node_id());
                 warnings++;
             }
         } else {
-            output.add_error_line(cp.ogr_linestring(true).release(), "not_closed", cp.ring_id());
-            output.add_error_point(cp.ogr_first_point(), "end_point", cp.first_node_id());
-            output.add_error_point(cp.ogr_last_point(), "end_point", cp.last_node_id());
+            output.add_error_line(ring->ogr_linestring(true).release(), "not_closed", ring->ring_id());
+            output.add_error_point(ring->ogr_first_point(), "end_point", ring->first_node_id());
+            output.add_error_point(ring->ogr_last_point(), "end_point", ring->last_node_id());
             warnings++;
         }
     }
@@ -245,8 +243,8 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
 
     std::vector<osmium::UndirectedSegment> segments;
     if (debug) std::cerr << "Setting up segments...\n";
-    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        it->get()->add_segments_to_vector(segments);
+    for (const auto& ring : m_list) {
+        ring->add_segments_to_vector(segments);
     }
 
     if (debug) std::cerr << "Sorting...\n";
@@ -254,9 +252,9 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
 
     if (debug) std::cerr << "Finding intersections...\n";
     std::vector<osmium::Location> intersections;
-    for (std::vector<osmium::UndirectedSegment>::const_iterator it1 = segments.begin(); it1 != segments.end()-1; ++it1) {
+    for (auto it1 = segments.cbegin(); it1 != segments.cend()-1; ++it1) {
         const osmium::UndirectedSegment& s1 = *it1;
-        for (std::vector<osmium::UndirectedSegment>::const_iterator it2 = it1+1; it2 != segments.end(); ++it2) {
+        for (auto it2 = it1+1; it2 != segments.cend(); ++it2) {
             const osmium::UndirectedSegment& s2 = *it2;
             if (s1 == s2) {
                 OGRLineString* line = create_ogr_linestring(s1);
@@ -276,8 +274,8 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
         }
     }
 
-    for (std::vector<osmium::Location>::const_iterator it = intersections.begin(); it != intersections.end(); ++it) {
-        OGRPoint* point = new OGRPoint(it->lon(), it->lat());
+    for (const auto& intersection : intersections) {
+        OGRPoint* point = new OGRPoint(intersection.lon(), intersection.lat());
         output.add_error_point(point, "intersection");
     }
 
@@ -285,16 +283,16 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
 }
 
 bool CoastlineRingCollection::close_antarctica_ring(int epsg) {
-    for (coastline_rings_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        osmium::Location fpos = (*it)->first_position();
-        osmium::Location lpos = (*it)->last_position();
+    for (const auto& ring : m_list) {
+        osmium::Location fpos = ring->first_position();
+        osmium::Location lpos = ring->last_position();
         if (fpos.lon() > 179.99 && lpos.lon() < -179.99 &&
             fpos.lat() <  -77.0 && fpos.lat() >  -78.0 &&
             lpos.lat() <  -77.0 && lpos.lat() >  -78.0) {
 
-            m_end_nodes.erase((*it)->last_node_id());
-            m_start_nodes.erase((*it)->first_node_id());
-            (*it)->close_antarctica_ring(epsg);
+            m_end_nodes.erase(ring->last_node_id());
+            m_start_nodes.erase(ring->first_node_id());
+            ring->close_antarctica_ring(epsg);
             return true;
         }
     }
@@ -395,16 +393,16 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     rings.reserve(m_list.size());
 
     // put all rings in a vector...
-    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        rings.push_back(std::make_pair<osmium::Location, CoastlineRing*>((*it)->first_position(), it->get()));
+    for (const auto& ring : m_list) {
+        rings.push_back(std::make_pair<osmium::Location, CoastlineRing*>(ring->first_position(), ring.get()));
     }
 
     // ... and sort it by position of the first node in the ring (this allows binary search in it)
     std::sort(rings.begin(), rings.end());
 
     // go through all the polygons that have been created before and mark the outer rings
-    for (polygon_vector_t::const_iterator it = polygons.begin(); it != polygons.end(); ++it) {
-        OGRLinearRing* exterior_ring = (*it)->getExteriorRing();
+    for (const auto& polygon : polygons) {
+        OGRLinearRing* exterior_ring = polygon->getExteriorRing();
         osmium::Location pos(exterior_ring->getX(0), exterior_ring->getY(0));
         std::vector<pos_ring_ptr_t>::iterator rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<osmium::Location, CoastlineRing*>(std::move(pos), NULL));
         if (rings_it != rings.end()) {
@@ -413,11 +411,10 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     }
 
     // find all rings not marked as outer and output them to the error_lines table
-    for (coastline_rings_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
-        if (!(*it)->is_outer()) {
-            CoastlineRing& ring = **it;
-            if (ring.is_closed() && ring.npoints() > 3 && ring.npoints() < max_nodes_to_be_considered_questionable) {
-                output.add_error_line(ring.ogr_linestring(false), "questionable", ring.ring_id());
+    for (const auto& ring : m_list) {
+        if (!ring->is_outer()) {
+            if (ring->is_closed() && ring->npoints() > 3 && ring->npoints() < max_nodes_to_be_considered_questionable) {
+                output.add_error_line(ring->ogr_linestring(false), "questionable", ring->ring_id());
                 warnings++;
             }
         }

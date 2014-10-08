@@ -99,7 +99,7 @@ public:
         }
 
         std::pair<posmap_type::iterator, posmap_type::iterator> ret = m_posmap.equal_range(node.id());
-        for (posmap_type::iterator it=ret.first; it != ret.second; ++it) {
+        for (auto it=ret.first; it != ret.second; ++it) {
             *(it->second) = node.location();
         }
     }

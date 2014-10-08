@@ -26,19 +26,19 @@
 #include "coastline_ring.hpp"
 
 void CoastlineRing::setup_positions(posmap_type& posmap) {
-    for (auto it = m_way_node_list.begin(); it != m_way_node_list.end(); ++it) {
-        posmap.insert(std::make_pair(it->ref(), &(it->location())));
+    for (auto& wn : m_way_node_list) {
+        posmap.insert(std::make_pair(wn.ref(), &(wn.location())));
     }
 }
 
 unsigned int CoastlineRing::check_positions(bool output_missing) {
     unsigned int missing_positions = 0;
 
-    for (auto it = m_way_node_list.begin(); it != m_way_node_list.end(); ++it) {
-        if (!it->location()) {
+    for (const auto& wn : m_way_node_list) {
+        if (!wn.location()) {
             ++missing_positions;
             if (output_missing) {
-                std::cerr << "Missing position of node " << it->ref() << "\n";
+                std::cerr << "Missing position of node " << wn.ref() << "\n";
             }
         }
     }
