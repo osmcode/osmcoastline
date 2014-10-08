@@ -43,7 +43,7 @@ class CoastlineWaysHandler1 : public osmium::handler::Handler {
     cfw_handler_t& m_cfw;
 
 public:
-    
+
     CoastlineWaysHandler1(cfw_handler_t& cfw) :
         m_cfw(cfw) {
     }
@@ -180,6 +180,6 @@ int main(int argc, char* argv[]) {
     osmium::io::Reader reader2(infile, osmium::osm_entity_bits::way);
     osmium::apply(reader2, handler2);
 
-    std::cerr << "Sum of way lengths: " << handler2.sum_length() << "m\n";
+    std::cerr << "Sum of way lengths: " << std::fixed << (handler2.sum_length() / 1000) << "km\n";
 }
 
