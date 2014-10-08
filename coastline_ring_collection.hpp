@@ -24,11 +24,6 @@
 
 #include <list>
 #include <vector>
-#include <boost/tr1/memory.hpp>
-#include <boost/make_shared.hpp>
-
-using std::tr1::shared_ptr;
-using boost::make_shared;
 
 #include <osmium/osm/way.hpp>
 
@@ -39,7 +34,7 @@ class OGRPolygon;
 class OutputDatabase;
 class CoastlinePolygons;
 
-typedef std::list< shared_ptr<CoastlineRing> > coastline_rings_list_t;
+typedef std::list<std::shared_ptr<CoastlineRing>> coastline_rings_list_t;
 typedef std::map<osmium::object_id_type, coastline_rings_list_t::iterator> idmap_t;
 
 /**
@@ -77,7 +72,7 @@ public:
         m_ways++;
         if (way.is_closed()) {
             m_rings_from_single_way++;
-            m_list.push_back(make_shared<CoastlineRing>(way));
+            m_list.push_back(std::make_shared<CoastlineRing>(way));
         } else {
             add_partial_ring(way);
         }

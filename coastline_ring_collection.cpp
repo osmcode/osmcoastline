@@ -20,6 +20,8 @@
 */
 
 #include <iostream>
+#include <memory>
+
 #include <ogr_geometry.h>
 
 #include "coastline_polygons.hpp"
@@ -54,7 +56,7 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
     // create one and add it to the collection.
     if (mprev == m_end_nodes.end() &&
         mnext == m_start_nodes.end()) {
-        coastline_rings_list_t::iterator added = m_list.insert(m_list.end(), make_shared<CoastlineRing>(way));
+        coastline_rings_list_t::iterator added = m_list.insert(m_list.end(), std::make_shared<CoastlineRing>(way));
         m_start_nodes[way.nodes().front().ref()] = added;
         m_end_nodes[way.nodes().back().ref()] = added;
         return;

@@ -23,6 +23,7 @@
 */
 
 #include <map>
+#include <memory>
 
 #include <osmium/osm/way.hpp>
 #include <osmium/osm/undirected_segment.hpp>
