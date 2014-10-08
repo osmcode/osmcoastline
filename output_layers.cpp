@@ -29,8 +29,6 @@
 #include <gdal_version.h>
 #include <geos_c.h>
 
-#include <boost/lexical_cast.hpp>
-
 #include <osmium/osm/types.hpp>
 
 #include "osmcoastline.hpp"
@@ -81,7 +79,7 @@ void LayerErrorPoints::add(OGRPoint* point, const char* error, osmium::object_id
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
     feature->SetGeometryDirectly(point);
-    feature->SetField("osm_id", boost::lexical_cast<std::string>(osm_id).c_str());
+    feature->SetField("osm_id", std::to_string(osm_id).c_str());
     feature->SetField("error", error);
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
@@ -126,7 +124,7 @@ void LayerErrorLines::add(OGRLineString* linestring, const char* error, osmium::
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
 
     feature->SetGeometryDirectly(linestring);
-    feature->SetField("osm_id", boost::lexical_cast<std::string>(osm_id).c_str());
+    feature->SetField("osm_id", std::to_string(osm_id).c_str());
     feature->SetField("error", error);
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {

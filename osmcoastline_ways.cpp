@@ -24,8 +24,6 @@
 
 #include <ogrsf_frmts.h>
 
-#include <boost/lexical_cast.hpp>
-
 #include <osmium/geom/haversine.hpp>
 #include <osmium/geom/ogr.hpp>
 #include <osmium/handler/node_locations_for_ways.hpp>
@@ -118,7 +116,7 @@ public:
             OGRFeature* feature = OGRFeature::CreateFeature(m_layer_ways->GetLayerDefn());
             OGRLineString* ogrlinestring = m_factory.create_linestring(way).release();
             feature->SetGeometry(ogrlinestring);
-            feature->SetField("way_id", boost::lexical_cast<std::string>(way.id()).c_str());
+            feature->SetField("way_id", std::to_string(way.id()).c_str());
             feature->SetField("name", way.tags().get_value_by_key("name"));
             feature->SetField("source", way.tags().get_value_by_key("source"));
 
