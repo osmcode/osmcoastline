@@ -86,7 +86,7 @@ public:
 
     unsigned int num_fixed_rings() const { return m_fixed_rings; }
 
-    void setup_positions(posmap_t& posmap);
+    void setup_positions(posmap_type& posmap);
 
     unsigned int check_positions(bool output_missing);
 

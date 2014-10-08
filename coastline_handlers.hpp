@@ -73,7 +73,7 @@ class CoastlineHandlerPass2 : public osmium::handler::Handler {
      * is set up first thing when the handler is instantiated and
      * thereafter used for each node coming in.
      */
-    posmap_t m_posmap;
+    posmap_type m_posmap;
     OutputDatabase& m_output;
     osmium::geom::OGRFactory<> m_factory;
 
@@ -98,8 +98,8 @@ public:
             }
         }
 
-        std::pair<posmap_t::iterator, posmap_t::iterator> ret = m_posmap.equal_range(node.id());
-        for (posmap_t::iterator it=ret.first; it != ret.second; ++it) {
+        std::pair<posmap_type::iterator, posmap_type::iterator> ret = m_posmap.equal_range(node.id());
+        for (posmap_type::iterator it=ret.first; it != ret.second; ++it) {
             *(it->second) = node.location();
         }
     }

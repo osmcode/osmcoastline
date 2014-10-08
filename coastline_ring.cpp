@@ -25,7 +25,7 @@
 
 #include "coastline_ring.hpp"
 
-void CoastlineRing::setup_positions(posmap_t& posmap) {
+void CoastlineRing::setup_positions(posmap_type& posmap) {
     for (auto it = m_way_node_list.begin(); it != m_way_node_list.end(); ++it) {
         posmap.insert(std::make_pair(it->ref(), &(it->location())));
     }

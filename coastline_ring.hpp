@@ -32,7 +32,7 @@ class OGRPoint;
 class OGRLineString;
 class OGRPolygon;
 
-typedef std::multimap<osmium::object_id_type, osmium::Location*> posmap_t;
+typedef std::multimap<osmium::object_id_type, osmium::Location*> posmap_type;
 
 /**
  * The CoastlineRing class models a (possibly unfinished) ring of
@@ -158,7 +158,7 @@ public:
      * posmap can than later be used to directly put the positions
      * into the right place.
      */
-    void setup_positions(posmap_t& posmap);
+    void setup_positions(posmap_type& posmap);
 
     /**
      * Check whether all positions for the ways are there. This
