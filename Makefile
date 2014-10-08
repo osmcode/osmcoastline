@@ -19,8 +19,7 @@ LIB_PBF   = -lz -lpthread -lprotobuf-lite -losmpbf
 LIB_GEOS  = $(shell geos-config --libs) -l geos_c
 LIB_OGR   = $(shell gdal-config --libs)
 
-PROGRAMS = osmcoastline_filter osmcoastline
-ALLPROGRAMS = osmcoastline_ways $(PROGRAMS)
+PROGRAMS = osmcoastline_filter osmcoastline osmcoastline_ways
 
 .PHONY: all clean
 
@@ -74,5 +73,5 @@ check:
 	cppcheck --enable=all *.cpp
 
 clean:
-	rm -f *.o core $(ALLPROGRAMS)
+	rm -f *.o core $(PROGRAMS)
 
