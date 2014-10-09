@@ -97,7 +97,7 @@ public:
     void add_ring(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed);
     void add_land_polygon(OGRPolygon* polygon);
     void add_water_polygon(OGRPolygon* polygon);
-    void add_line(OGRLineString* linestring);
+    void add_line(std::unique_ptr<OGRLineString> linestring);
 
     void set_options(const Options& options);
     void set_meta(int runtime, int memory_usage, const Stats& stats);

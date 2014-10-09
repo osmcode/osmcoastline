@@ -166,8 +166,8 @@ void OutputDatabase::add_water_polygon(OGRPolygon* polygon) {
     layer_water_polygons()->add(polygon);
 }
 
-void OutputDatabase::add_line(OGRLineString* linestring) {
-    layer_lines()->add(linestring);
+void OutputDatabase::add_line(std::unique_ptr<OGRLineString> linestring) {
+    layer_lines()->add(linestring.release());
 }
 
 const char** OutputDatabase::layer_options() const {

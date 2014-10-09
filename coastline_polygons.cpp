@@ -125,8 +125,8 @@ void CoastlinePolygons::split_polygon(OGRPolygon* polygon, int level) {
         }
 
         // These polygons will contain the bounding box of each half of the "polygon" polygon.
-        OGRPolygon* b1;
-        OGRPolygon* b2;
+        std::unique_ptr<OGRPolygon> b1;
+        std::unique_ptr<OGRPolygon> b2;
 
         if (envelope.MaxX - envelope.MinX < envelope.MaxY-envelope.MinY) {
             if (m_expand >= (envelope.MaxY - envelope.MinY) / 4) {
@@ -138,8 +138,8 @@ void CoastlinePolygons::split_polygon(OGRPolygon* polygon, int level) {
             // split vertically
             double MidY = (envelope.MaxY+envelope.MinY) / 2;
 
-            b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, MidY, m_expand);
-            b2 = create_rectangular_polygon(envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, m_expand);
+            b1 = std::unique_ptr<OGRPolygon>(create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, MidY, m_expand));
+            b2 = std::unique_ptr<OGRPolygon>(create_rectangular_polygon(envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, m_expand));
         } else {
             if (m_expand >= (envelope.MaxX - envelope.MinX) / 4) {
                 std::cerr << "Not splitting polygon with " << num_points << " points on outer ring. It would not get smaller because --bbox-overlap/-b is set to high.\n";
@@ -150,44 +150,39 @@ void CoastlinePolygons::split_polygon(OGRPolygon* polygon, int level) {
             // split horizontally
             double MidX = (envelope.MaxX+envelope.MinX) / 2;
 
-            b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, MidX, envelope.MaxY, m_expand);
-            b2 = create_rectangular_polygon(MidX, envelope.MinY, envelope.MaxX, envelope.MaxY, m_expand);
+            b1 = std::unique_ptr<OGRPolygon>(create_rectangular_polygon(envelope.MinX, envelope.MinY, MidX, envelope.MaxY, m_expand));
+            b2 = std::unique_ptr<OGRPolygon>(create_rectangular_polygon(MidX, envelope.MinY, envelope.MaxX, envelope.MaxY, m_expand));
         }
 
         // Use intersection with bbox polygons to split polygon into two halfes
-        OGRGeometry* geom1 = polygon->Intersection(b1);
-        OGRGeometry* geom2 = polygon->Intersection(b2);
+        std::unique_ptr<OGRGeometry> geom1 { polygon->Intersection(b1.get()) };
+        std::unique_ptr<OGRGeometry> geom2 { polygon->Intersection(b2.get()) };
 
         if (geom1 && (geom1->getGeometryType() == wkbPolygon || geom1->getGeometryType() == wkbMultiPolygon) &&
             geom2 && (geom2->getGeometryType() == wkbPolygon || geom2->getGeometryType() == wkbMultiPolygon)) {
             // split was successful, go on recursively
-            split_geometry(geom1, level+1);
-            split_geometry(geom2, level+1);
+            split_geometry(geom1.release(), level+1);
+            split_geometry(geom2.release(), level+1);
         } else {
             // split was not successful, output some debugging info and keep polygon before split
             std::cerr << "Polygon split at depth " << level << " was not successful. Keeping un-split polygon.\n";
             m_polygons.push_back(polygon);
             if (debug) {
-                std::cerr << "DEBUG geom1=" << geom1 << " geom2=" << geom2 << "\n";
-                if (geom1 != 0) {
+                std::cerr << "DEBUG geom1=" << geom1.get() << " geom2=" << geom2.get() << "\n";
+                if (geom1) {
                     std::cerr << "DEBUG geom1 type=" << geom1->getGeometryName() << "\n";
                     if (geom1->getGeometryType() == wkbGeometryCollection) {
-                        std::cerr << "DEBUG   numGeometries=" << static_cast<OGRGeometryCollection*>(geom1)->getNumGeometries() << "\n";
+                        std::cerr << "DEBUG   numGeometries=" << static_cast<OGRGeometryCollection*>(geom1.get())->getNumGeometries() << "\n";
                     }
                 }
-                if (geom2 != 0) {
+                if (geom2) {
                     std::cerr << "DEBUG geom2 type=" << geom2->getGeometryName() << "\n";
                     if (geom2->getGeometryType() == wkbGeometryCollection) {
-                        std::cerr << "DEBUG   numGeometries=" << static_cast<OGRGeometryCollection*>(geom2)->getNumGeometries() << "\n";
+                        std::cerr << "DEBUG   numGeometries=" << static_cast<OGRGeometryCollection*>(geom2.get())->getNumGeometries() << "\n";
                     }
                 }
             }
-            delete geom2;
-            delete geom1;
         }
-
-        delete b2;
-        delete b1;
     }
 }
 
@@ -244,22 +239,23 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, OGRLinearRi
     int num = ring->getNumPoints();
     assert(num > 2);
 
-    OGRPoint* point1 = new OGRPoint;
-    OGRPoint* point2 = new OGRPoint;
-    OGRLineString* line = new OGRLineString;
+    std::unique_ptr<OGRPoint> point1 { new OGRPoint };
+    std::unique_ptr<OGRPoint> point2 { new OGRPoint };
+    std::unique_ptr<OGRLineString> line { new OGRLineString };
 
-    ring->getPoint(0, point1);
+    ring->getPoint(0, point1.get());
     for (int i=1; i < num; ++i) {
-        ring->getPoint(i, point2);
+        ring->getPoint(i, point2.get());
 
-        bool added = add_segment_to_line(line, point1, point2);
+        bool added = add_segment_to_line(line.get(), point1.get(), point2.get());
 
         if (line->getNumPoints() >= max_points || !added) {
             if (line->getNumPoints() >= 2) {
                 line->setCoordinateDimension(2);
                 line->assignSpatialReference(ring->getSpatialReference());
-                m_output.add_line(line);
-                line = new OGRLineString;
+                std::unique_ptr<OGRLineString> new_line { new OGRLineString };
+                std::swap(line, new_line);
+                m_output.add_line(std::move(new_line));
             }
         }
 
@@ -270,13 +266,8 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, OGRLinearRi
     if (line->getNumPoints() >= 2) {
         line->setCoordinateDimension(2);
         line->assignSpatialReference(ring->getSpatialReference());
-        m_output.add_line(line);
-    } else {
-        delete line;
+        m_output.add_line(std::move(line));
     }
-
-    delete point2;
-    delete point1;
 }
 
 void CoastlinePolygons::output_lines(int max_points) {
@@ -292,28 +283,26 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
 //    std::cerr << "envelope = (" << e.MinX << ", " << e.MinY << "), (" << e.MaxX << ", " << e.MaxY << ") v.size()=" << v.size() << "\n";
     if (v.size() < 100) {
         try {
-            OGRGeometry* geom = create_rectangular_polygon(e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand);
+            std::unique_ptr<OGRGeometry> geom { create_rectangular_polygon(e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand) };
             assert(geom->getSpatialReference() != nullptr);
             for (const auto& polygon : v) {
                 OGRGeometry* diff = geom->Difference(polygon);
                 // for some reason there is sometimes no srs on the geometries, so we add them on
                 diff->assignSpatialReference(srs.out());
-                delete geom;
-                geom = diff;
+                geom.reset(diff);
             }
             if (geom) {
                 switch (geom->getGeometryType()) {
                     case wkbPolygon:
-                        m_output.add_water_polygon(static_cast<OGRPolygon*>(geom));
+                        m_output.add_water_polygon(static_cast<OGRPolygon*>(geom.release()));
                         break;
                     case wkbMultiPolygon:
-                        for (int i=static_cast<OGRMultiPolygon*>(geom)->getNumGeometries() - 1; i >= 0; --i) {
-                            OGRPolygon* p = static_cast<OGRPolygon*>(static_cast<OGRMultiPolygon*>(geom)->getGeometryRef(i));
+                        for (int i=static_cast<OGRMultiPolygon*>(geom.get())->getNumGeometries() - 1; i >= 0; --i) {
+                            OGRPolygon* p = static_cast<OGRPolygon*>(static_cast<OGRMultiPolygon*>(geom.get())->getGeometryRef(i));
                             p->assignSpatialReference(geom->getSpatialReference());
-                            static_cast<OGRMultiPolygon*>(geom)->removeGeometry(i, FALSE);
+                            static_cast<OGRMultiPolygon*>(geom.get())->removeGeometry(i, FALSE);
                             m_output.add_water_polygon(p);
                         }
-                        delete geom;
                         break;
                     case wkbGeometryCollection:
                         // XXX
