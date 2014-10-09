@@ -31,7 +31,7 @@ class OGRMultiPolygon;
 class OGREnvelope;
 class OutputDatabase;
 
-typedef std::vector<OGRPolygon*> polygon_vector_t;
+typedef std::vector<OGRPolygon*> polygon_vector_type;
 
 /**
  * A collection of land polygons created out of coastlines.
@@ -62,7 +62,7 @@ class CoastlinePolygons {
      * After that the different methods on this class will convert the
      * polygons and always leave the result in this vector again.
      */
-    polygon_vector_t* m_polygons;
+    polygon_vector_type m_polygons;
 
     /**
      * Max depth after recursive splitting.
@@ -73,34 +73,30 @@ class CoastlinePolygons {
 
     void split_geometry(OGRGeometry* geom, int level);
     void split_polygon(OGRPolygon* polygon, int level);
-    void split_bbox(OGREnvelope e, polygon_vector_t* v);
+    void split_bbox(OGREnvelope e, polygon_vector_type&& v);
 
     bool add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2);
     void output_polygon_ring_as_lines(int max_points, OGRLinearRing* ring);
 
 public:
 
-    CoastlinePolygons(polygon_vector_t* polygons, OutputDatabase& output, double expand, unsigned int max_points_in_polygon) :
+    CoastlinePolygons(polygon_vector_type&& polygons, OutputDatabase& output, double expand, unsigned int max_points_in_polygon) :
         m_output(output),
         m_expand(expand),
         m_max_points_in_polygon(max_points_in_polygon),
-        m_polygons(polygons),
+        m_polygons(std::move(polygons)),
         m_max_split_depth(0) {
     }
 
-    ~CoastlinePolygons() {
-        delete m_polygons;
-    }
-
     /// Number of polygons
-    int num_polygons() const { return m_polygons->size(); }
+    int num_polygons() const { return m_polygons.size(); }
 
-    polygon_vector_t::const_iterator begin() const {
-        return m_polygons->begin();
+    polygon_vector_type::const_iterator begin() const {
+        return m_polygons.begin();
     }
 
-    polygon_vector_t::const_iterator end() const {
-        return m_polygons->end();
+    polygon_vector_type::const_iterator end() const {
+        return m_polygons.end();
     }
 
     /// Turn polygons with wrong winding order around.

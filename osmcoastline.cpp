@@ -57,7 +57,7 @@ const unsigned int max_warnings = 500;
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-polygon_vector_t* create_polygons(CoastlineRingCollection& coastline_rings, OutputDatabase& output, unsigned int* warnings, unsigned int* errors) {
+polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, OutputDatabase& output, unsigned int* warnings, unsigned int* errors) {
     std::vector<OGRGeometry*> all_polygons;
     coastline_rings.add_polygons_to_vector(all_polygons);
 
@@ -73,27 +73,25 @@ polygon_vector_t* create_polygons(CoastlineRingCollection& coastline_rings, Outp
 
     assert(mega_multipolygon->getGeometryType() == wkbMultiPolygon);
 
-    polygon_vector_t* polygons = new polygon_vector_t;
-    polygons->reserve(static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries());
+    polygon_vector_type polygons;
+    polygons.reserve(static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries());
     for (int i=0; i < static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries(); ++i) {
         OGRGeometry* geom = static_cast<OGRMultiPolygon*>(mega_multipolygon)->getGeometryRef(i);
         assert(geom->getGeometryType() == wkbPolygon);
-        OGRPolygon* p = static_cast<OGRPolygon*>(geom);
+        std::unique_ptr<OGRPolygon> p { static_cast<OGRPolygon*>(geom) };
         if (p->IsValid()) {
-            polygons->push_back(p);
+            polygons.push_back(p.release());
         } else {
             output.add_error_line(static_cast<OGRLineString*>(p->getExteriorRing()->clone()), "invalid");
-            OGRGeometry* buf0 = p->Buffer(0);
+            std::unique_ptr<OGRGeometry> buf0 { p->Buffer(0) };
             if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
                 buf0->assignSpatialReference(srs.wgs84());
-                polygons->push_back(static_cast<OGRPolygon*>(buf0));
+                polygons.push_back(static_cast<OGRPolygon*>(buf0.release()));
                 (*warnings)++;
             } else {
                 std::cerr << "Ignoring invalid polygon geometry.\n";
-                delete buf0;
                 (*errors)++;
             }
-            delete p;
         }
     }
 

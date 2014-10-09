@@ -114,8 +114,8 @@ public:
         m_length += osmium::geom::haversine::distance(way.nodes());
         try {
             OGRFeature* feature = OGRFeature::CreateFeature(m_layer_ways->GetLayerDefn());
-            OGRLineString* ogrlinestring = m_factory.create_linestring(way).release();
-            feature->SetGeometry(ogrlinestring);
+            std::unique_ptr<OGRLineString> ogrlinestring = m_factory.create_linestring(way);
+            feature->SetGeometry(ogrlinestring.get());
             feature->SetField("way_id", std::to_string(way.id()).c_str());
             feature->SetField("name", way.tags().get_value_by_key("name"));
             feature->SetField("source", way.tags().get_value_by_key("source"));
@@ -129,7 +129,6 @@ public:
             }
 
             OGRFeature::DestroyFeature(feature);
-            delete ogrlinestring;
         } catch (osmium::geometry_error&) {
             std::cerr << "Ignoring illegal geometry for way " << way.id() << ".\n";
         }

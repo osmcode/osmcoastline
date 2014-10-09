@@ -136,13 +136,12 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
                 p->assignSpatialReference(srs.wgs84());
                 vector.push_back(p.release());
             } else {
-                OGRGeometry* geom = p->Buffer(0);
-                if (geom && (geom->getGeometryType() == wkbPolygon) && (static_cast<OGRPolygon*>(geom)->getExteriorRing()->getNumPoints() > 3) && (static_cast<OGRPolygon*>(geom)->getNumInteriorRings() == 0) && geom->IsValid()) {
+                std::unique_ptr<OGRGeometry> geom { p->Buffer(0) };
+                if (geom && (geom->getGeometryType() == wkbPolygon) && (static_cast<OGRPolygon*>(geom.get())->getExteriorRing()->getNumPoints() > 3) && (static_cast<OGRPolygon*>(geom.get())->getNumInteriorRings() == 0) && geom->IsValid()) {
                     geom->assignSpatialReference(srs.wgs84());
-                    vector.push_back(static_cast<OGRPolygon*>(geom));
+                    vector.push_back(static_cast<OGRPolygon*>(geom.release()));
                 } else {
                     std::cerr << "Ignoring invalid polygon geometry (ring_id=" << ring->ring_id() << ").\n";
-                    delete geom;
                 }
             }
         }
