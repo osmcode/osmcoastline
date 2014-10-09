@@ -25,6 +25,7 @@
 #include <list>
 #include <vector>
 
+#include <osmium/geom/ogr.hpp>
 #include <osmium/osm/way.hpp>
 
 #include "coastline_ring.hpp"
@@ -54,6 +55,8 @@ class CoastlineRingCollection {
     unsigned int m_fixed_rings;
 
     void add_partial_ring(const osmium::Way& way);
+
+    osmium::geom::OGRFactory<> m_factory;
 
 public:
 

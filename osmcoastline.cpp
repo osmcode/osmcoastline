@@ -57,7 +57,7 @@ const unsigned int max_warnings = 500;
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-polygon_vector_t* create_polygons(CoastlineRingCollection coastline_rings, OutputDatabase& output, unsigned int* warnings, unsigned int* errors) {
+polygon_vector_t* create_polygons(CoastlineRingCollection& coastline_rings, OutputDatabase& output, unsigned int* warnings, unsigned int* errors) {
     std::vector<OGRGeometry*> all_polygons;
     coastline_rings.add_polygons_to_vector(all_polygons);
 

@@ -25,8 +25,9 @@
 #include <map>
 #include <memory>
 
-#include <osmium/osm/way.hpp>
+#include <osmium/geom/ogr.hpp>
 #include <osmium/osm/undirected_segment.hpp>
+#include <osmium/osm/way.hpp>
 
 class OGRPoint;
 class OGRLineString;
@@ -203,18 +204,20 @@ public:
      *
      * Caller takes ownership of the created object.
      *
+     * @param geom_factory Geometry factory that should be used to build the geometry.
      * @param reverse Reverse the ring when creating the geometry.
      */
-    std::unique_ptr<OGRPolygon> ogr_polygon(bool reverse) const;
+    std::unique_ptr<OGRPolygon> ogr_polygon(osmium::geom::OGRFactory<>& geom_factory, bool reverse) const;
 
     /**
      * Create OGRLineString for this ring.
      *
      * Caller takes ownership of the created object.
      *
+     * @param geom_factory Geometry factory that should be used to build the geometry.
      * @param reverse Reverse the ring when creating the geometry.
      */
-    std::unique_ptr<OGRLineString> ogr_linestring(bool reverse) const;
+    std::unique_ptr<OGRLineString> ogr_linestring(osmium::geom::OGRFactory<>& geom_factory, bool reverse) const;
 
     /**
      * Create OGRPoint for the first point in this ring.

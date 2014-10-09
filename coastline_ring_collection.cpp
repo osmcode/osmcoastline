@@ -131,7 +131,7 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
 
     for (const auto& ring : m_list) {
         if (ring->is_closed() && ring->npoints() > 3) { // everything that doesn't match here is bad beyond repair and reported elsewhere
-            std::unique_ptr<OGRPolygon> p = ring->ogr_polygon(true);
+            std::unique_ptr<OGRPolygon> p = ring->ogr_polygon(m_factory, true);
             if (p->IsValid()) {
                 p->assignSpatialReference(srs.wgs84());
                 vector.push_back(p.release());
@@ -155,18 +155,18 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     for (const auto& ring : m_list) {
         if (ring->is_closed()) {
             if (ring->npoints() > 3) {
-                output.add_ring(ring->ogr_polygon(true).release(), ring->ring_id(), ring->nways(), ring->npoints(), ring->is_fixed());
+                output.add_ring(ring->ogr_polygon(m_factory, true).release(), ring->ring_id(), ring->nways(), ring->npoints(), ring->is_fixed());
             } else if (ring->npoints() == 1) {
                 output.add_error_point(ring->ogr_first_point(), "single_point_in_ring", ring->first_node_id());
                 warnings++;
             } else { // ring->npoints() == 2 or 3
-                output.add_error_line(ring->ogr_linestring(true).release(), "not_a_ring", ring->ring_id());
+                output.add_error_line(ring->ogr_linestring(m_factory, true).release(), "not_a_ring", ring->ring_id());
                 output.add_error_point(ring->ogr_first_point(), "not_a_ring", ring->first_node_id());
                 output.add_error_point(ring->ogr_last_point(), "not_a_ring", ring->last_node_id());
                 warnings++;
             }
         } else {
-            output.add_error_line(ring->ogr_linestring(true).release(), "not_closed", ring->ring_id());
+            output.add_error_line(ring->ogr_linestring(m_factory, true).release(), "not_closed", ring->ring_id());
             output.add_error_point(ring->ogr_first_point(), "end_point", ring->first_node_id());
             output.add_error_point(ring->ogr_last_point(), "end_point", ring->last_node_id());
             warnings++;
@@ -414,7 +414,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     for (const auto& ring : m_list) {
         if (!ring->is_outer()) {
             if (ring->is_closed() && ring->npoints() > 3 && ring->npoints() < max_nodes_to_be_considered_questionable) {
-                output.add_error_line(ring->ogr_linestring(false), "questionable", ring->ring_id());
+                output.add_error_line(ring->ogr_linestring(m_factory, false), "questionable", ring->ring_id());
                 warnings++;
             }
         }
