@@ -36,7 +36,7 @@ class OutputDatabase;
 class CoastlinePolygons;
 
 typedef std::list<std::shared_ptr<CoastlineRing>> coastline_rings_list_t;
-typedef std::map<osmium::object_id_type, coastline_rings_list_t::iterator> idmap_t;
+typedef std::map<osmium::object_id_type, coastline_rings_list_t::iterator> idmap_type;
 
 /**
  * A collection of CoastlineRing objects. Keeps a list of all start and end
@@ -47,8 +47,8 @@ class CoastlineRingCollection {
     coastline_rings_list_t m_list;
 
     // Mapping from node IDs to CoastlineRings.
-    idmap_t m_start_nodes;
-    idmap_t m_end_nodes;
+    idmap_type m_start_nodes;
+    idmap_type m_end_nodes;
 
     unsigned int m_ways;
     unsigned int m_rings_from_single_way;

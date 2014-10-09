@@ -49,8 +49,8 @@ CoastlineRingCollection::CoastlineRingCollection() :
  * CoastlineRing for it and add that to the collection.
  */
 void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
-    idmap_t::iterator mprev = m_end_nodes.find(way.nodes().front().ref());
-    idmap_t::iterator mnext = m_start_nodes.find(way.nodes().back().ref());
+    idmap_type::iterator mprev = m_end_nodes.find(way.nodes().front().ref());
+    idmap_type::iterator mnext = m_start_nodes.find(way.nodes().back().ref());
 
     // There is no CoastlineRing yet where this way could fit. So we
     // create one and add it to the collection.
@@ -81,7 +81,7 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
             (*prev)->join(**next);
             m_start_nodes.erase(mnext);
             if ((*prev)->is_closed()) {
-                idmap_t::iterator x = m_start_nodes.find((*prev)->first_node_id());
+                idmap_type::iterator x = m_start_nodes.find((*prev)->first_node_id());
                 if (x != m_start_nodes.end()) {
                     m_start_nodes.erase(x);
                 }
@@ -302,8 +302,8 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
     std::vector<Connection> connections;
 
     // Create vector with all possible combinations of connections between rings.
-    for (idmap_t::iterator eit = m_end_nodes.begin(); eit != m_end_nodes.end(); ++eit) {
-        for (idmap_t::iterator sit = m_start_nodes.begin(); sit != m_start_nodes.end(); ++sit) {
+    for (idmap_type::iterator eit = m_end_nodes.begin(); eit != m_end_nodes.end(); ++eit) {
+        for (idmap_type::iterator sit = m_start_nodes.begin(); sit != m_start_nodes.end(); ++sit) {
             double distance = (*sit->second)->distance_to_start_position((*eit->second)->last_position());
             if (distance < max_distance) {
                 connections.emplace_back(distance, eit->first, sit->first);
@@ -323,8 +323,8 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
         // Invalidate all other connections using one of the same end points.
         connections.erase(remove_if(connections.begin(), connections.end(), conn), connections.end());
 
-        idmap_t::iterator eit = m_end_nodes.find(conn.start_id);
-        idmap_t::iterator sit = m_start_nodes.find(conn.end_id);
+        idmap_type::iterator eit = m_end_nodes.find(conn.start_id);
+        idmap_type::iterator sit = m_start_nodes.find(conn.end_id);
 
         if (eit != m_end_nodes.end() && sit != m_start_nodes.end()) {
             if (debug) {
