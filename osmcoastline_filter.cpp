@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
 
     osmium::io::Header header;
     header.set("generator", "osmcoastline_filter");
+    header.add_box(osmium::Box(-180.0, -90.0, 180.0, 90.0));
 
     osmium::io::File infile(argv[optind]);
 
