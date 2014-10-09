@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
         vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
     }
 
-    if (options.output_polygons != none) {
+    if (options.output_polygons != output_polygon_type::none) {
         vout << "Create polygons...\n";
         CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database, &warnings, &errors), output_database, options.bbox_overlap, options.max_points_in_polygon);
         stats.land_polygons_before_split = coastline_polygons.num_polygons();
@@ -287,11 +287,13 @@ int main(int argc, char *argv[]) {
             coastline_polygons.split();
             stats.land_polygons_after_split = coastline_polygons.num_polygons();
         }
-        if (options.output_polygons == land || options.output_polygons == both) {
+        if (options.output_polygons == output_polygon_type::land ||
+            options.output_polygons == output_polygon_type::both) {
             vout << "Writing out land polygons...\n";
-            coastline_polygons.output_land_polygons(options.output_polygons == both);
+            coastline_polygons.output_land_polygons(options.output_polygons == output_polygon_type::both);
         }
-        if (options.output_polygons == water || options.output_polygons == both) {
+        if (options.output_polygons == output_polygon_type::water ||
+            options.output_polygons == output_polygon_type::both) {
             vout << "Writing out water polygons...\n";
             warnings += coastline_polygons.output_water_polygons();
         }

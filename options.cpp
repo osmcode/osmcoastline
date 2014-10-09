@@ -37,7 +37,7 @@ Options::Options(int argc, char* argv[]) :
     debug(false),
     max_points_in_polygon(1000),
     split_large_polygons(true),
-    output_polygons(land),
+    output_polygons(output_polygon_type::land),
     output_database(),
     overwrite_output(false),
     output_rings(false),
@@ -100,13 +100,13 @@ Options::Options(int argc, char* argv[]) :
                 break;
             case 'p':
                 if (!strcmp(optarg, "none")) {
-                    output_polygons = none;
+                    output_polygons = output_polygon_type::none;
                 } else if (!strcmp(optarg, "land")) {
-                    output_polygons = land;
+                    output_polygons = output_polygon_type::land;
                 } else if (!strcmp(optarg, "water")) {
-                    output_polygons = water;
+                    output_polygons = output_polygon_type::water;
                 } else if (!strcmp(optarg, "both")) {
-                    output_polygons = both;
+                    output_polygons = output_polygon_type::both;
                 } else {
                     std::cerr << "Unknown argument '" << optarg << "' for -p/--output-polygon option\n";
                     exit(return_code_cmdline);
@@ -132,7 +132,7 @@ Options::Options(int argc, char* argv[]) :
         }
     }
 
-    if (!split_large_polygons && (output_polygons == water || output_polygons == both)) {
+    if (!split_large_polygons && (output_polygons == output_polygon_type::water || output_polygons == output_polygon_type::both)) {
         std::cerr << "Can not use -m/--max-points=0 when writing out water polygons\n";
         exit(return_code_cmdline);
     }

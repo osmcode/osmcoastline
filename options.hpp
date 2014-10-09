@@ -24,7 +24,7 @@
 
 #include <string>
 
-enum output_polygon_t {
+enum class output_polygon_type {
     none  = 0,
     land  = 1,
     water = 2,
@@ -66,7 +66,7 @@ public:
     bool split_large_polygons;
 
     /// What polygons should be written out?
-    output_polygon_t output_polygons;
+    output_polygon_type output_polygons;
 
     /// Output Spatialite database file name.
     std::string output_database;
