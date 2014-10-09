@@ -22,6 +22,8 @@
 
 */
 
+#include <memory>
+
 #include <ogr_spatialref.h>
 
 class OGRGeometry;
@@ -39,7 +41,7 @@ class SRS {
      * If the output SRS is not WGS84, this contains the transformation
      * object. Otherwise nullptr.
      */
-    OGRCoordinateTransformation* m_transform;
+    std::unique_ptr<OGRCoordinateTransformation> m_transform;
 
 public:
 
@@ -48,8 +50,9 @@ public:
      */
     class TransformationException {};
 
-    SRS();
-    ~SRS();
+    SRS() {
+        m_srs_wgs84.SetWellKnownGeogCS("WGS84");
+    }
 
     /**
      * Set output SRS to EPGS code. Call this method before using any

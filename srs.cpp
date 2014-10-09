@@ -23,23 +23,11 @@
 
 #include "srs.hpp"
 
-SRS::SRS() :
-        m_srs_wgs84(),
-        m_srs_out(),
-        m_transform(nullptr)
-{
-    m_srs_wgs84.SetWellKnownGeogCS("WGS84");
-}
-
-SRS::~SRS() {
-    delete m_transform;
-}
-
 bool SRS::set_output(int epsg) {
     m_srs_out.importFromEPSG(epsg);
 
     if (epsg != 4326) {
-        m_transform = OGRCreateCoordinateTransformation(&m_srs_wgs84, &m_srs_out);
+        m_transform = std::unique_ptr<OGRCoordinateTransformation>(OGRCreateCoordinateTransformation(&m_srs_wgs84, &m_srs_out));
         if (!m_transform) {
             return false;
         }
@@ -56,7 +44,7 @@ void SRS::transform(OGRGeometry* geometry) {
     // Transform if no SRS is set on input geometry or it is set to WGS84.
     OGRSpatialReference* srs = geometry->getSpatialReference();
     if (srs == nullptr || srs->IsSame(&m_srs_wgs84)) {
-        if (geometry->transform(m_transform) != OGRERR_NONE) {
+        if (geometry->transform(m_transform.get()) != OGRERR_NONE) {
             throw TransformationException();
         }
     }
