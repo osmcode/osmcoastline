@@ -93,15 +93,15 @@ void CoastlineRing::close_antarctica_ring(int epsg) {
     double min = epsg == 4326 ? -90.0 : -85.0511;
 
     for (double lat = -78.0; lat > min; --lat) {
-        m_way_node_list.push_back(osmium::NodeRef(0, osmium::Location(-179.99999, static_cast<double>(lat))));
+        m_way_node_list.emplace_back(0, osmium::Location(-179.99999, static_cast<double>(lat)));
     }
 
     for (int lon = -180; lon < 180; ++lon) {
-        m_way_node_list.push_back(osmium::NodeRef(0, osmium::Location(static_cast<double>(lon), min)));
+        m_way_node_list.emplace_back(0, osmium::Location(static_cast<double>(lon), min));
     }
 
     for (double lat = min; lat < -78.0; ++lat) {
-        m_way_node_list.push_back(osmium::NodeRef(0, osmium::Location(179.99999, static_cast<double>(lat))));
+        m_way_node_list.emplace_back(0, osmium::Location(179.99999, static_cast<double>(lat)));
     }
 
     m_way_node_list.push_back(m_way_node_list.front());
@@ -150,7 +150,7 @@ double CoastlineRing::distance_to_start_position(osmium::Location pos) const {
 void CoastlineRing::add_segments_to_vector(std::vector<osmium::UndirectedSegment>& segments) const {
     if (m_way_node_list.size() > 1) {
         for (auto it = m_way_node_list.begin(); it != m_way_node_list.end()-1; ++it) {
-            segments.push_back(osmium::UndirectedSegment(it->location(), (it+1)->location()));
+            segments.emplace_back(it->location(), (it+1)->location());
         }
     }
 }

@@ -307,7 +307,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
         for (idmap_t::iterator sit = m_start_nodes.begin(); sit != m_start_nodes.end(); ++sit) {
             double distance = (*sit->second)->distance_to_start_position((*eit->second)->last_position());
             if (distance < max_distance) {
-                connections.push_back(Connection(distance, eit->first, sit->first));
+                connections.emplace_back(distance, eit->first, sit->first);
             }
         }
     }
@@ -394,7 +394,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
 
     // put all rings in a vector...
     for (const auto& ring : m_list) {
-        rings.push_back(std::make_pair<osmium::Location, CoastlineRing*>(ring->first_position(), ring.get()));
+        rings.emplace_back(ring->first_position(), ring.get());
     }
 
     // ... and sort it by position of the first node in the ring (this allows binary search in it)
