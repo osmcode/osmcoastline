@@ -53,23 +53,23 @@ public:
 
         const char* driver_name = "SQLite";
         OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name);
-        if (driver == NULL) {
+        if (!driver) {
             std::cerr << driver_name << " driver not available.\n";
             exit(return_code_fatal);
         }
 
         CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "FALSE");
-        const char* options[] = { "SPATIALITE=TRUE", NULL };
+        const char* options[] = { "SPATIALITE=TRUE", nullptr };
         m_data_source = driver->CreateDataSource("coastline-ways.db", const_cast<char**>(options));
-        if (m_data_source == NULL) {
+        if (!m_data_source) {
             std::cerr << "Creation of output file failed.\n";
             exit(return_code_fatal);
         }
 
         OGRSpatialReference sparef;
         sparef.SetWellKnownGeogCS("WGS84");
-        m_layer_ways = m_data_source->CreateLayer("ways", &sparef, wkbLineString, NULL);
-        if (m_layer_ways == NULL) {
+        m_layer_ways = m_data_source->CreateLayer("ways", &sparef, wkbLineString, nullptr);
+        if (!m_layer_ways) {
             std::cerr << "Layer creation failed.\n";
             exit(return_code_fatal);
         }

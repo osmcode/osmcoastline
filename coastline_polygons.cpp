@@ -294,7 +294,7 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_t* v) {
     if (v->size() < 100) {
         try {
             OGRGeometry* geom = create_rectangular_polygon(e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand);
-            assert(geom->getSpatialReference() != NULL);
+            assert(geom->getSpatialReference() != nullptr);
             for (const auto& polygon : *v) {
                 OGRGeometry* diff = geom->Difference(polygon);
                 // for some reason there is sometimes no srs on the geometries, so we add them on

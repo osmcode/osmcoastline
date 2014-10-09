@@ -44,7 +44,7 @@ protected:
     /// OGRLayer implementing this output layer.
     OGRLayer* m_layer;
 
-    Layer() : m_layer(NULL) {}
+    Layer() : m_layer(nullptr) {}
 
 public:
 

@@ -10,18 +10,18 @@ class VerboseOutput {
 public:
 
     VerboseOutput(bool verbose) :
-        m_start(time(NULL)),
+        m_start(time(nullptr)),
         m_verbose(verbose),
         m_newline(true) {
     }
 
     int runtime() const {
-        return time(NULL) - m_start;
+        return time(nullptr) - m_start;
     }
 
     void start_line() {
         if (m_newline) {
-            int elapsed = time(NULL) - m_start;
+            int elapsed = time(nullptr) - m_start;
             char timestr[20];
             snprintf(timestr, sizeof(timestr)-1, "[%2d:%02d] ", elapsed / 60, elapsed % 60);
             std::cerr << timestr;

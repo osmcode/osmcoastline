@@ -37,7 +37,7 @@ class SRS {
 
     /**
      * If the output SRS is not WGS84, this contains the transformation
-     * object. Otherwise NULL.
+     * object. Otherwise nullptr.
      */
     OGRCoordinateTransformation* m_transform;
 

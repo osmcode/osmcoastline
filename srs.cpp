@@ -26,7 +26,7 @@
 SRS::SRS() :
         m_srs_wgs84(),
         m_srs_out(),
-        m_transform(NULL)
+        m_transform(nullptr)
 {
     m_srs_wgs84.SetWellKnownGeogCS("WGS84");
 }
@@ -55,7 +55,7 @@ void SRS::transform(OGRGeometry* geometry) {
 
     // Transform if no SRS is set on input geometry or it is set to WGS84.
     OGRSpatialReference* srs = geometry->getSpatialReference();
-    if (srs == NULL || srs->IsSame(&m_srs_wgs84)) {
+    if (srs == nullptr || srs->IsSame(&m_srs_wgs84)) {
         if (geometry->transform(m_transform) != OGRERR_NONE) {
             throw TransformationException();
         }

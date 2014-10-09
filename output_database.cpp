@@ -30,31 +30,31 @@
 #include "options.hpp"
 #include "stats.hpp"
 
-const char* OutputDatabase::options_with_index[] = { NULL };
-const char* OutputDatabase::options_without_index[] = { "SPATIAL_INDEX=no", NULL };
+const char* OutputDatabase::options_with_index[] = { nullptr };
+const char* OutputDatabase::options_without_index[] = { "SPATIAL_INDEX=no", nullptr };
 
 OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_with_index(with_index),
-    m_data_source(NULL),
-    m_layer_error_points(NULL),
-    m_layer_error_lines(NULL),
-    m_layer_rings(NULL),
-    m_layer_land_polygons(NULL),
-    m_layer_water_polygons(NULL),
-    m_layer_lines(NULL)
+    m_data_source(),
+    m_layer_error_points(),
+    m_layer_error_lines(),
+    m_layer_rings(),
+    m_layer_land_polygons(),
+    m_layer_water_polygons(),
+    m_layer_lines()
 {
     OGRRegisterAll();
 
     const char* driver_name = "SQLite";
     OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name);
-    if (driver == NULL) {
+    if (!driver) {
         std::cerr << driver_name << " driver not available.\n";
         exit(return_code_fatal);
     }
 
-    const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no", NULL };
+    const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no", nullptr };
     m_data_source = driver->CreateDataSource(outdb.c_str(), const_cast<char**>(options));
-    if (m_data_source == NULL) {
+    if (!m_data_source) {
         std::cerr << "Creation of output file failed.\n";
         exit(return_code_fatal);
     }
@@ -175,6 +175,6 @@ const char** OutputDatabase::layer_options() const {
 }
 
 void OutputDatabase::exec(const char* sql) {
-    m_data_source->ReleaseResultSet(m_data_source->ExecuteSQL(sql, NULL, NULL));
+    m_data_source->ReleaseResultSet(m_data_source->ExecuteSQL(sql, nullptr, nullptr));
 }
 

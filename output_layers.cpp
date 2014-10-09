@@ -51,7 +51,7 @@ LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, const char** opti
     Layer()
 {
     m_layer = data_source->CreateLayer("error_points", srs.out(), wkbPoint, const_cast<char**>(options));
-    if (m_layer == NULL) {
+    if (!m_layer) {
         std::cerr << "Creating layer 'error_points' failed.\n";
         exit(return_code_fatal);
     }
@@ -96,7 +96,7 @@ LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, const char** option
     Layer()
 {
     m_layer = data_source->CreateLayer("error_lines", srs.out(), wkbLineString, const_cast<char**>(options));
-    if (m_layer == NULL) {
+    if (!m_layer) {
         std::cerr << "Creating layer 'error_lines' failed.\n";
         exit(return_code_fatal);
     }
@@ -141,7 +141,7 @@ LayerRings::LayerRings(OGRDataSource* data_source, const char** options) :
     Layer()
 {
     m_layer = data_source->CreateLayer("rings", srs.out(), wkbPolygon, const_cast<char**>(options));
-    if (m_layer == NULL) {
+    if (!m_layer) {
         std::cerr << "Creating layer 'rings' failed.\n";
         exit(return_code_fatal);
     }
@@ -268,7 +268,7 @@ LayerPolygons::LayerPolygons(OGRDataSource* data_source, const char** options, c
     m_name(name)
 {
     m_layer = data_source->CreateLayer(name, srs.out(), wkbPolygon, const_cast<char**>(options));
-    if (m_layer == NULL) {
+    if (!m_layer) {
         std::cerr << "Creating layer '" << name << "' failed.\n";
         exit(return_code_fatal);
     }
@@ -297,7 +297,7 @@ LayerLines::LayerLines(OGRDataSource* data_source, const char** options) :
     Layer()
 {
     m_layer = data_source->CreateLayer("lines", srs.out(), wkbLineString, const_cast<char**>(options));
-    if (m_layer == NULL) {
+    if (!m_layer) {
         std::cerr << "Creating layer 'lines' failed.\n";
         exit(return_code_fatal);
     }

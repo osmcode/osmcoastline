@@ -62,7 +62,7 @@ polygon_vector_t* create_polygons(CoastlineRingCollection& coastline_rings, Outp
     coastline_rings.add_polygons_to_vector(all_polygons);
 
     int is_valid;
-    const char* options[] = { "METHOD=ONLY_CCW", NULL };
+    const char* options[] = { "METHOD=ONLY_CCW", nullptr };
     if (debug) {
         std::cerr << "Calling organizePolygons()\n";
     }
