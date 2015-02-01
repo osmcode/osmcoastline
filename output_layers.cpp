@@ -19,11 +19,11 @@
 
 */
 
+#include <cassert>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <assert.h>
 
 #include <ogrsf_frmts.h>
 #include <gdal_version.h>

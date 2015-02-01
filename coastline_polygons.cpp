@@ -19,10 +19,10 @@
 
 */
 
+#include <cassert>
+#include <cmath>
 #include <iostream>
 #include <vector>
-#include <cmath>
-#include <assert.h>
 
 #include <ogr_geometry.h>
 
