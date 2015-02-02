@@ -5,3 +5,4 @@ core
 doc
 *.o
 *.swp
+.ycm_extra_conf.pyc
