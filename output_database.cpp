@@ -58,12 +58,12 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
         exit(return_code_fatal);
     }
 
-    m_layer_error_points = new LayerErrorPoints(m_data_source.get(), layer_options());
-    m_layer_error_lines = new LayerErrorLines(m_data_source.get(), layer_options());
-    m_layer_rings = new LayerRings(m_data_source.get(), layer_options());
-    m_layer_land_polygons = new LayerPolygons(m_data_source.get(), layer_options(), "land_polygons");
-    m_layer_water_polygons = new LayerPolygons(m_data_source.get(), layer_options(), "water_polygons");
-    m_layer_lines = new LayerLines(m_data_source.get(), layer_options());
+    m_layer_error_points.reset(new LayerErrorPoints(m_data_source.get(), layer_options()));
+    m_layer_error_lines.reset(new LayerErrorLines(m_data_source.get(), layer_options()));
+    m_layer_rings.reset(new LayerRings(m_data_source.get(), layer_options()));
+    m_layer_land_polygons.reset(new LayerPolygons(m_data_source.get(), layer_options(), "land_polygons"));
+    m_layer_water_polygons.reset(new LayerPolygons(m_data_source.get(), layer_options(), "water_polygons"));
+    m_layer_lines.reset(new LayerLines(m_data_source.get(), layer_options()));
 
     exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER)");
     exec("CREATE TABLE meta ("

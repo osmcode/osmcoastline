@@ -59,12 +59,12 @@ class OutputDatabase {
 
     std::unique_ptr<OGRDataSource, OGRDataSourceDestroyer> m_data_source;
 
-    LayerErrorPoints* m_layer_error_points;
-    LayerErrorLines*  m_layer_error_lines;
-    LayerRings*       m_layer_rings;
-    LayerPolygons*    m_layer_land_polygons;
-    LayerPolygons*    m_layer_water_polygons;
-    LayerLines*       m_layer_lines;
+    std::unique_ptr<LayerErrorPoints> m_layer_error_points;
+    std::unique_ptr<LayerErrorLines>  m_layer_error_lines;
+    std::unique_ptr<LayerRings>       m_layer_rings;
+    std::unique_ptr<LayerPolygons>    m_layer_land_polygons;
+    std::unique_ptr<LayerPolygons>    m_layer_water_polygons;
+    std::unique_ptr<LayerLines>       m_layer_lines;
 
     const char** layer_options() const;
 
@@ -84,12 +84,12 @@ public:
     void create_layer_water_polygons();
     void create_layer_lines();
 
-    LayerErrorPoints* layer_error_points()   const { return m_layer_error_points; }
-    LayerErrorLines*  layer_error_lines()    const { return m_layer_error_lines; }
-    LayerRings*       layer_rings()          const { return m_layer_rings; }
-    LayerPolygons*    layer_land_polygons()  const { return m_layer_land_polygons; }
-    LayerPolygons*    layer_water_polygons() const { return m_layer_water_polygons; }
-    LayerLines*       layer_lines()          const { return m_layer_lines; }
+    LayerErrorPoints* layer_error_points()   const { return m_layer_error_points.get(); }
+    LayerErrorLines*  layer_error_lines()    const { return m_layer_error_lines.get(); }
+    LayerRings*       layer_rings()          const { return m_layer_rings.get(); }
+    LayerPolygons*    layer_land_polygons()  const { return m_layer_land_polygons.get(); }
+    LayerPolygons*    layer_water_polygons() const { return m_layer_water_polygons.get(); }
+    LayerLines*       layer_lines()          const { return m_layer_lines.get(); }
 
     void add_error_point(std::unique_ptr<OGRPoint> point, const char* error, osmium::object_id_type id=0);
     void add_error_point(OGRPoint* point, const char* error, osmium::object_id_type id=0);
