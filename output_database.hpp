@@ -28,17 +28,13 @@
 #include <osmium/osm/types.hpp>
 #include <ogr_spatialref.h>
 
+#include "ogr_include.hpp"
+
 class LayerErrorPoints;
 class LayerErrorLines;
 class LayerRings;
 class LayerPolygons;
 class LayerLines;
-
-class OGRDataSource;
-class OGRCoordinateTransformation;
-class OGRPoint;
-class OGRLineString;
-class OGRPolygon;
 
 class Options;
 struct Stats;
@@ -55,7 +51,13 @@ class OutputDatabase {
 
     bool m_with_index;
 
-    OGRDataSource* m_data_source;
+    struct OGRDataSourceDestroyer {
+        void operator()(OGRDataSource* ptr) {
+            OGRDataSource::DestroyDataSource(ptr);
+        }
+    };
+
+    std::unique_ptr<OGRDataSource, OGRDataSourceDestroyer> m_data_source;
 
     LayerErrorPoints* m_layer_error_points;
     LayerErrorLines*  m_layer_error_lines;
@@ -73,7 +75,7 @@ public:
 
     OutputDatabase(const std::string& outdb, bool with_index=false);
 
-    ~OutputDatabase();
+    ~OutputDatabase() = default;
 
     void create_layer_error_points();
     void create_layer_error_lines();

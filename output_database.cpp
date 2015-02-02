@@ -52,18 +52,18 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     }
 
     const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no", nullptr };
-    m_data_source = driver->CreateDataSource(outdb.c_str(), const_cast<char**>(options));
+    m_data_source.reset(driver->CreateDataSource(outdb.c_str(), const_cast<char**>(options)));
     if (!m_data_source) {
         std::cerr << "Creation of output file failed.\n";
         exit(return_code_fatal);
     }
 
-    m_layer_error_points = new LayerErrorPoints(m_data_source, layer_options());
-    m_layer_error_lines = new LayerErrorLines(m_data_source, layer_options());
-    m_layer_rings = new LayerRings(m_data_source, layer_options());
-    m_layer_land_polygons = new LayerPolygons(m_data_source, layer_options(), "land_polygons");
-    m_layer_water_polygons = new LayerPolygons(m_data_source, layer_options(), "water_polygons");
-    m_layer_lines = new LayerLines(m_data_source, layer_options());
+    m_layer_error_points = new LayerErrorPoints(m_data_source.get(), layer_options());
+    m_layer_error_lines = new LayerErrorLines(m_data_source.get(), layer_options());
+    m_layer_rings = new LayerRings(m_data_source.get(), layer_options());
+    m_layer_land_polygons = new LayerPolygons(m_data_source.get(), layer_options(), "land_polygons");
+    m_layer_water_polygons = new LayerPolygons(m_data_source.get(), layer_options(), "water_polygons");
+    m_layer_lines = new LayerLines(m_data_source.get(), layer_options());
 
     exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER)");
     exec("CREATE TABLE meta ("
@@ -118,10 +118,6 @@ void OutputDatabase::set_meta(int runtime, int memory_usage, const Stats& stats)
         << ")";
 
     exec(sql.str().c_str());
-}
-
-OutputDatabase::~OutputDatabase() {
-    OGRDataSource::DestroyDataSource(m_data_source);
 }
 
 void OutputDatabase::commit() {
