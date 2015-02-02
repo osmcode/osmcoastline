@@ -22,8 +22,6 @@
 #include <iostream>
 #include <set>
 
-#include <ogrsf_frmts.h>
-
 #include <osmium/geom/haversine.hpp>
 #include <osmium/geom/ogr.hpp>
 #include <osmium/handler/node_locations_for_ways.hpp>

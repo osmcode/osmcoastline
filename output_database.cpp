@@ -22,8 +22,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <ogrsf_frmts.h>
-
+#include "ogr_include.hpp"
 #include "osmcoastline.hpp"
 #include "output_database.hpp"
 #include "output_layers.hpp"

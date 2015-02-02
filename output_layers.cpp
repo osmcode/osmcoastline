@@ -25,12 +25,12 @@
 #include <stdexcept>
 #include <string>
 
-#include <ogrsf_frmts.h>
 #include <gdal_version.h>
 #include <geos_c.h>
 
 #include <osmium/osm/types.hpp>
 
+#include "ogr_include.hpp"
 #include "osmcoastline.hpp"
 #include "output_layers.hpp"
 #include "srs.hpp"

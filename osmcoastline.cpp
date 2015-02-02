@@ -27,8 +27,6 @@
 #include <osmium/io/any_input.hpp>
 #include <osmium/visitor.hpp>
 
-#include <ogrsf_frmts.h>
-
 #include "osmcoastline.hpp"
 #include "coastline_ring.hpp"
 #include "coastline_ring_collection.hpp"
