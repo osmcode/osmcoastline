@@ -32,6 +32,10 @@
 const char* OutputDatabase::options_with_index[] = { nullptr };
 const char* OutputDatabase::options_without_index[] = { "SPATIAL_INDEX=no", nullptr };
 
+OutputDatabase::~OutputDatabase() {
+    OGRCleanupAll();
+}
+
 OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_with_index(with_index),
     m_data_source(),

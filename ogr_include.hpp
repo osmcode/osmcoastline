@@ -22,6 +22,7 @@
    so we are adding them here, so that not everybody will need all those
    pragmas to disable warnings. */
 //#include <ogr_geometry.h>
+#include <ogr_api.h>
 #include <ogrsf_frmts.h>
 
 #ifdef _MSC_VER

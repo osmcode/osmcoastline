@@ -69,7 +69,7 @@ public:
 
     OutputDatabase(const std::string& outdb, bool with_index=false);
 
-    ~OutputDatabase() = default;
+    ~OutputDatabase();
 
     void create_layer_error_points();
     void create_layer_error_lines();
