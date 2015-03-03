@@ -310,6 +310,8 @@ int main(int argc, char *argv[]) {
     std::cout << "There were " << warnings << " warnings.\n";
     std::cout << "There were " << errors << " errors.\n";
 
+    google::protobuf::ShutdownProtobufLibrary();
+
     if (errors || warnings > max_warnings) {
         return return_code_error;
     } else if (warnings) {

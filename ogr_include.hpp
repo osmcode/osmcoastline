@@ -32,7 +32,9 @@
 
 struct OGRDataSourceDestroyer {
     void operator()(OGRDataSource* ptr) {
-        OGRDataSource::DestroyDataSource(ptr);
+        if (ptr) {
+            OGRDataSource::DestroyDataSource(ptr);
+        }
     }
 };
 

@@ -224,7 +224,11 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
         */
 
 #if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR <= 10
-        std::string reason = GEOSisValidReason(polygon->exportToGEOS());
+        GEOSGeom p { polygon->exportToGEOS() };
+        char* r = GEOSisValidReason(p);
+        std::string reason = r;
+        GEOSFree(r);
+        GEOSGeom_destroy(p);
 #else
         GEOSContextHandle_t contextHandle = OGRGeometry::createGEOSContext();
         std::string reason = GEOSisValidReason(polygon->exportToGEOS(contextHandle));
