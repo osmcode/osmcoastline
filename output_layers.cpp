@@ -240,7 +240,7 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
         iss >> y;
         reason = reason.substr(0, left_bracket);
 
-        OGRPoint* point = new OGRPoint();
+        std::unique_ptr<OGRPoint> point { new OGRPoint() };
         point->assignSpatialReference(polygon->getSpatialReference());
         point->setX(x);
         point->setY(y);
@@ -248,7 +248,7 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
         if (reason == "Self-intersection") {
             reason = "self_intersection";
         }
-        layer_error_points->add(point, reason.c_str(), osm_id);
+        layer_error_points->add(point.release(), reason.c_str(), osm_id);
 
         feature->SetField("valid", 0);
     }

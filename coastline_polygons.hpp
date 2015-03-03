@@ -22,16 +22,19 @@
 
 */
 
+#include <memory>
 #include <vector>
 
 class OGRGeometry;
 class OGRLinearRing;
+class OGRLineString;
+class OGRPoint;
 class OGRPolygon;
 class OGRMultiPolygon;
 class OGREnvelope;
 class OutputDatabase;
 
-typedef std::vector<OGRPolygon*> polygon_vector_type;
+typedef std::vector<std::unique_ptr<OGRPolygon>> polygon_vector_type;
 
 /**
  * A collection of land polygons created out of coastlines.
@@ -69,10 +72,10 @@ class CoastlinePolygons {
      */
     int m_max_split_depth;
 
-    OGRPolygon* create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand=0) const;
+    std::unique_ptr<OGRPolygon> create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand=0) const;
 
-    void split_geometry(OGRGeometry* geom, int level);
-    void split_polygon(OGRPolygon* polygon, int level);
+    void split_geometry(std::unique_ptr<OGRGeometry> geom, int level);
+    void split_polygon(std::unique_ptr<OGRPolygon> polygon, int level);
     void split_bbox(OGREnvelope e, polygon_vector_type&& v);
 
     bool add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2);

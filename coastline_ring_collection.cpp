@@ -223,8 +223,8 @@ bool y_range_overlap(const osmium::UndirectedSegment& s1, const osmium::Undirect
     return true;
 }
 
-OGRLineString* create_ogr_linestring(const osmium::Segment& segment) {
-    OGRLineString* line = new OGRLineString;
+std::unique_ptr<OGRLineString> create_ogr_linestring(const osmium::Segment& segment) {
+    std::unique_ptr<OGRLineString> line { new OGRLineString };
     line->setNumPoints(2);
     line->setPoint(0, segment.first().lon(), segment.first().lat());
     line->setPoint(1, segment.second().lon(), segment.second().lat());
@@ -256,8 +256,8 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
         for (auto it2 = it1+1; it2 != segments.cend(); ++it2) {
             const osmium::UndirectedSegment& s2 = *it2;
             if (s1 == s2) {
-                OGRLineString* line = create_ogr_linestring(s1);
-                output.add_error_line(line, "overlap");
+                std::unique_ptr<OGRLineString> line = create_ogr_linestring(s1);
+                output.add_error_line(std::move(line), "overlap");
                 overlaps++;
             } else {
                 if (outside_x_range(s2, s1)) {
@@ -274,8 +274,8 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
     }
 
     for (const auto& intersection : intersections) {
-        OGRPoint* point = new OGRPoint(intersection.lon(), intersection.lat());
-        output.add_error_point(point, "intersection");
+        std::unique_ptr<OGRPoint> point { new OGRPoint(intersection.lon(), intersection.lat()) };
+        output.add_error_point(std::move(point), "intersection");
     }
 
     return intersections.size() + overlaps;
@@ -340,10 +340,10 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
             output.add_error_point(s->ogr_first_point(), "fixed_end_point", s->first_node_id());
 
             if (e->last_position() != s->first_position()) {
-                OGRLineString* linestring = new OGRLineString;
+                std::unique_ptr<OGRLineString> linestring { new OGRLineString };
                 linestring->addPoint(e->last_position().lon(), e->last_position().lat());
                 linestring->addPoint(s->first_position().lon(), s->first_position().lat());
-                output.add_error_line(linestring, "added_line");
+                output.add_error_line(std::move(linestring), "added_line");
             }
 
             if (e == s) {

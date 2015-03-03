@@ -29,6 +29,7 @@
 #include <osmium/io/any_input.hpp>
 #include <osmium/visitor.hpp>
 
+#include "ogr_include.hpp"
 #include "osmcoastline.hpp"
 
 typedef osmium::index::map::SparseMemArray<osmium::unsigned_object_id_type, osmium::Location> index_type;
@@ -38,7 +39,7 @@ class CoastlineWaysHandler : public osmium::handler::Handler {
 
     double m_length;
 
-    OGRDataSource* m_data_source;
+    std::unique_ptr<OGRDataSource, OGRDataSourceDestroyer> m_data_source;
     OGRLayer* m_layer_ways;
 
     osmium::geom::OGRFactory<> m_factory;
@@ -58,7 +59,7 @@ public:
 
         CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "FALSE");
         const char* options[] = { "SPATIALITE=TRUE", nullptr };
-        m_data_source = driver->CreateDataSource("coastline-ways.db", const_cast<char**>(options));
+        m_data_source.reset(driver->CreateDataSource("coastline-ways.db", const_cast<char**>(options)));
         if (!m_data_source) {
             std::cerr << "Creation of output file failed.\n";
             exit(return_code_fatal);
@@ -105,7 +106,6 @@ public:
 
     ~CoastlineWaysHandler() {
         m_layer_ways->CommitTransaction();
-        OGRDataSource::DestroyDataSource(m_data_source);
     }
 
     void way(osmium::Way& way) {

@@ -30,4 +30,10 @@
 # pragma GCC diagnostic pop
 #endif
 
+struct OGRDataSourceDestroyer {
+    void operator()(OGRDataSource* ptr) {
+        OGRDataSource::DestroyDataSource(ptr);
+    }
+};
+
 #endif // OGR_INCLUDE_HPP

@@ -91,8 +91,7 @@ public:
         const char* natural = node.tags().get_value_by_key("natural");
         if (natural && !strcmp(natural, "coastline")) {
             try {
-                std::unique_ptr<OGRPoint> ogr_point = m_factory.create_point(node);
-                m_output.add_error_point(std::move(ogr_point), "tagged_node", node.id());
+                m_output.add_error_point(m_factory.create_point(node), "tagged_node", node.id());
             } catch (osmium::geometry_error&) {
                 std::cerr << "Ignoring illegal geometry for node " << node.id() << ".\n";
             }
