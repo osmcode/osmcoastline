@@ -33,7 +33,7 @@
 #include "osmcoastline.hpp"
 
 typedef osmium::index::map::SparseMemArray<osmium::unsigned_object_id_type, osmium::Location> index_type;
-typedef osmium::handler::NodeLocationsForWays<index_type> node_location_handler_type;
+typedef osmium::handler::NodeLocationsForWays<index_type, index_type> node_location_handler_type;
 
 class CoastlineWaysHandler : public osmium::handler::Handler {
 
@@ -145,7 +145,8 @@ int main(int argc, char* argv[]) {
     }
 
     index_type store_pos;
-    node_location_handler_type location_handler(store_pos);
+    index_type store_neg;
+    node_location_handler_type location_handler(store_pos, store_neg);
 
     osmium::io::File infile(argv[1]);
     osmium::io::Reader reader1(infile, osmium::osm_entity_bits::node);
