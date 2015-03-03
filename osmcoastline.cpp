@@ -64,17 +64,18 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     if (debug) {
         std::cerr << "Calling organizePolygons()\n";
     }
-    OGRGeometry* mega_multipolygon = OGRGeometryFactory::organizePolygons(&all_polygons[0], all_polygons.size(), &is_valid, options);
+    std::unique_ptr<OGRGeometry> mega_geometry { OGRGeometryFactory::organizePolygons(&all_polygons[0], all_polygons.size(), &is_valid, options) };
     if (debug) {
         std::cerr << "organizePolygons() done\n";
     }
 
-    assert(mega_multipolygon->getGeometryType() == wkbMultiPolygon);
+    assert(mega_geometry->getGeometryType() == wkbMultiPolygon);
+    OGRMultiPolygon* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.get());
 
     polygon_vector_type polygons;
-    polygons.reserve(static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries());
-    for (int i=0; i < static_cast<OGRMultiPolygon*>(mega_multipolygon)->getNumGeometries(); ++i) {
-        OGRGeometry* geom = static_cast<OGRMultiPolygon*>(mega_multipolygon)->getGeometryRef(i);
+    polygons.reserve(mega_multipolygon->getNumGeometries());
+    for (int i=0; i < mega_multipolygon->getNumGeometries(); ++i) {
+        OGRGeometry* geom = mega_multipolygon->getGeometryRef(i);
         assert(geom->getGeometryType() == wkbPolygon);
         std::unique_ptr<OGRPolygon> p { static_cast<OGRPolygon*>(geom) };
         if (p->IsValid()) {
@@ -93,7 +94,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
         }
     }
 
-    static_cast<OGRMultiPolygon*>(mega_multipolygon)->removeGeometry(-1, FALSE);
+    mega_multipolygon->removeGeometry(-1, FALSE);
 
     return polygons;
 }
