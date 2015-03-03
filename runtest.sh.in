@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ "x$1" = "x-v" ]; then
+    osmcoastline_valgrind="valgrind --leak-check=full --show-reachable=yes"
+fi
+
+exec $osmcoastline_valgrind ./osmcoastline --debug --verbose --overwrite --output-lines --output-polygons=both --output-rings -o testdata.db @PROJECT_SOURCE_DIR@/testdata.osm
+

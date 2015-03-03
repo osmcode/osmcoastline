@@ -1,8 +1,2 @@
-osmcoastline
-osmcoastline_filter
-osmcoastline_ways
-core
-doc
-*.o
 *.swp
 .ycm_extra_conf.pyc

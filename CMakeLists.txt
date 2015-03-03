@@ -107,7 +107,7 @@ set(CMAKE_CONFIGURATION_TYPES "Debug Release RelWithDebInfo MinSizeRel Dev")
 # In 'Dev' mode: compile with very strict warnings and turn them into errors.
 if(CMAKE_BUILD_TYPE STREQUAL "Dev")
     if(NOT MSVC)
-        add_definitions(-Werror)
+        add_definitions(-Werror -fno-omit-frame-pointer)
     endif()
     add_definitions(${OSMIUM_WARNING_OPTIONS})
 endif()
@@ -135,8 +135,7 @@ find_program(CPPCHECK cppcheck)
 
 if(CPPCHECK)
     message(STATUS "Looking for cppcheck - found")
-    set(CPPCHECK_OPTIONS
-        --enable=warning,style,performance,portability,information,missingInclude)
+    set(CPPCHECK_OPTIONS --enable=all)
 
     # cpp doesn't find system includes for some reason, suppress that report
     set(CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --suppress=missingIncludeSystem)
@@ -171,6 +170,21 @@ target_link_libraries(osmcoastline_filter ${OSMIUM_IO_LIBRARIES})
 add_executable(osmcoastline_ways osmcoastline_ways.cpp osmcoastline.hpp)
 target_link_libraries(osmcoastline_ways ${OSMIUM_IO_LIBRARIES} ${GDAL_LIBRARIES})
 
+configure_file(
+    ${PROJECT_SOURCE_DIR}/runtest.sh.in
+    ${PROJECT_BINARY_DIR}/runtest.sh
+)
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/coastline_sqlite.qgs
+    ${PROJECT_BINARY_DIR}/coastline_sqlite.qgs
+)
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/coastline_sources.qgs
+    ${PROJECT_BINARY_DIR}/coastline_sources.qgs
+)
+
 
 #-----------------------------------------------------------------------------
 #
@@ -178,7 +192,7 @@ target_link_libraries(osmcoastline_ways ${OSMIUM_IO_LIBRARIES} ${GDAL_LIBRARIES}
 #
 #-----------------------------------------------------------------------------
 
-#add_subdirectory(doc)
+add_subdirectory(doc)
 
 
 #-----------------------------------------------------------------------------

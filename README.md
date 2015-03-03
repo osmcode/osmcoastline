@@ -45,16 +45,22 @@ https://github.com/joto/osmcoastline
 
 You'll need all the prerequisites including `libosmium` installed.
 
-Run `make` to build the `osmcoastline`, `osmcoastline_filter`, and
-`osmcoastline_ways` programs.
+OSMCoastline uses CMake for building:
 
-Run `make clean` to clean up.
+    mkdir build
+    cd build
+    cmake ..
+    make
+
+Call `make doc` to build the Doxygen API documentation which will be available
+in the `doc/html` directory.
 
 
 ## Testing
 
-Run the script `runtest.sh`. It will read the supplied `testdata.osm` and
-create output in the `testdata.db` spatialite database.
+Run the script `runtest.sh` from the directory you built the program in. It
+will read the supplied `testdata.osm` and create output in the `testdata.db`
+spatialite database.
 
 It is normal for this program to create errors and warnings, because it is
 testing a rather broken input file. You will get messages such as "Closing
@@ -67,10 +73,13 @@ at or near point 7.48488 53.8169". At the end it should print:
 You can use the supplied `coastline_sqlite.qgs` QGIS project file to open the
 output with QGIS.
 
+Call `runtest.sh -v` to run the tests under Valgrind.
+
 
 ## Running
 
-Note that you might want to run `osmcoastline_filter` first, see below.
+Note that you might want to run `osmcoastline_filter` first, see below under
+**Filtering**.
 
 Run: `osmcoastline -o DBFILE PLANET-FILE`
 
