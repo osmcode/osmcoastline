@@ -157,8 +157,8 @@ void OutputDatabase::add_ring(OGRPolygon* polygon, int id, int nways, int npoint
     layer_rings()->add(polygon, id, nways, npoints, fixed, layer_error_points());
 }
 
-void OutputDatabase::add_land_polygon(std::unique_ptr<OGRPolygon> polygon) {
-    layer_land_polygons()->add(polygon.release());
+void OutputDatabase::add_land_polygon(OGRPolygon* polygon) {
+    layer_land_polygons()->add(polygon);
 }
 
 void OutputDatabase::add_water_polygon(OGRPolygon* polygon) {

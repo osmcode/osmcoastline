@@ -79,7 +79,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
         assert(geom->getGeometryType() == wkbPolygon);
         std::unique_ptr<OGRPolygon> p { static_cast<OGRPolygon*>(geom) };
         if (p->IsValid()) {
-            polygons.push_back(std::move(p));
+            polygons.push_back(p.release());
         } else {
             output.add_error_line(static_cast<OGRLineString*>(p->getExteriorRing()->clone()), "invalid");
             std::unique_ptr<OGRGeometry> buf0 { p->Buffer(0) };
