@@ -6,7 +6,7 @@ the pieces into polygons for use in map renderers etc.
 
 http://wiki.openstreetmap.org/wiki/OSMCoastline
 
-https://github.com/joto/osmcoastline
+https://github.com/osmcode/osmcoastline
 
 
 ## Prerequisites
