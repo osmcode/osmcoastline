@@ -22,6 +22,9 @@
 
 */
 
+#include <iostream>
+#include <utility>
+
 #include <osmium/handler.hpp>
 #include <osmium/geom/ogr.hpp>
 

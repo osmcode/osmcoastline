@@ -1,6 +1,9 @@
 #ifndef VERBOSE_OUTPUT_HPP
 #define VERBOSE_OUTPUT_HPP
 
+#include <iostream>
+#include <sstream>
+
 class VerboseOutput {
 
     time_t m_start;

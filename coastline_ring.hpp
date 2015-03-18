@@ -24,6 +24,8 @@
 
 #include <map>
 #include <memory>
+#include <ostream>
+#include <vector>
 
 #include <osmium/geom/ogr.hpp>
 #include <osmium/osm/undirected_segment.hpp>

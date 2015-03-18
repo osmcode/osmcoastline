@@ -23,6 +23,8 @@
 */
 
 #include <list>
+#include <map>
+#include <memory>
 #include <vector>
 
 #include <osmium/geom/ogr.hpp>
