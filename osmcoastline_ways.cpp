@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <set>
+#include <string>
 
 #include <osmium/geom/haversine.hpp>
 #include <osmium/geom/ogr.hpp>
@@ -46,7 +47,7 @@ class CoastlineWaysHandler : public osmium::handler::Handler {
 
 public:
 
-    CoastlineWaysHandler() :
+    CoastlineWaysHandler(const std::string& db_filename) :
         m_length(0.0) {
         OGRRegisterAll();
 
@@ -59,7 +60,7 @@ public:
 
         CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "FALSE");
         const char* options[] = { "SPATIALITE=TRUE", nullptr };
-        m_data_source.reset(driver->CreateDataSource("coastline-ways.db", const_cast<char**>(options)));
+        m_data_source.reset(driver->CreateDataSource(db_filename.c_str(), const_cast<char**>(options)));
         if (!m_data_source) {
             std::cerr << "Creation of output file failed.\n";
             exit(return_code_fatal);
@@ -139,21 +140,28 @@ public:
 };
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        std::cerr << "Usage: osmcoastline_ways OSMFILE\n";
+    if (argc != 2 && argc != 3) {
+        std::cerr << "Usage: osmcoastline_ways OSMFILE [WAYSDB]\n";
         exit(return_code_cmdline);
+    }
+
+    std::string input_osm_filename { argv[1] };
+    std::string output_db_filename { "coastline-ways.db" };
+
+    if (argc >= 3) {
+        output_db_filename = argv[2];
     }
 
     index_type store_pos;
     index_type store_neg;
     node_location_handler_type location_handler(store_pos, store_neg);
 
-    osmium::io::File infile(argv[1]);
+    osmium::io::File infile(input_osm_filename);
     osmium::io::Reader reader1(infile, osmium::osm_entity_bits::node);
     osmium::apply(reader1, location_handler);
     reader1.close();
 
-    CoastlineWaysHandler coastline_ways_handler;
+    CoastlineWaysHandler coastline_ways_handler(output_db_filename);
     osmium::io::Reader reader2(infile, osmium::osm_entity_bits::way);
     osmium::apply(reader2, location_handler, coastline_ways_handler);
     reader2.close();
