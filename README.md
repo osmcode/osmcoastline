@@ -144,7 +144,7 @@ directory for some more ways of doing this.
 
 The database tables `options` and `meta` contain the command line options
 used to create the database and some metadata. You can use the script
-`osmcoastline_readmeta.sh` to look at them.
+`osmcoastline_readmeta` to look at them.
 
 
 ## Steps

@@ -1,0 +1,87 @@
+#!/bin/sh
+#
+#  osmcoastline_readmeta [COASTLINEDB]
+#
+
+SQLEXEC="sqlite3"
+
+if [ "x$1" = "x" ]; then
+    DBFILE=testdata.db
+else
+    DBFILE=$1
+fi
+
+if [ ! -e $DBFILE ]; then
+    echo "Can't open '$DBFILE'"
+    exit 1
+fi
+
+echo "Options used to create this data:\n"
+
+echo -n "  Overlap (--bbox-overlap/-b): "
+$SQLEXEC $DBFILE "SELECT overlap FROM options;"
+
+echo -n "  Close gaps in coastline smaller than (--close-distance/-c): "
+$SQLEXEC $DBFILE "SELECT close_distance FROM options;"
+
+echo -n "  Max points in polygons (--max-points/-m): "
+$SQLEXEC $DBFILE "SELECT max_points_in_polygons FROM options;"
+
+echo -n "  Split large polygons: "
+$SQLEXEC $DBFILE "SELECT CASE split_large_polygons WHEN 0 THEN 'no' ELSE 'yes' END FROM options;"
+
+echo -n "  Spatial reference system (--srid/-s): "
+$SQLEXEC $DBFILE "SELECT CASE srid WHEN 4326 THEN '4326 (WGS84)' WHEN 3857 THEN '3857 (Mercator)' ELSE srid END FROM geometry_columns WHERE f_table_name='land_polygons';"
+
+echo "\nMetadata:\n"
+
+echo -n "  Database created at: "
+$SQLEXEC $DBFILE "SELECT timestamp FROM meta;"
+
+echo -n "  Runtime (minutes): "
+$SQLEXEC $DBFILE "SELECT CAST(round(CAST(runtime AS REAL)/60) AS INT) FROM meta;"
+
+echo -n "  Memory usage (MB): "
+$SQLEXEC $DBFILE "SELECT memory_usage FROM meta;"
+
+echo -n "  Ways tagged natural=coastline: "
+$SQLEXEC $DBFILE "SELECT num_ways FROM meta;"
+
+echo -n "  Number of nodes where coastline is not closed (before fixing): "
+$SQLEXEC $DBFILE "SELECT num_unconnected_nodes FROM meta;"
+
+echo -n "  Coastline rings: "
+$SQLEXEC $DBFILE "SELECT num_rings FROM meta;"
+
+echo -n "  Coastline rings created from a single way: "
+$SQLEXEC $DBFILE "SELECT num_rings_from_single_way FROM meta;"
+
+echo -n "  Coastline rings created from more then one way: "
+$SQLEXEC $DBFILE "SELECT num_rings - num_rings_from_single_way FROM meta;"
+
+echo -n "  Number of rings fixed (closed): "
+$SQLEXEC $DBFILE "SELECT num_rings_fixed FROM meta;"
+
+echo -n "  Number of rings turned around: "
+$SQLEXEC $DBFILE "SELECT num_rings_turned_around FROM meta;"
+
+echo -n "  Number of land polygons before split: "
+$SQLEXEC $DBFILE "SELECT num_land_polygons_before_split FROM meta;"
+
+echo -n "  Number of land polygons after split: "
+$SQLEXEC $DBFILE "SELECT CASE num_land_polygons_after_split WHEN 0 THEN 'NOT SPLIT' ELSE num_land_polygons_after_split END FROM meta;"
+
+echo "\nErrors/warnings (Points):\n"
+echo ".width 3 20\nSELECT count(*), error FROM error_points GROUP BY error;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
+
+echo "\nErrors/warnings (LineStrings):\n"
+echo ".width 3 20\nSELECT count(*), error FROM error_lines GROUP BY error;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
+
+echo "\nOutput:\n"
+echo "SELECT count(*), 'land_polygons' FROM land_polygons;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
+echo "SELECT count(*), 'water_polygons' FROM water_polygons;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
+echo "SELECT count(*), 'lines' FROM lines;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
+echo "SELECT count(*), 'rings' FROM rings;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
+
+echo
+

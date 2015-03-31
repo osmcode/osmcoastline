@@ -202,6 +202,7 @@ if(PANDOC)
 
     add_man_page(1 osmcoastline)
     add_man_page(1 osmcoastline_filter)
+    add_man_page(1 osmcoastline_readmeta)
     add_man_page(1 osmcoastline_ways)
 
     install(DIRECTORY ${CMAKE_BINARY_DIR}/man DESTINATION share)
@@ -241,6 +242,12 @@ configure_file(
 configure_file(
     ${PROJECT_SOURCE_DIR}/coastline_sources.qgs
     ${PROJECT_BINARY_DIR}/coastline_sources.qgs
+)
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/osmcoastline_readmeta
+    ${PROJECT_BINARY_DIR}/osmcoastline_readmeta
+    COPYONLY
 )
 
 

@@ -105,6 +105,6 @@ Running **osmcoastline_filter** first:
 # SEE ALSO
 
 * `README.md`
-* **osmcoastline_filter**(1), **osmcoastline_ways**(1)
+* **osmcoastline_filter**(1), **osmcoastline_readmeta**(1), **osmcoastline_ways**(1)
 * [OSMCoastline in OSM wiki](http://wiki.openstreetmap.org/wiki/OSMCoastline)
 
