@@ -25,6 +25,8 @@ set(OSMCOASTLINE_VERSION_PATCH 0)
 set(OSMCOASTLINE_VERSION
     ${OSMCOASTLINE_VERSION_MAJOR}.${OSMCOASTLINE_VERSION_MINOR}.${OSMCOASTLINE_VERSION_PATCH})
 
+set(AUTHOR "Jochen Topf <jochen@topf.org>")
+
 
 #-----------------------------------------------------------------------------
 #
@@ -153,6 +155,62 @@ else()
     message(STATUS "Looking for cppcheck - not found")
     message(STATUS "  Build target 'cppcheck' will not be available.")
 endif(CPPCHECK)
+
+
+#-----------------------------------------------------------------------------
+#
+#  Optional "man" target to generate man pages
+#
+#-----------------------------------------------------------------------------
+message(STATUS "Looking for pandoc")
+find_program(PANDOC pandoc)
+
+function(add_man_page _section _name)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/man/man${_section})
+    set(_output_file ${CMAKE_BINARY_DIR}/man/man${_section}/${_name}.${_section})
+    set(_source_file ${CMAKE_SOURCE_DIR}/man/${_name}.md)
+    set(_install_dir "share/man/man{$_section}")
+    string(TOUPPER ${_name} _name_upcase)
+    add_custom_command(OUTPUT ${_output_file}
+        COMMAND ${PANDOC}
+            ${PANDOC_MAN_OPTIONS}
+            --variable "title=${_name_upcase}"
+            --variable "section=${_section}"
+            -o ${_output_file}
+            ${_source_file}
+        DEPENDS ${_source_file}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Building manpage ${_name}.${_section}"
+        VERBATIM)
+    set(ALL_MAN_PAGES "${ALL_MAN_PAGES};${_output_file}" PARENT_SCOPE)
+endfunction()
+
+
+if(PANDOC)
+    message(STATUS "Looking for pandoc - found")
+    message(STATUS "  Manual pages will be built")
+    execute_process(COMMAND date "+%Y-%m-%d" OUTPUT_VARIABLE PUBDATE OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(PANDOC_MAN_OPTIONS
+        -s
+        -t man
+        --template ${CMAKE_CURRENT_SOURCE_DIR}/man/manpage.template
+        --variable "description=osmcoastline/${OSMCOASTLINE_VERSION}"
+        --variable "date=${PUBDATE}"
+        --variable "author=${AUTHOR}"
+    )
+    set(PANDOC_HTML_OPTIONS -s -t html)
+
+    add_man_page(1 osmcoastline)
+    add_man_page(1 osmcoastline_filter)
+    add_man_page(1 osmcoastline_ways)
+
+    install(DIRECTORY ${CMAKE_BINARY_DIR}/man DESTINATION share)
+
+    add_custom_target(man ALL DEPENDS ${ALL_MAN_PAGES})
+else()
+    message(STATUS "Looking for pandoc - not found")
+    message(STATUS "  Manual pages will not be built")
+endif(PANDOC)
 
 
 #-----------------------------------------------------------------------------

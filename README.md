@@ -1,8 +1,8 @@
 
 # OSMCoastline
 
-OSMCoastline extracts the coastline from an OSM planet file and assembles all
-the pieces into polygons for use in map renderers etc.
+OSMCoastline extracts the coastline data from an OSM planet file and assembles
+all the pieces into polygons for use in map renderers etc.
 
 http://wiki.openstreetmap.org/wiki/OSMCoastline
 
@@ -40,10 +40,16 @@ https://github.com/osmcode/osmcoastline
     http://www.gaia-gis.it/gaia-sins/
     Debian/Ubuntu: sqlite3
 
+### Pandoc (optional, to build documentation)
+
+    http://johnmacfarlane.net/pandoc/
+    Debian/Ubuntu: pandoc
+    (If pandoc is found by CMake, the manpages will automatically be built.)
+
 
 ## Building
 
-You'll need all the prerequisites including `libosmium` installed.
+You'll need the prerequisites including `libosmium` installed.
 
 OSMCoastline uses CMake for building:
 
