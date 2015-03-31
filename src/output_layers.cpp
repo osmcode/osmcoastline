@@ -48,8 +48,7 @@ void Layer::commit() {
 /***************************************************************/
 
 LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, const char** options) :
-    Layer()
-{
+    Layer() {
     m_layer = data_source->CreateLayer("error_points", srs.out(), wkbPoint, const_cast<char**>(options));
     if (!m_layer) {
         std::cerr << "Creating layer 'error_points' failed.\n";
@@ -93,8 +92,7 @@ void LayerErrorPoints::add(OGRPoint* point, const char* error, osmium::object_id
 /***************************************************************/
 
 LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, const char** options) :
-    Layer()
-{
+    Layer() {
     m_layer = data_source->CreateLayer("error_lines", srs.out(), wkbLineString, const_cast<char**>(options));
     if (!m_layer) {
         std::cerr << "Creating layer 'error_lines' failed.\n";
@@ -138,8 +136,7 @@ void LayerErrorLines::add(OGRLineString* linestring, const char* error, osmium::
 /***************************************************************/
 
 LayerRings::LayerRings(OGRDataSource* data_source, const char** options) :
-    Layer()
-{
+    Layer() {
     m_layer = data_source->CreateLayer("rings", srs.out(), wkbPolygon, const_cast<char**>(options));
     if (!m_layer) {
         std::cerr << "Creating layer 'rings' failed.\n";
@@ -269,8 +266,7 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
 
 LayerPolygons::LayerPolygons(OGRDataSource* data_source, const char** options, const char* name) :
     Layer(),
-    m_name(name)
-{
+    m_name(name) {
     m_layer = data_source->CreateLayer(name, srs.out(), wkbPolygon, const_cast<char**>(options));
     if (!m_layer) {
         std::cerr << "Creating layer '" << name << "' failed.\n";
@@ -298,8 +294,7 @@ void LayerPolygons::add(OGRPolygon* polygon) {
 /***************************************************************/
 
 LayerLines::LayerLines(OGRDataSource* data_source, const char** options) :
-    Layer()
-{
+    Layer() {
     m_layer = data_source->CreateLayer("lines", srs.out(), wkbLineString, const_cast<char**>(options));
     if (!m_layer) {
         std::cerr << "Creating layer 'lines' failed.\n";

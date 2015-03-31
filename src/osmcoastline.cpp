@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
         stats.rings_fixed = coastline_rings.num_fixed_rings();
         warnings += coastline_rings.num_fixed_rings();
         vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
-            << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
+             << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
         errors += coastline_rings.num_unconnected_nodes();
     } else {
         vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";

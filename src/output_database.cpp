@@ -44,8 +44,7 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_layer_rings(),
     m_layer_land_polygons(),
     m_layer_water_polygons(),
-    m_layer_lines()
-{
+    m_layer_lines() {
     OGRRegisterAll();
 
     const char* driver_name = "SQLite";

@@ -315,7 +315,7 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
                         break;
                 }
             }
-        } catch(...) {
+        } catch (...) {
             std::cerr << "ignoring exception\n";
         }
     } else {

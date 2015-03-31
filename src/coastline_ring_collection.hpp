@@ -67,7 +67,9 @@ public:
     CoastlineRingCollection();
 
     /// Return the number of CoastlineRings in the collection.
-    size_t size() const { return m_list.size(); }
+    size_t size() const {
+        return m_list.size();
+    }
 
     /**
      * Add way to collection. A new CoastlineRing will be created for the way
@@ -83,13 +85,21 @@ public:
         }
     }
 
-    unsigned int num_ways() const { return m_ways; }
+    unsigned int num_ways() const {
+        return m_ways;
+    }
 
-    unsigned int num_rings_from_single_way() const { return m_rings_from_single_way; }
+    unsigned int num_rings_from_single_way() const {
+        return m_rings_from_single_way;
+    }
 
-    unsigned int num_unconnected_nodes() const { return m_start_nodes.size() + m_end_nodes.size(); }
+    unsigned int num_unconnected_nodes() const {
+        return m_start_nodes.size() + m_end_nodes.size();
+    }
 
-    unsigned int num_fixed_rings() const { return m_fixed_rings; }
+    unsigned int num_fixed_rings() const {
+        return m_fixed_rings;
+    }
 
     void setup_positions(posmap_type& posmap);
 
@@ -126,7 +136,9 @@ private:
         }
 
         // Used in std::sort
-        static bool sort_by_distance(const Connection& a, const Connection& b) { return a.distance > b.distance; }
+        static bool sort_by_distance(const Connection& a, const Connection& b) {
+            return a.distance > b.distance;
+        }
 
     };
 

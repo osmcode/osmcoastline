@@ -93,8 +93,7 @@ public:
         m_ring_id(way.id()),
         m_nways(1),
         m_fixed(false),
-        m_outer(false)
-    {
+        m_outer(false) {
         m_way_node_list.reserve(way.is_closed() ? way.nodes().size() : 1000);
         m_way_node_list.insert(m_way_node_list.begin(), way.nodes().begin(), way.nodes().end());
     }
@@ -108,19 +107,29 @@ public:
     }
 
     /// ID of first node in the ring.
-    osmium::object_id_type first_node_id() const { return m_way_node_list.front().ref(); }
+    osmium::object_id_type first_node_id() const {
+        return m_way_node_list.front().ref();
+    }
 
     /// ID of last node in the ring.
-    osmium::object_id_type last_node_id() const { return m_way_node_list.back().ref(); }
+    osmium::object_id_type last_node_id() const {
+        return m_way_node_list.back().ref();
+    }
 
     /// Position of the first node in the ring.
-    osmium::Location first_position() const { return m_way_node_list.front().location(); }
+    osmium::Location first_position() const {
+        return m_way_node_list.front().location();
+    }
 
     /// Position of the last node in the ring.
-    osmium::Location last_position() const { return m_way_node_list.back().location(); }
+    osmium::Location last_position() const {
+        return m_way_node_list.back().location();
+    }
 
     /// Return ID of this ring (defined as smallest ID of the ways making up the ring).
-    osmium::object_id_type ring_id() const { return m_ring_id; }
+    osmium::object_id_type ring_id() const {
+        return m_ring_id;
+    }
 
     /**
      * Set ring ID. The ring will only get the new ID if it is smaller than the
@@ -133,16 +142,24 @@ public:
     }
 
     /// Returns the number of ways making up this ring.
-    unsigned int nways() const { return m_nways; }
+    unsigned int nways() const {
+        return m_nways;
+    }
 
     /// Returns the number of points in this ring.
-    unsigned int npoints() const { return m_way_node_list.size(); }
+    unsigned int npoints() const {
+        return m_way_node_list.size();
+    }
 
     /// Returns true if the ring is closed.
-    bool is_closed() const { return first_node_id() == last_node_id(); }
+    bool is_closed() const {
+        return first_node_id() == last_node_id();
+    }
 
     /// Was this ring fixed because of missing/wrong OSM data?
-    bool is_fixed() const { return m_fixed; }
+    bool is_fixed() const {
+        return m_fixed;
+    }
 
     /**
      * When there are two different nodes with the same position

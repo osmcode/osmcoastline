@@ -92,7 +92,9 @@ public:
     }
 
     /// Number of polygons
-    int num_polygons() const { return m_polygons.size(); }
+    int num_polygons() const {
+        return m_polygons.size();
+    }
 
     polygon_vector_type::const_iterator begin() const {
         return m_polygons.begin();

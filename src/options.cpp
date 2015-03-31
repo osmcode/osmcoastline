@@ -45,8 +45,7 @@ Options::Options(int argc, char* argv[]) :
     epsg(4326),
     simplify(false),
     tolerance(0),
-    verbose(false)
-{
+    verbose(false) {
     static struct option long_options[] = {
         {"bbox-overlap",    required_argument, 0, 'b'},
         {"close-distance",  required_argument, 0, 'c'},
@@ -175,23 +174,23 @@ int Options::get_epsg(const char* text) {
 
 void Options::print_help() const {
     std::cout << "osmcoastline [OPTIONS] OSMFILE\n"
-                << "\nOptions:\n"
-                << "  -h, --help                 - This help message\n"
-                << "  -c, --close-distance=DIST  - Distance between nodes under which open rings\n"
-                << "                               are closed (0 - disable closing of rings)\n"
-                << "  -b, --bbox-overlap=OVERLAP - Set overlap when splitting polygons\n"
-                << "  -i, --no-index             - Do not create spatial indexes in output db\n"
-                << "  -d, --debug                - Enable debugging output\n"
-                << "  -f, --overwrite            - Overwrite output file if it already exists\n"
-                << "  -l, --output-lines         - Output coastlines as lines to database file\n"
-                << "  -m, --max-points=NUM       - Split lines/polygons with more than this many\n"
-                << "                               points (0 - disable splitting)\n"
-                << "  -o, --output-database=FILE - Spatialite database file for output\n"
-                << "  -p, --output-polygons=land|water|both|none\n"
-                << "                             - Which polygons to write out (default: land)\n"
-                << "  -r, --output-rings         - Output rings to database file\n"
-                << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
-                << "  -v, --verbose              - Verbose output\n"
-                << "\n";
+              << "\nOptions:\n"
+              << "  -h, --help                 - This help message\n"
+              << "  -c, --close-distance=DIST  - Distance between nodes under which open rings\n"
+              << "                               are closed (0 - disable closing of rings)\n"
+              << "  -b, --bbox-overlap=OVERLAP - Set overlap when splitting polygons\n"
+              << "  -i, --no-index             - Do not create spatial indexes in output db\n"
+              << "  -d, --debug                - Enable debugging output\n"
+              << "  -f, --overwrite            - Overwrite output file if it already exists\n"
+              << "  -l, --output-lines         - Output coastlines as lines to database file\n"
+              << "  -m, --max-points=NUM       - Split lines/polygons with more than this many\n"
+              << "                               points (0 - disable splitting)\n"
+              << "  -o, --output-database=FILE - Spatialite database file for output\n"
+              << "  -p, --output-polygons=land|water|both|none\n"
+              << "                             - Which polygons to write out (default: land)\n"
+              << "  -r, --output-rings         - Output rings to database file\n"
+              << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
+              << "  -v, --verbose              - Verbose output\n"
+              << "\n";
 }
 

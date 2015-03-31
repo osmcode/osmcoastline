@@ -43,8 +43,7 @@ class CoastlineHandlerPass1 : public osmium::handler::Handler {
 public:
 
     CoastlineHandlerPass1(CoastlineRingCollection& coastline_rings) :
-        m_coastline_rings(coastline_rings)
-    {
+        m_coastline_rings(coastline_rings) {
     }
 
     void way(const osmium::Way& way) {
@@ -85,8 +84,7 @@ public:
     CoastlineHandlerPass2(CoastlineRingCollection& coastline_rings, OutputDatabase& output) :
         m_coastline_rings(coastline_rings),
         m_posmap(),
-        m_output(output)
-    {
+        m_output(output) {
         m_coastline_rings.setup_positions(m_posmap);
     }
 
