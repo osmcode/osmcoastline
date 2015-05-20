@@ -109,7 +109,7 @@ public:
 
     unsigned int output_rings(OutputDatabase& output);
 
-    unsigned int check_for_intersections(OutputDatabase& output);
+    unsigned int check_for_intersections(OutputDatabase& output, int segments_fd);
 
     bool close_antarctica_ring(int epsg);
 

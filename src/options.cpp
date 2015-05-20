@@ -45,7 +45,8 @@ Options::Options(int argc, char* argv[]) :
     epsg(4326),
     simplify(false),
     tolerance(0),
-    verbose(false) {
+    verbose(false),
+    segmentfile() {
     static struct option long_options[] = {
         {"bbox-overlap",    required_argument, 0, 'b'},
         {"close-distance",  required_argument, 0, 'c'},
@@ -59,6 +60,7 @@ Options::Options(int argc, char* argv[]) :
         {"output-rings",          no_argument, 0, 'r'},
         {"overwrite",             no_argument, 0, 'f'},
         {"srs",             required_argument, 0, 's'},
+        {"write-segments",  required_argument, 0, 'S'},
         {"verbose",               no_argument, 0, 'v'},
         {0, 0, 0, 0}
     };
@@ -122,6 +124,9 @@ Options::Options(int argc, char* argv[]) :
                 break;
             case 's':
                 epsg = get_epsg(optarg);
+                break;
+            case 'S':
+                segmentfile = optarg;
                 break;
             case 'v':
                 verbose = true;
@@ -190,6 +195,7 @@ void Options::print_help() const {
               << "                             - Which polygons to write out (default: land)\n"
               << "  -r, --output-rings         - Output rings to database file\n"
               << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
+              << "  -S, --write-segments=FILE  - Write segments to given file\n"
               << "  -v, --verbose              - Verbose output\n"
               << "\n";
 }

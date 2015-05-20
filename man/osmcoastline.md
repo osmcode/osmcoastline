@@ -79,6 +79,14 @@ description of the options below and the README.md for details.
     re-project to some other projection, 4326 is probably right. Other
     projections are curently not supported. Default is 4326.
 
+-S, --write-segments=FILENAME
+:   Write out all coastline segments to the given file. Segments are
+    connections between two points. The segments are written in an internal
+    format intended for use with the **osmcoastline_segments** program
+    only. The file includes all segments actually in the OSM data and only
+    those. Gaps are (possibly) closed in a later stage of running
+    **osmcoastline**, but those closing segments will not be included.
+
 -v, --verbose
 :   Gives you detailed information on what **osmcoastline** is doing,
     including timing.
@@ -105,6 +113,7 @@ Running **osmcoastline_filter** first:
 # SEE ALSO
 
 * `README.md`
-* **osmcoastline_filter**(1), **osmcoastline_readmeta**(1), **osmcoastline_ways**(1)
+* **osmcoastline_filter**(1), **osmcoastline_readmeta**(1),
+  **osmcoastline_segments**(1), **osmcoastline_ways**(1)
 * [OSMCoastline in OSM wiki](http://wiki.openstreetmap.org/wiki/OSMCoastline)
 

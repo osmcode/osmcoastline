@@ -237,7 +237,7 @@ std::unique_ptr<OGRLineString> create_ogr_linestring(const osmium::Segment& segm
  * Checks if there are intersections between any coastline segments.
  * Returns the number of intersections and overlaps.
  */
-unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& output) {
+unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& output, int segments_fd) {
     unsigned int overlaps = 0;
 
     std::vector<osmium::UndirectedSegment> segments;
@@ -248,6 +248,14 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
 
     if (debug) std::cerr << "Sorting...\n";
     std::sort(segments.begin(), segments.end());
+
+    if (segments_fd >= 0) {
+        if (debug) std::cerr << "Writing segments to file...\n";
+        ssize_t length = segments.size() * sizeof(osmium::UndirectedSegment);
+        if (::write(segments_fd, segments.data(), length) != length) {
+            throw std::runtime_error("Write error");
+        }
+    }
 
     if (debug) std::cerr << "Finding intersections...\n";
     std::vector<osmium::Location> intersections;

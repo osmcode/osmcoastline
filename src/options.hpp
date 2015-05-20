@@ -92,6 +92,9 @@ public:
     /// Verbose output?
     bool verbose;
 
+    /// Name of optional segment file
+    std::string segmentfile;
+
     Options(int argc, char* argv[]);
 
 private:

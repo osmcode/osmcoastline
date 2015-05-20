@@ -161,6 +161,17 @@ int main(int argc, char *argv[]) {
         exit(return_code_fatal);
     }
 
+    // Optionally set up segments file
+    int segments_fd = -1;
+    if (!options.segmentfile.empty()) {
+        vout << "Writing segments to file '" << options.segmentfile << "' (because you told me to with --write-segments/-S option).\n";
+        segments_fd = ::open(options.segmentfile.c_str(), O_WRONLY | O_CREAT, 0666);
+        if (segments_fd == -1) {
+            std::cerr << "Couldn't open file '" << options.segmentfile << "' (" << strerror(errno) << ")\n";
+            exit(return_code_fatal);
+        }
+    }
+
     // Set up output database.
     vout << "Writing to output database '" << options.output_database << "'. (Was set with the --output-database/-o option.)\n";
     if (options.overwrite_output) {
@@ -220,7 +231,11 @@ int main(int argc, char *argv[]) {
     output_database.set_options(options);
 
     vout << "Check line segments for intersections and overlaps...\n";
-    warnings += coastline_rings.check_for_intersections(output_database);
+    warnings += coastline_rings.check_for_intersections(output_database, segments_fd);
+
+    if (segments_fd != -1) {
+        ::close(segments_fd);
+    }
 
     vout << "Trying to close Antarctica ring...\n";
     if (coastline_rings.close_antarctica_ring(options.epsg)) {

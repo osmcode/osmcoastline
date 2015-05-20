@@ -205,6 +205,7 @@ if(PANDOC)
     add_man_page(1 osmcoastline)
     add_man_page(1 osmcoastline_filter)
     add_man_page(1 osmcoastline_readmeta)
+    add_man_page(1 osmcoastline_segments)
     add_man_page(1 osmcoastline_ways)
 
     install(DIRECTORY ${CMAKE_BINARY_DIR}/man DESTINATION share)
