@@ -77,7 +77,7 @@ description of the options below and the README.md for details.
     "Google Mercator". If you want to use the data for the usual tiled web
     maps, 3857 is probably right. For other uses, especially if you want to
     re-project to some other projection, 4326 is probably right. Other
-    projections are curently not supported. Default is 4326.
+    projections are currently not supported. Default is 4326.
 
 -S, --write-segments=FILENAME
 :   Write out all coastline segments to the given file. Segments are
