@@ -207,7 +207,7 @@ case. Default is 1000.
 Set spatial reference system/projection. Use 4326 for WGS84 or 3857 for "Google
 Mercator". If you want to use the data for the usual tiled web maps, 3857 is
 probably right. For other uses, especially if you want to re-project to some
-other projection, 4326 is probably right. Other projections are curently not
+other projection, 4326 is probably right. Other projections are currently not
 supported. Default is 4326.
 
     -v, --verbose
