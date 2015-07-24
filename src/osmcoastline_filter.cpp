@@ -136,7 +136,5 @@ int main(int argc, char* argv[]) {
         std::cerr << "io error: " << e.what() << "'\n";
         exit(return_code_fatal);
     }
-
-    google::protobuf::ShutdownProtobufLibrary();
 }
 

@@ -167,7 +167,5 @@ int main(int argc, char* argv[]) {
     reader2.close();
 
     std::cerr << "Sum of way lengths: " << std::fixed << (coastline_ways_handler.sum_length() / 1000) << "km\n";
-
-    google::protobuf::ShutdownProtobufLibrary();
 }
 
