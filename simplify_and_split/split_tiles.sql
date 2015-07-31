@@ -14,7 +14,7 @@ INSERT INTO split_land_polygons (fid, tolerance, min_area, zoom, x, y, geom)
     SELECT p.fid, :tolerance, :min_area, :to_zoom, b.x, b.y, ST_Multi(ST_Intersection(p.geom, b.geom))
         FROM split_land_polygons p, bbox_tiles b
         WHERE p.geom && b.geom
-          AND ST_Intersects(p.geom, b.geom)
+          AND _ST_Intersects(p.geom, b.geom)
           AND p.tolerance=:tolerance
           AND p.min_area=:min_area
           AND p.zoom=:from_zoom
