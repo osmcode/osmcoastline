@@ -98,6 +98,22 @@ To speed up processing you might want to run the **osmcoastline_filter**
 program first. See its man page for details.
 
 
+# DIAGNOSTICS
+
+**osmcoastline** exits with exit code
+
+0
+  ~ if everything was okay
+1
+  ~ if there were warnings while processing the coastline
+2
+  ~ if there were errors while processing the coastline
+3
+  ~ if there was a fatal error when running the program
+4
+  ~ if there was a problem with the command line arguments.
+
+
 # EXAMPLES
 
 Run **osmcoastline** on a planet file using default options:
