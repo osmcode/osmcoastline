@@ -6,6 +6,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [unreleased] -
 
+### Added
+
+- Optionally writes out list of all coastline segments and the new program
+  `osmcoastline_segments` can compare those lists in various ways.
+
+### Changed
+
+- Updates for new libosmium version
+
 ## [2.0.1] - 2015-03-31
 
 ### Changed
