@@ -208,5 +208,7 @@ int main(int argc, char *argv[]) {
     } else if (!geom.empty()) {
         output_ogr(geom, format, removed_segments, added_segments);
     }
+
+    return (removed_segments.empty() && added_segments.empty()) ? 0 : 1;
 }
 
