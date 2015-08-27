@@ -37,7 +37,7 @@ set(AUTHOR "Jochen Topf <jochen@topf.org>")
 #-----------------------------------------------------------------------------
 
 find_package(Osmium COMPONENTS io gdal)
-include_directories(${OSMIUM_INCLUDE_DIRS})
+include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
 
 if(MSVC)
     find_path(GETOPT_INCLUDE_DIR getopt.h)
