@@ -8,7 +8,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Add --help/-h and --version/-V options to all programs.
+
 ### Changed
+
+- Use a better approximation for the southernmost coordinate for Mercator
+  projection.
 
 ### Fixed
 
