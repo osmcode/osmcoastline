@@ -90,7 +90,7 @@ void CoastlineRing::close_ring() {
 }
 
 void CoastlineRing::close_antarctica_ring(int epsg) {
-    double min = epsg == 4326 ? -90.0 : -85.0511;
+    double min = epsg == 4326 ? -90.0 : -85.0511288;
 
     for (double lat = -78.0; lat > min; --lat) {
         m_way_node_list.emplace_back(0, osmium::Location(-179.99999, static_cast<double>(lat)));
