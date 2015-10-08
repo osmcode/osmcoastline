@@ -91,6 +91,9 @@ description of the options below and the README.md for details.
 :   Gives you detailed information on what **osmcoastline** is doing,
     including timing.
 
+-V, --version
+:   Display program version and license information.
+
 
 # NOTES
 

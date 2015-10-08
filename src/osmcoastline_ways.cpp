@@ -19,6 +19,7 @@
 
 */
 
+#include <cstring>
 #include <iostream>
 #include <set>
 #include <string>
@@ -140,6 +141,22 @@ public:
 };
 
 int main(int argc, char* argv[]) {
+    if (argc >= 2) {
+        if (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
+            std::cout << "Usage: osmcoastline_ways OSMFILE [WAYSDB]\n";
+            exit(return_code_ok);
+        }
+
+        if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "-V")) {
+            std::cout << "osmcoastline_ways version " OSMCOASTLINE_VERSION "\n"
+                      << "Copyright (C) 2012-2015  Jochen Topf <jochen@topf.org>\n"
+                      << "License: GNU GENERAL PUBLIC LICENSE Version 3 <http://gnu.org/licenses/gpl.html>.\n"
+                      << "This is free software: you are free to change and redistribute it.\n"
+                      << "There is NO WARRANTY, to the extent permitted by law.\n";
+            exit(return_code_ok);
+        }
+    }
+
     if (argc != 2 && argc != 3) {
         std::cerr << "Usage: osmcoastline_ways OSMFILE [WAYSDB]\n";
         exit(return_code_cmdline);

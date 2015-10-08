@@ -9,6 +9,15 @@ osmcoastline_ways - extract coastline ways from OSM data
 **osmcoastline_ways** *INPUT-FILE* \[*OUTPUT-DB*\]
 
 
+# OPTIONS
+
+-h, --help
+:   Display usage information.
+
+-V, --version
+:   Display program version and license information.
+
+
 # DESCRIPTION
 
 **osmcoastline_ways** extracts coastline ways from OSM data and writes them

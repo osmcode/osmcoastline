@@ -9,6 +9,15 @@ osmcoastline_readmeta - display metadata from database create by osmcoastline
 **osmcoastline_readmeta** \[*COASTLINE-DB*\]
 
 
+# OPTIONS
+
+-h, --help
+:   Display usage information.
+
+-V, --version
+:   Display program version and license information.
+
+
 # DESCRIPTION
 
 This program displays various meta data from a database created by the

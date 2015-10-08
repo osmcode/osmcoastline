@@ -3,7 +3,23 @@
 #  osmcoastline_readmeta [COASTLINEDB]
 #
 
+OSMCOASTLINE_VERSION=@OSMCOASTLINE_VERSION@
+
 SQLEXEC="sqlite3"
+
+if [ "x$1" = "x--help" -o "x$1" = "x-h" ]; then
+    echo "Usage: osmcoastline_readmeta [COASTLINEDB]"
+    exit 0
+fi
+
+if [ "x$1" = "x--version" -o "x$1" = "x-V" ]; then
+    echo "osmcoastline_readmeta version $OSMCOASTLINE_VERSION"
+    echo "Copyright (C) 2012-2015  Jochen Topf <jochen@topf.org>"
+    echo "License: GNU GENERAL PUBLIC LICENSE Version 3 <http://gnu.org/licenses/gpl.html>."
+    echo "This is free software: you are free to change and redistribute it."
+    echo "There is NO WARRANTY, to the extent permitted by law.";
+    exit 0
+fi
 
 if [ "x$1" = "x" ]; then
     DBFILE=testdata.db

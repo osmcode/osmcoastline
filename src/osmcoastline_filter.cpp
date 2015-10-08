@@ -35,6 +35,7 @@ void print_help() {
               << "\nOptions:\n"
               << "  -h, --help           - This help message\n"
               << "  -o, --output=OSMFILE - Where to write output (default: none)\n"
+              << "  -V, --version        - Show version and exit\n"
               << "\n";
 }
 
@@ -44,11 +45,12 @@ int main(int argc, char* argv[]) {
     static struct option long_options[] = {
         {"help",         no_argument, 0, 'h'},
         {"output", required_argument, 0, 'o'},
+        {"version",      no_argument, 0, 'V'},
         {0, 0, 0, 0}
     };
 
     while (1) {
-        int c = getopt_long(argc, argv, "ho:", long_options, 0);
+        int c = getopt_long(argc, argv, "ho:V", long_options, 0);
         if (c == -1)
             break;
 
@@ -59,6 +61,13 @@ int main(int argc, char* argv[]) {
             case 'o':
                 output_filename = optarg;
                 break;
+            case 'V':
+                std::cout << "osmcoastline_filter version " OSMCOASTLINE_VERSION "\n"
+                          << "Copyright (C) 2012-2015  Jochen Topf <jochen@topf.org>\n"
+                          << "License: GNU GENERAL PUBLIC LICENSE Version 3 <http://gnu.org/licenses/gpl.html>.\n"
+                          << "This is free software: you are free to change and redistribute it.\n"
+                          << "There is NO WARRANTY, to the extent permitted by law.\n";
+                exit(return_code_ok);
             default:
                 exit(return_code_fatal);
         }

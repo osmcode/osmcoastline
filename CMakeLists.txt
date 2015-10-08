@@ -27,6 +27,8 @@ set(OSMCOASTLINE_VERSION_PATCH 1)
 set(OSMCOASTLINE_VERSION
     ${OSMCOASTLINE_VERSION_MAJOR}.${OSMCOASTLINE_VERSION_MINOR}.${OSMCOASTLINE_VERSION_PATCH})
 
+add_definitions(-DOSMCOASTLINE_VERSION="${OSMCOASTLINE_VERSION}")
+
 set(AUTHOR "Jochen Topf <jochen@topf.org>")
 
 
@@ -242,7 +244,7 @@ configure_file(
 configure_file(
     ${PROJECT_SOURCE_DIR}/osmcoastline_readmeta
     ${PROJECT_BINARY_DIR}/osmcoastline_readmeta
-    COPYONLY
+    @ONLY
 )
 install(PROGRAMS osmcoastline_readmeta DESTINATION bin)
 

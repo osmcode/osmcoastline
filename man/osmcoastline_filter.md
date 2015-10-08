@@ -40,6 +40,9 @@ the **osmcoastline** and **osmcoastline_ways** programs work fine with it.
 -o, --output=OSMFILE
 :   Where to write output (default: none)
 
+-V, --version
+:   Display program version and license information.
+
 
 # EXAMPLES
 

@@ -31,6 +31,9 @@ coastline changes between different runs of the **osmcoastline** program.
 -f, --format=FORMAT
 :   OGR format for writing out geometries.
 
+-V, --version
+:   Display program version and license information.
+
 
 # DIAGNOSTICS
 
