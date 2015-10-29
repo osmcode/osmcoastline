@@ -19,6 +19,7 @@
 
 */
 
+#include <algorithm>
 #include <iostream>
 #include <set>
 #include <getopt.h>
@@ -95,7 +96,7 @@ int main(int argc, char* argv[]) {
         osmium::io::Writer writer(output_filename, header);
         auto output_it = osmium::io::make_output_iterator(writer, 10240);
 
-        std::set<osmium::object_id_type> ids;
+        std::vector<osmium::object_id_type> ids;
 
         {
             osmium::io::Reader reader(infile, osmium::osm_entity_bits::way);
@@ -105,19 +106,22 @@ int main(int argc, char* argv[]) {
                 if (natural && !strcmp(natural, "coastline")) {
                     *output_it++ = way;
                     for (const auto& nr : way.nodes()) {
-                        ids.insert(nr.ref());
+                        ids.push_back(nr.ref());
                     }
                 }
             }
             reader.close();
         }
 
+        std::sort(ids.begin(), ids.end());
+        auto last = std::unique(ids.begin(), ids.end());
+
         {
             osmium::io::Reader reader(infile, osmium::osm_entity_bits::node);
             auto nodes = osmium::io::make_input_iterator_range<const osmium::Node>(reader);
             for (const osmium::Node& node : nodes) {
                 const char* natural = node.get_value_by_key("natural");
-                if ((ids.find(node.id()) != ids.end()) || (natural && !strcmp(natural, "coastline"))) {
+                if (std::binary_search(ids.begin(), last, node.id()) || (natural && !strcmp(natural, "coastline"))) {
                     *output_it++ = node;
                 }
             }
