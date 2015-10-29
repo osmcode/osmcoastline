@@ -92,16 +92,16 @@ void CoastlineRing::close_ring() {
 void CoastlineRing::close_antarctica_ring(int epsg) {
     double min = epsg == 4326 ? -90.0 : -85.0511288;
 
-    for (double lat = -78.0; lat > min; --lat) {
-        m_way_node_list.emplace_back(0, osmium::Location(-179.99999, static_cast<double>(lat)));
+    for (int lat = -78; lat > int(min); --lat) {
+        m_way_node_list.emplace_back(0, osmium::Location(-179.99999, double(lat)));
     }
 
     for (int lon = -180; lon < 180; ++lon) {
-        m_way_node_list.emplace_back(0, osmium::Location(static_cast<double>(lon), min));
+        m_way_node_list.emplace_back(0, osmium::Location(double(lon), min));
     }
 
-    for (double lat = min; lat < -78.0; ++lat) {
-        m_way_node_list.emplace_back(0, osmium::Location(179.99999, static_cast<double>(lat)));
+    for (int lat = int(min); lat < -78; ++lat) {
+        m_way_node_list.emplace_back(0, osmium::Location(179.99999, double(lat)));
     }
 
     m_way_node_list.push_back(m_way_node_list.front());
