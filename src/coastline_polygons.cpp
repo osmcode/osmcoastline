@@ -190,7 +190,8 @@ void CoastlinePolygons::split_polygon(OGRPolygon* polygon, int level) {
 
 void CoastlinePolygons::split() {
     polygon_vector_type v;
-    std::swap(v, m_polygons);
+    using std::swap;
+    swap(v, m_polygons);
     m_polygons.reserve(v.size());
     for (auto& polygon : v) {
         split_polygon(polygon, 0);
@@ -256,7 +257,8 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, OGRLinearRi
                 line->setCoordinateDimension(2);
                 line->assignSpatialReference(ring->getSpatialReference());
                 std::unique_ptr<OGRLineString> new_line { new OGRLineString };
-                std::swap(line, new_line);
+                using std::swap;
+                swap(line, new_line);
                 m_output.add_line(std::move(new_line));
             }
         }
