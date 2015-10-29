@@ -119,12 +119,11 @@ int main(int argc, char* argv[]) {
         {
             osmium::io::Reader reader(infile, osmium::osm_entity_bits::node);
             auto nodes = osmium::io::make_input_iterator_range<const osmium::Node>(reader);
-            for (const osmium::Node& node : nodes) {
+            std::copy_if(nodes.cbegin(), nodes.cend(), output_it, [&ids, &last](const osmium::Node& node){
                 const char* natural = node.get_value_by_key("natural");
-                if (std::binary_search(ids.begin(), last, node.id()) || (natural && !strcmp(natural, "coastline"))) {
-                    *output_it++ = node;
-                }
-            }
+                return std::binary_search(ids.begin(), last, node.id()) ||
+                       (natural && !strcmp(natural, "coastline"));
+            });
             reader.close();
         }
 
