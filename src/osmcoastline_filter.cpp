@@ -24,6 +24,8 @@
 #include <getopt.h>
 
 #include <osmium/io/any_input.hpp>
+#include <osmium/io/input_iterator.hpp>
+#include <osmium/io/output_iterator.hpp>
 #include <osmium/io/pbf_output.hpp>
 #include <osmium/handler.hpp>
 #include <osmium/osm/entity_bits.hpp>
@@ -91,26 +93,19 @@ int main(int argc, char* argv[]) {
 
     try {
         osmium::io::Writer writer(output_filename, header);
+        auto output_it = osmium::io::make_output_iterator(writer, 10240);
 
         std::set<osmium::object_id_type> ids;
-        osmium::memory::Buffer output_buffer(10240);
 
         {
             osmium::io::Reader reader(infile, osmium::osm_entity_bits::way);
-            while (auto input_buffer = reader.read()) {
-                for (auto it = input_buffer.begin<const osmium::Way>(); it != input_buffer.end<const osmium::Way>(); ++it) {
-                    const char* natural = it->get_value_by_key("natural");
-                    if (natural && !strcmp(natural, "coastline")) {
-                        output_buffer.add_item(*it);
-                        output_buffer.commit();
-                        if (output_buffer.committed() >= 10240) {
-                            osmium::memory::Buffer new_buffer(10240);
-                            std::swap(output_buffer, new_buffer);
-                            writer(std::move(new_buffer));
-                        }
-                        for (const auto& nr : it->nodes()) {
-                            ids.insert(nr.ref());
-                        }
+            auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
+            for (const osmium::Way& way : ways) {
+                const char* natural = way.get_value_by_key("natural");
+                if (natural && !strcmp(natural, "coastline")) {
+                    *output_it++ = way;
+                    for (const auto& nr : way.nodes()) {
+                        ids.insert(nr.ref());
                     }
                 }
             }
@@ -119,27 +114,17 @@ int main(int argc, char* argv[]) {
 
         {
             osmium::io::Reader reader(infile, osmium::osm_entity_bits::node);
-            while (auto input_buffer = reader.read()) {
-                for (auto it = input_buffer.begin<const osmium::Node>(); it != input_buffer.end<const osmium::Node>(); ++it) {
-                    const char* natural = it->get_value_by_key("natural");
-                    if ((ids.find(it->id()) != ids.end()) || (natural && !strcmp(natural, "coastline"))) {
-                        output_buffer.add_item(*it);
-                        output_buffer.commit();
-                        if (output_buffer.committed() >= 10240) {
-                            osmium::memory::Buffer new_buffer(10240);
-                            std::swap(output_buffer, new_buffer);
-                            writer(std::move(new_buffer));
-                        }
-                    }
+            auto nodes = osmium::io::make_input_iterator_range<const osmium::Node>(reader);
+            for (const osmium::Node& node : nodes) {
+                const char* natural = node.get_value_by_key("natural");
+                if ((ids.find(node.id()) != ids.end()) || (natural && !strcmp(natural, "coastline"))) {
+                    *output_it++ = node;
                 }
             }
             reader.close();
         }
 
-        if (output_buffer.committed() > 0) {
-            writer(std::move(output_buffer));
-        }
-
+        output_it.flush();
         writer.close();
     } catch (osmium::io_error& e) {
         std::cerr << "io error: " << e.what() << "'\n";
