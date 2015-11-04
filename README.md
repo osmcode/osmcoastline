@@ -15,6 +15,7 @@ https://github.com/osmcode/osmcoastline
 
     http://github.com/osmcode/libosmium
     http://osmcode.org/libosmium
+    At least version 2.5.0 is needed.
 
 ### zlib (for PBF support)
 

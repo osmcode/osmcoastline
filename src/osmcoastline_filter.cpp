@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
 
     try {
         osmium::io::Writer writer(output_filename, header);
-        auto output_it = osmium::io::make_output_iterator(writer, 10240);
+        auto output_it = osmium::io::make_output_iterator(writer);
 
         std::vector<osmium::object_id_type> ids;
 
@@ -127,7 +127,6 @@ int main(int argc, char* argv[]) {
             reader.close();
         }
 
-        output_it.flush();
         writer.close();
     } catch (osmium::io_error& e) {
         std::cerr << "io error: " << e.what() << "'\n";
