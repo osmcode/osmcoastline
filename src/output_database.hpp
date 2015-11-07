@@ -51,7 +51,11 @@ class OutputDatabase {
 
     bool m_with_index;
 
+#if GDAL_VERSION_MAJOR < 2
     std::unique_ptr<OGRDataSource, OGRDataSourceDestroyer> m_data_source;
+#else
+    std::unique_ptr<GDALDataset, GDALDatasetDestroyer> m_data_source;
+#endif
 
     std::unique_ptr<LayerErrorPoints> m_layer_error_points;
     std::unique_ptr<LayerErrorLines>  m_layer_error_lines;

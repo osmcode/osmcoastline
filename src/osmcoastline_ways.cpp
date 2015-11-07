@@ -41,7 +41,11 @@ class CoastlineWaysHandler : public osmium::handler::Handler {
 
     double m_length;
 
+#if GDAL_VERSION_MAJOR < 2
     std::unique_ptr<OGRDataSource, OGRDataSourceDestroyer> m_data_source;
+#else
+    std::unique_ptr<GDALDataset, GDALDatasetDestroyer> m_data_source;
+#endif
     OGRLayer* m_layer_ways;
 
     osmium::geom::OGRFactory<> m_factory;
@@ -50,10 +54,18 @@ public:
 
     CoastlineWaysHandler(const std::string& db_filename) :
         m_length(0.0) {
+#if GDAL_VERSION_MAJOR < 2
         OGRRegisterAll();
+#else
+        GDALAllRegister();
+#endif
 
         const char* driver_name = "SQLite";
+#if GDAL_VERSION_MAJOR < 2
         OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name);
+#else
+        GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(driver_name);
+#endif
         if (!driver) {
             std::cerr << driver_name << " driver not available.\n";
             exit(return_code_fatal);
@@ -61,7 +73,11 @@ public:
 
         CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "FALSE");
         const char* options[] = { "SPATIALITE=TRUE", nullptr };
+#if GDAL_VERSION_MAJOR < 2
         m_data_source.reset(driver->CreateDataSource(db_filename.c_str(), const_cast<char**>(options)));
+#else
+        m_data_source.reset(driver->Create(db_filename.c_str(), 0, 0, 0, GDT_Unknown, const_cast<char**>(options)));
+#endif
         if (!m_data_source) {
             std::cerr << "Creation of output file failed.\n";
             exit(return_code_fatal);

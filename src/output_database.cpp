@@ -45,17 +45,30 @@ OutputDatabase::OutputDatabase(const std::string& outdb, bool with_index) :
     m_layer_land_polygons(),
     m_layer_water_polygons(),
     m_layer_lines() {
+
+#if GDAL_VERSION_MAJOR < 2
     OGRRegisterAll();
+#else
+    GDALAllRegister();
+#endif
 
     const char* driver_name = "SQLite";
+#if GDAL_VERSION_MAJOR < 2
     OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name);
+#else
+    GDALDriver* driver = GetGDALDriverManager()->GetDriverByName(driver_name);
+#endif
     if (!driver) {
         std::cerr << driver_name << " driver not available.\n";
         exit(return_code_fatal);
     }
 
     const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no", nullptr };
+#if GDAL_VERSION_MAJOR < 2
     m_data_source.reset(driver->CreateDataSource(outdb.c_str(), const_cast<char**>(options)));
+#else
+    m_data_source.reset(driver->Create(outdb.c_str(), 0, 0, 0, GDT_Unknown, const_cast<char**>(options)));
+#endif
     if (!m_data_source) {
         std::cerr << "Creation of output file failed.\n";
         exit(return_code_fatal);

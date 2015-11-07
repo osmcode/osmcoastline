@@ -29,7 +29,11 @@
 extern SRS srs;
 
 class OGRLayer;
+#if GDAL_VERSION_MAJOR < 2
 class OGRDataSource;
+#else
+class GDALDataset;
+#endif
 class OGRPoint;
 class OGRLineString;
 class OGRPolygon;
@@ -60,7 +64,11 @@ class LayerErrorPoints : public Layer {
 
 public:
 
+#if GDAL_VERSION_MAJOR < 2
     LayerErrorPoints(OGRDataSource* data_source, const char** options);
+#else
+    LayerErrorPoints(GDALDataset* data_source, const char** options);
+#endif
     void add(OGRPoint* point, const char* error, osmium::object_id_type id);
 
 };
@@ -72,7 +80,11 @@ class LayerErrorLines : public Layer {
 
 public:
 
+#if GDAL_VERSION_MAJOR < 2
     LayerErrorLines(OGRDataSource* data_source, const char** options);
+#else
+    LayerErrorLines(GDALDataset* data_source, const char** options);
+#endif
     void add(OGRLineString* linestring, const char* error, osmium::object_id_type id);
 
 };
@@ -88,7 +100,11 @@ class LayerRings : public Layer {
 
 public:
 
+#if GDAL_VERSION_MAJOR < 2
     LayerRings(OGRDataSource* data_source, const char** options);
+#else
+    LayerRings(GDALDataset* data_source, const char** options);
+#endif
     void add(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed, LayerErrorPoints* layer_error_points);
 
 };
@@ -103,7 +119,11 @@ class LayerPolygons : public Layer {
 
 public:
 
+#if GDAL_VERSION_MAJOR < 2
     LayerPolygons(OGRDataSource* data_source, const char** options, const char* name);
+#else
+    LayerPolygons(GDALDataset* data_source, const char** options, const char* name);
+#endif
     void add(OGRPolygon* polygon);
 
 };
@@ -116,7 +136,11 @@ class LayerLines : public Layer {
 
 public:
 
+#if GDAL_VERSION_MAJOR < 2
     LayerLines(OGRDataSource* data_source, const char** options);
+#else
+    LayerLines(GDALDataset* data_source, const char** options);
+#endif
     void add(OGRLineString* lines);
 
 };
