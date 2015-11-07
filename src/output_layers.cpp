@@ -47,7 +47,11 @@ void Layer::commit() {
 
 /***************************************************************/
 
+#if GDAL_VERSION_MAJOR < 2
 LayerErrorPoints::LayerErrorPoints(OGRDataSource* data_source, const char** options) :
+#else
+LayerErrorPoints::LayerErrorPoints(GDALDataset* data_source, const char** options) :
+#endif
     Layer() {
     m_layer = data_source->CreateLayer("error_points", srs.out(), wkbPoint, const_cast<char**>(options));
     if (!m_layer) {
@@ -91,7 +95,11 @@ void LayerErrorPoints::add(OGRPoint* point, const char* error, osmium::object_id
 
 /***************************************************************/
 
+#if GDAL_VERSION_MAJOR < 2
 LayerErrorLines::LayerErrorLines(OGRDataSource* data_source, const char** options) :
+#else
+LayerErrorLines::LayerErrorLines(GDALDataset* data_source, const char** options) :
+#endif
     Layer() {
     m_layer = data_source->CreateLayer("error_lines", srs.out(), wkbLineString, const_cast<char**>(options));
     if (!m_layer) {
@@ -135,7 +143,11 @@ void LayerErrorLines::add(OGRLineString* linestring, const char* error, osmium::
 
 /***************************************************************/
 
+#if GDAL_VERSION_MAJOR < 2
 LayerRings::LayerRings(OGRDataSource* data_source, const char** options) :
+#else
+LayerRings::LayerRings(GDALDataset* data_source, const char** options) :
+#endif
     Layer() {
     m_layer = data_source->CreateLayer("rings", srs.out(), wkbPolygon, const_cast<char**>(options));
     if (!m_layer) {
@@ -264,7 +276,11 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
 
 /***************************************************************/
 
+#if GDAL_VERSION_MAJOR < 2
 LayerPolygons::LayerPolygons(OGRDataSource* data_source, const char** options, const char* name) :
+#else
+LayerPolygons::LayerPolygons(GDALDataset* data_source, const char** options, const char* name) :
+#endif
     Layer(),
     m_name(name) {
     m_layer = data_source->CreateLayer(name, srs.out(), wkbPolygon, const_cast<char**>(options));
@@ -293,7 +309,11 @@ void LayerPolygons::add(OGRPolygon* polygon) {
 
 /***************************************************************/
 
+#if GDAL_VERSION_MAJOR < 2
 LayerLines::LayerLines(OGRDataSource* data_source, const char** options) :
+#else
+LayerLines::LayerLines(GDALDataset* data_source, const char** options) :
+#endif
     Layer() {
     m_layer = data_source->CreateLayer("lines", srs.out(), wkbLineString, const_cast<char**>(options));
     if (!m_layer) {

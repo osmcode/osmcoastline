@@ -31,6 +31,7 @@
 # pragma GCC diagnostic pop
 #endif
 
+#if GDAL_VERSION_MAJOR < 2
 struct OGRDataSourceDestroyer {
     void operator()(OGRDataSource* ptr) {
         if (ptr) {
@@ -38,5 +39,14 @@ struct OGRDataSourceDestroyer {
         }
     }
 };
+#else
+struct GDALDatasetDestroyer {
+    void operator()(GDALDataset* ptr) {
+        if (ptr) {
+            GDALClose(ptr);
+        }
+    }
+};
+#endif
 
 #endif // OGR_INCLUDE_HPP

@@ -92,9 +92,15 @@ void add_segment(OGRLayer* layer, int change, const osmium::UndirectedSegment& s
 }
 
 void output_ogr(const std::string& filename, const std::string& driver_name, const segvec& removed_segments, const segvec& added_segments) {
+#if GDAL_VERSION_MAJOR < 2
     OGRRegisterAll();
 
     OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name.c_str());
+#else
+    GDALAllRegister();
+
+    GDALDriver* driver = GetGDALDriverManager()->GetDriverByName(driver_name.c_str());
+#endif
     if (!driver) {
         std::cerr << driver_name << " driver not available.\n";
         exit(return_code_fatal);
@@ -102,7 +108,11 @@ void output_ogr(const std::string& filename, const std::string& driver_name, con
 
     //const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no", nullptr };
     const char* options[] = { nullptr };
+#if GDAL_VERSION_MAJOR < 2
     auto data_source = std::unique_ptr<OGRDataSource, OGRDataSourceDestroyer>(driver->CreateDataSource(filename.c_str(), const_cast<char**>(options)));
+#else
+    auto data_source = std::unique_ptr<GDALDataset, GDALDatasetDestroyer>(driver->Create(filename.c_str(), 0, 0, 0, GDT_Unknown, NULL));
+#endif
     if (!data_source) {
         std::cerr << "Creation of output file failed.\n";
         exit(return_code_fatal);
