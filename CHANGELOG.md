@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Use a better approximation for the southernmost coordinate for Mercator
   projection.
+- Updated for newest libosmium version (2.5.2).
 
 ### Fixed
 
