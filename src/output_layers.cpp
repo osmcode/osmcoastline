@@ -210,33 +210,39 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
 #if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR <= 10
         GEOSGeom p { polygon->exportToGEOS() };
         char* r = GEOSisValidReason(p);
-        std::string reason = r;
+        std::string reason = r ? r : "";
         GEOSFree(r);
         GEOSGeom_destroy(p);
 #else
         GEOSContextHandle_t contextHandle = OGRGeometry::createGEOSContext();
-        std::string reason = GEOSisValidReason(polygon->exportToGEOS(contextHandle));
+        auto r = GEOSisValidReason(polygon->exportToGEOS(contextHandle));
+        std::string reason = r ? r : "";
         OGRGeometry::freeGEOSContext(contextHandle);
 #endif
-        size_t left_bracket = reason.find('[');
-        size_t right_bracket = reason.find(']');
 
-        std::istringstream iss(reason.substr(left_bracket+1, right_bracket-left_bracket-1), std::istringstream::in);
-        double x;
-        double y;
-        iss >> x;
-        iss >> y;
-        reason = reason.substr(0, left_bracket);
+        if (!reason.empty()) {
+            size_t left_bracket = reason.find('[');
+            size_t right_bracket = reason.find(']');
 
-        std::unique_ptr<OGRPoint> point { new OGRPoint() };
-        point->assignSpatialReference(polygon->getSpatialReference());
-        point->setX(x);
-        point->setY(y);
+            std::istringstream iss(reason.substr(left_bracket+1, right_bracket-left_bracket-1), std::istringstream::in);
+            double x;
+            double y;
+            iss >> x;
+            iss >> y;
+            reason = reason.substr(0, left_bracket);
 
-        if (reason == "Self-intersection") {
-            reason = "self_intersection";
+            std::unique_ptr<OGRPoint> point { new OGRPoint() };
+            point->assignSpatialReference(polygon->getSpatialReference());
+            point->setX(x);
+            point->setY(y);
+
+            if (reason == "Self-intersection") {
+                reason = "self_intersection";
+            }
+            layer_error_points->add(point.release(), reason.c_str(), osm_id);
+        } else {
+            std::cerr << "Did not get reason from GEOS why polygon " << osm_id << " is invalid. Could not write info to error points layer\n";
         }
-        layer_error_points->add(point.release(), reason.c_str(), osm_id);
     }
 
     OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
