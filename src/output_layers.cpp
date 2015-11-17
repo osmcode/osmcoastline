@@ -191,23 +191,10 @@ LayerRings::LayerRings(OGRDataSource* data_source, const char** options) :
 void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bool fixed, LayerErrorPoints* layer_error_points) {
     srs.transform(polygon);
 
-    OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
+    bool land = polygon->getExteriorRing()->isClockwise();
+    bool valid = polygon->IsValid();
 
-    feature->SetGeometryDirectly(polygon);
-    feature->SetField("osm_id", osm_id);
-    feature->SetField("nways", nways);
-    feature->SetField("npoints", npoints);
-    feature->SetField("fixed", fixed ? 0 : 1);
-
-    if (polygon->getExteriorRing()->isClockwise()) {
-        feature->SetField("land", 1);
-    } else {
-        feature->SetField("land", 0);
-    }
-
-    if (polygon->IsValid()) {
-        feature->SetField("valid", 1);
-    } else {
+    if (!valid) {
         /*
            When the polygon is invalid we find out what and where the problem is.
            This code is a bit strange because older versions of the GEOS library
@@ -250,9 +237,17 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
             reason = "self_intersection";
         }
         layer_error_points->add(point.release(), reason.c_str(), osm_id);
-
-        feature->SetField("valid", 0);
     }
+
+    OGRFeature* feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
+
+    feature->SetGeometryDirectly(polygon);
+    feature->SetField("osm_id", osm_id);
+    feature->SetField("nways", nways);
+    feature->SetField("npoints", npoints);
+    feature->SetField("fixed", fixed ? 0 : 1);
+    feature->SetField("land", land);
+    feature->SetField("valid", valid);
 
     if (m_layer->CreateFeature(feature) != OGRERR_NONE) {
         std::cerr << "Failed to create feature in layer 'rings'.\n";
