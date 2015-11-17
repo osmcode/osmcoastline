@@ -245,7 +245,7 @@ void LayerRings::add(OGRPolygon* polygon, int osm_id, int nways, int npoints, bo
     feature->SetField("osm_id", osm_id);
     feature->SetField("nways", nways);
     feature->SetField("npoints", npoints);
-    feature->SetField("fixed", fixed ? 0 : 1);
+    feature->SetField("fixed", fixed);
     feature->SetField("land", land);
     feature->SetField("valid", valid);
 
