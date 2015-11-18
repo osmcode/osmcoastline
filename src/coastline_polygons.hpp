@@ -78,8 +78,8 @@ class CoastlinePolygons {
     void split_polygon(OGRPolygon* polygon, int level);
     void split_bbox(OGREnvelope e, polygon_vector_type&& v);
 
-    bool add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2);
-    void output_polygon_ring_as_lines(int max_points, OGRLinearRing* ring);
+    bool add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2) const;
+    void output_polygon_ring_as_lines(int max_points, const OGRLinearRing* ring) const;
 
 public:
 
@@ -120,7 +120,7 @@ public:
     unsigned int output_water_polygons();
 
     /// Write all coastlines to the output database (as lines).
-    void output_lines(int max_points);
+    void output_lines(int max_points) const;
 
 };
 

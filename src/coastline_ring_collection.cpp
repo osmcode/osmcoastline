@@ -409,7 +409,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
 
     // go through all the polygons that have been created before and mark the outer rings
     for (const auto& polygon : polygons) {
-        OGRLinearRing* exterior_ring = polygon->getExteriorRing();
+        const OGRLinearRing* exterior_ring = polygon->getExteriorRing();
         osmium::Location pos(exterior_ring->getX(0), exterior_ring->getY(0));
         std::vector<pos_ring_ptr_t>::iterator rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<osmium::Location, CoastlineRing*>(std::move(pos), nullptr));
         if (rings_it != rings.end()) {

@@ -211,7 +211,7 @@ void CoastlinePolygons::output_land_polygons(bool make_copy) {
     }
 }
 
-bool CoastlinePolygons::add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2) {
+bool CoastlinePolygons::add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2) const {
     // segments along southern edge of the map are not added to line output
     if (point1->getY() < srs.min_y() && point2->getY() < srs.min_y()) {
         if (debug) {
@@ -238,7 +238,7 @@ bool CoastlinePolygons::add_segment_to_line(OGRLineString* line, OGRPoint* point
 
 // Add a coastline ring as LineString to output. Segments in this line that are
 // near the southern edge of the map or near the antimeridian are suppressed.
-void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, OGRLinearRing* ring) {
+void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLinearRing* ring) const {
     int num = ring->getNumPoints();
     assert(num > 2);
 
@@ -274,8 +274,8 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, OGRLinearRi
     }
 }
 
-void CoastlinePolygons::output_lines(int max_points) {
-    for (OGRPolygon* polygon : m_polygons) {
+void CoastlinePolygons::output_lines(int max_points) const {
+    for (const OGRPolygon* polygon : m_polygons) {
         output_polygon_ring_as_lines(max_points, polygon->getExteriorRing());
         for (int i=0; i < polygon->getNumInteriorRings(); ++i) {
             output_polygon_ring_as_lines(max_points, polygon->getInteriorRing(i));
