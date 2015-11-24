@@ -126,7 +126,16 @@ unsigned int CoastlineRingCollection::check_positions(bool output_missing) {
     return missing_positions;
 }
 
-void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& vector) {
+bool is_valid_polygon(const OGRGeometry* geometry) {
+    if (geometry && geometry->getGeometryType() == wkbPolygon) {
+        const auto polygon = static_cast<const OGRPolygon*>(geometry);
+        return (polygon->getExteriorRing()->getNumPoints() > 3) && (polygon->getNumInteriorRings() == 0) && geometry->IsValid();
+    }
+    return false;
+}
+
+std::vector<OGRGeometry*> CoastlineRingCollection::add_polygons_to_vector() {
+    std::vector<OGRGeometry*> vector;
     vector.reserve(m_list.size());
 
     for (const auto& ring : m_list) {
@@ -137,15 +146,17 @@ void CoastlineRingCollection::add_polygons_to_vector(std::vector<OGRGeometry*>& 
                 vector.push_back(p.release());
             } else {
                 std::unique_ptr<OGRGeometry> geom { p->Buffer(0) };
-                if (geom && (geom->getGeometryType() == wkbPolygon) && (static_cast<OGRPolygon*>(geom.get())->getExteriorRing()->getNumPoints() > 3) && (static_cast<OGRPolygon*>(geom.get())->getNumInteriorRings() == 0) && geom->IsValid()) {
+                if (is_valid_polygon(geom.get())) {
                     geom->assignSpatialReference(srs.wgs84());
-                    vector.push_back(static_cast<OGRPolygon*>(geom.release()));
+                    vector.push_back(geom.release());
                 } else {
                     std::cerr << "Ignoring invalid polygon geometry (ring_id=" << ring->ring_id() << ").\n";
                 }
             }
         }
     }
+
+    return vector;
 }
 
 unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
@@ -154,18 +165,18 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     for (const auto& ring : m_list) {
         if (ring->is_closed()) {
             if (ring->npoints() > 3) {
-                output.add_ring(ring->ogr_polygon(m_factory, true).release(), ring->ring_id(), ring->nways(), ring->npoints(), ring->is_fixed());
+                output.add_ring(ring->ogr_polygon(m_factory, true), ring->ring_id(), ring->nways(), ring->npoints(), ring->is_fixed());
             } else if (ring->npoints() == 1) {
                 output.add_error_point(ring->ogr_first_point(), "single_point_in_ring", ring->first_node_id());
                 warnings++;
             } else { // ring->npoints() == 2 or 3
-                output.add_error_line(ring->ogr_linestring(m_factory, true).release(), "not_a_ring", ring->ring_id());
+                output.add_error_line(ring->ogr_linestring(m_factory, true), "not_a_ring", ring->ring_id());
                 output.add_error_point(ring->ogr_first_point(), "not_a_ring", ring->first_node_id());
                 output.add_error_point(ring->ogr_last_point(), "not_a_ring", ring->last_node_id());
                 warnings++;
             }
         } else {
-            output.add_error_line(ring->ogr_linestring(m_factory, true).release(), "not_closed", ring->ring_id());
+            output.add_error_line(ring->ogr_linestring(m_factory, true), "not_closed", ring->ring_id());
             output.add_error_point(ring->ogr_first_point(), "end_point", ring->first_node_id());
             output.add_error_point(ring->ogr_last_point(), "end_point", ring->last_node_id());
             warnings++;

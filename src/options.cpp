@@ -25,7 +25,7 @@
 #include <cstdlib>
 #include <getopt.h>
 
-#include "osmcoastline.hpp"
+#include "return_codes.hpp"
 #include "options.hpp"
 
 Options::Options(int argc, char* argv[]) :

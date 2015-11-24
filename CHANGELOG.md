@@ -15,6 +15,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Use a better approximation for the southernmost coordinate for Mercator
   projection.
 - Updated for newest libosmium version (2.5.2).
+- Uses gdalcpp.hpp from https://github.com/joto/gdalcpp instead of directly
+  talking to GDAL/OGR. Makes this compatible with GDAL 2.
+- Improved internal code using unique_ptr where possible.
 
 ### Fixed
 

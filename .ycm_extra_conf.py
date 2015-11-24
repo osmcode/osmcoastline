@@ -29,7 +29,7 @@ flags = [
 '-x',
 'c++',
 
-# libosmium include dirs
+'-Iinclude',
 '-I%s/../libosmium/include' % basedir,
 '-I/usr/include/gdal',
 

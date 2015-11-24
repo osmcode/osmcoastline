@@ -21,7 +21,7 @@
 
 #include <cstring>
 #include <iostream>
-#include <set>
+#include <memory>
 #include <string>
 
 #include <osmium/geom/haversine.hpp>
@@ -31,8 +31,9 @@
 #include <osmium/io/any_input.hpp>
 #include <osmium/visitor.hpp>
 
-#include "ogr_include.hpp"
-#include "osmcoastline.hpp"
+#include <gdalcpp.hpp>
+
+#include "return_codes.hpp"
 
 typedef osmium::index::map::SparseMemArray<osmium::unsigned_object_id_type, osmium::Location> index_type;
 typedef osmium::handler::NodeLocationsForWays<index_type, index_type> node_location_handler_type;
@@ -41,94 +42,41 @@ class CoastlineWaysHandler : public osmium::handler::Handler {
 
     double m_length;
 
-    std::unique_ptr<OGRDataSource, OGRDataSourceDestroyer> m_data_source;
-    OGRLayer* m_layer_ways;
+    gdalcpp::Dataset m_dataset;
+    gdalcpp::Layer m_layer_ways;
 
     osmium::geom::OGRFactory<> m_factory;
 
 public:
 
     CoastlineWaysHandler(const std::string& db_filename) :
-        m_length(0.0) {
-        OGRRegisterAll();
+        m_length(0.0),
+        m_dataset("SQLite", db_filename, gdalcpp::SRS{}, {"SPATIALITE=TRUE", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no" }),
+        m_layer_ways(m_dataset, "ways", wkbLineString) {
 
-        const char* driver_name = "SQLite";
-        OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name);
-        if (!driver) {
-            std::cerr << driver_name << " driver not available.\n";
-            exit(return_code_fatal);
-        }
-
-        CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "FALSE");
-        const char* options[] = { "SPATIALITE=TRUE", nullptr };
-        m_data_source.reset(driver->CreateDataSource(db_filename.c_str(), const_cast<char**>(options)));
-        if (!m_data_source) {
-            std::cerr << "Creation of output file failed.\n";
-            exit(return_code_fatal);
-        }
-
-        OGRSpatialReference sparef;
-        sparef.SetWellKnownGeogCS("WGS84");
-        m_layer_ways = m_data_source->CreateLayer("ways", &sparef, wkbLineString, nullptr);
-        if (!m_layer_ways) {
-            std::cerr << "Layer creation failed.\n";
-            exit(return_code_fatal);
-        }
-
-        OGRFieldDefn field_way_id("way_id", OFTString);
-        field_way_id.SetWidth(10);
-        if (m_layer_ways->CreateField(&field_way_id) != OGRERR_NONE ) {
-            std::cerr << "Creating field 'way_id' on 'ways' layer failed.\n";
-            exit(return_code_fatal);
-        }
-
-        OGRFieldDefn field_name("name", OFTString);
-        field_name.SetWidth(100);
-        if (m_layer_ways->CreateField(&field_name) != OGRERR_NONE ) {
-            std::cerr << "Creating field 'name' on 'ways' layer failed.\n";
-            exit(return_code_fatal);
-        }
-
-        OGRFieldDefn field_source("source", OFTString);
-        field_source.SetWidth(255);
-        if (m_layer_ways->CreateField(&field_source) != OGRERR_NONE ) {
-            std::cerr << "Creating field 'source' on 'ways' layer failed.\n";
-            exit(return_code_fatal);
-        }
-
-        OGRFieldDefn field_bogus("bogus", OFTString);
-        field_bogus.SetWidth(1);
-        if (m_layer_ways->CreateField(&field_bogus) != OGRERR_NONE ) {
-            std::cerr << "Creating field 'bogus' on 'ways' layer failed.\n";
-            exit(return_code_fatal);
-        }
-
-        m_layer_ways->StartTransaction();
+        m_layer_ways.add_field("way_id", OFTString, 10);
+        m_layer_ways.add_field("name",   OFTString, 100);
+        m_layer_ways.add_field("source", OFTString, 255);
+        m_layer_ways.add_field("bogus",  OFTString, 1);
+        m_layer_ways.start_transaction();
     }
 
     ~CoastlineWaysHandler() {
-        m_layer_ways->CommitTransaction();
+        m_layer_ways.commit_transaction();
     }
 
     void way(osmium::Way& way) {
         m_length += osmium::geom::haversine::distance(way.nodes());
         try {
-            OGRFeature* feature = OGRFeature::CreateFeature(m_layer_ways->GetLayerDefn());
             std::unique_ptr<OGRLineString> ogrlinestring = m_factory.create_linestring(way);
-            feature->SetGeometry(ogrlinestring.get());
-            feature->SetField("way_id", std::to_string(way.id()).c_str());
-            feature->SetField("name", way.tags().get_value_by_key("name"));
-            feature->SetField("source", way.tags().get_value_by_key("source"));
+            gdalcpp::Feature feature(m_layer_ways, std::move(ogrlinestring));
+            feature.set_field("way_id", std::to_string(way.id()).c_str());
+            feature.set_field("name", way.tags().get_value_by_key("name"));
+            feature.set_field("source", way.tags().get_value_by_key("source"));
 
             const char* coastline = way.tags().get_value_by_key("coastline");
-            feature->SetField("bogus", (coastline && !strcmp(coastline, "bogus")) ? "t" : "f");
-
-            if (m_layer_ways->CreateFeature(feature) != OGRERR_NONE) {
-                std::cerr << "Failed to create feature.\n";
-                exit(1);
-            }
-
-            OGRFeature::DestroyFeature(feature);
+            feature.set_field("bogus", (coastline && !std::strcmp(coastline, "bogus")) ? "t" : "f");
+            feature.add_to_layer();
         } catch (osmium::geometry_error&) {
             std::cerr << "Ignoring illegal geometry for way " << way.id() << ".\n";
         }
@@ -142,12 +90,12 @@ public:
 
 int main(int argc, char* argv[]) {
     if (argc >= 2) {
-        if (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
+        if (!std::strcmp(argv[1], "--help") || !std::strcmp(argv[1], "-h")) {
             std::cout << "Usage: osmcoastline_ways OSMFILE [WAYSDB]\n";
             exit(return_code_ok);
         }
 
-        if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "-V")) {
+        if (!std::strcmp(argv[1], "--version") || !std::strcmp(argv[1], "-V")) {
             std::cout << "osmcoastline_ways version " OSMCOASTLINE_VERSION "\n"
                       << "Copyright (C) 2012-2015  Jochen Topf <jochen@topf.org>\n"
                       << "License: GNU GENERAL PUBLIC LICENSE Version 3 <http://gnu.org/licenses/gpl.html>.\n"

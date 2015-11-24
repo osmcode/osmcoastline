@@ -31,7 +31,7 @@
 #include <osmium/handler.hpp>
 #include <osmium/osm/entity_bits.hpp>
 
-#include "osmcoastline.hpp"
+#include "return_codes.hpp"
 
 void print_help() {
     std::cout << "osmcoastline_filter [OPTIONS] OSMFILE\n"

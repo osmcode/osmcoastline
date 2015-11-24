@@ -105,7 +105,7 @@ public:
 
     unsigned int check_positions(bool output_missing);
 
-    void add_polygons_to_vector(std::vector<OGRGeometry*>& vector);
+    std::vector<OGRGeometry*> add_polygons_to_vector();
 
     unsigned int output_rings(OutputDatabase& output);
 

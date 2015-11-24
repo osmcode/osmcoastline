@@ -35,9 +35,9 @@
 #include <osmium/osm/undirected_segment.hpp>
 #include <osmium/util/memory_mapping.hpp>
 
-#include "ogr_include.hpp"
-#include "osmcoastline.hpp"
-#include "srs.hpp"
+#include <gdalcpp.hpp>
+
+#include "return_codes.hpp"
 
 typedef std::vector<osmium::UndirectedSegment> segvec;
 
@@ -73,56 +73,22 @@ public:
 void print_help() {
 }
 
-void add_segment(OGRLayer* layer, int change, const osmium::UndirectedSegment& segment) {
-    OGRFeature* feature = OGRFeature::CreateFeature(layer->GetLayerDefn());
-
-    auto linestring = new OGRLineString();
+void add_segment(gdalcpp::Layer& layer, int change, const osmium::UndirectedSegment& segment) {
+    auto linestring = std::unique_ptr<OGRLineString>(new OGRLineString());
     linestring->addPoint(segment.first().lon(), segment.first().lat());
     linestring->addPoint(segment.second().lon(), segment.second().lat());
 
-    feature->SetGeometryDirectly(linestring);
-    feature->SetField("change", change);
-
-    if (layer->CreateFeature(feature) != OGRERR_NONE) {
-        std::cerr << "Failed to create feature on layer 'changes'.\n";
-        exit(return_code_fatal);
-    }
-
-    OGRFeature::DestroyFeature(feature);
+    gdalcpp::Feature feature(layer, std::move(linestring));
+    feature.set_field("change", change);
+    feature.add_to_layer();
 }
 
 void output_ogr(const std::string& filename, const std::string& driver_name, const segvec& removed_segments, const segvec& added_segments) {
-    OGRRegisterAll();
+    gdalcpp::Dataset dataset{driver_name, filename};
 
-    OGRSFDriver* driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver_name.c_str());
-    if (!driver) {
-        std::cerr << driver_name << " driver not available.\n";
-        exit(return_code_fatal);
-    }
-
-    //const char* options[] = { "SPATIALITE=yes", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no", nullptr };
-    const char* options[] = { nullptr };
-    auto data_source = std::unique_ptr<OGRDataSource, OGRDataSourceDestroyer>(driver->CreateDataSource(filename.c_str(), const_cast<char**>(options)));
-    if (!data_source) {
-        std::cerr << "Creation of output file failed.\n";
-        exit(return_code_fatal);
-    }
-
-    SRS srs;
-    auto layer = data_source->CreateLayer("changes", srs.out(), wkbLineString, const_cast<char**>(options));
-    if (!layer) {
-        std::cerr << "Creating layer 'changes' failed.\n";
-        exit(return_code_fatal);
-    }
-
-    OGRFieldDefn field_change("change", OFTInteger);
-    field_change.SetWidth(1);
-    if (layer->CreateField(&field_change) != OGRERR_NONE ) {
-        std::cerr << "Creating field 'change' on 'changes' layer failed.\n";
-        exit(return_code_fatal);
-    }
-
-    layer->StartTransaction();
+    gdalcpp::Layer layer{dataset, "changes", wkbLineString};
+    layer.add_field("change", OFTInteger, 1);
+    layer.start_transaction();
 
     for (const auto& segment : removed_segments) {
         add_segment(layer, 0, segment);
@@ -132,7 +98,7 @@ void output_ogr(const std::string& filename, const std::string& driver_name, con
         add_segment(layer, 1, segment);
     }
 
-    layer->CommitTransaction();
+    layer.commit_transaction();
 }
 
 int main(int argc, char *argv[]) {

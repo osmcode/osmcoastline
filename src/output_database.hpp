@@ -24,18 +24,13 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <osmium/osm/types.hpp>
-#include <ogr_spatialref.h>
 
-#include "ogr_include.hpp"
+#include <gdalcpp.hpp>
 
-class LayerErrorPoints;
-class LayerErrorLines;
-class LayerRings;
-class LayerPolygons;
-class LayerLines;
-
+class SRS;
 class Options;
 struct Stats;
 
@@ -46,54 +41,50 @@ struct Stats;
  */
 class OutputDatabase {
 
-    static const char* options_without_index[];
-    static const char* options_with_index[];
-
     bool m_with_index;
 
-    std::unique_ptr<OGRDataSource, OGRDataSourceDestroyer> m_data_source;
+    SRS& m_srs;
 
-    std::unique_ptr<LayerErrorPoints> m_layer_error_points;
-    std::unique_ptr<LayerErrorLines>  m_layer_error_lines;
-    std::unique_ptr<LayerRings>       m_layer_rings;
-    std::unique_ptr<LayerPolygons>    m_layer_land_polygons;
-    std::unique_ptr<LayerPolygons>    m_layer_water_polygons;
-    std::unique_ptr<LayerLines>       m_layer_lines;
+    gdalcpp::Dataset m_dataset;
 
-    const char** layer_options() const;
+    // Any errors in a linestring
+    gdalcpp::Layer m_layer_error_points;
 
-    /// Execute arbitrary SQL command on database
-    void exec(const char* sql);
+    // Any errors in a point
+    gdalcpp::Layer m_layer_error_lines;
+
+    // Layer for polygon rings.
+    // Will contain polygons without holes, ie. with just an outer ring.
+    // Polygon outer rings will be oriented according to usual GIS custom with
+    // points going clockwise around the ring, ie "land" is on the right hand
+    // side of the border. This is the other way around from how it looks in
+    // OSM.
+    gdalcpp::Layer m_layer_rings;
+
+    // Completed land polygons.
+    gdalcpp::Layer m_layer_land_polygons;
+
+    // Completed water polygons.
+    gdalcpp::Layer m_layer_water_polygons;
+
+    // Coastlines generated from completed polygons.
+    // Lines contain at most max-points points.
+    gdalcpp::Layer m_layer_lines;
+
+    std::vector<std::string> layer_options() const;
 
 public:
 
-    OutputDatabase(const std::string& outdb, bool with_index=false);
+    OutputDatabase(const std::string& outdb, SRS& srs, bool with_index=false);
 
-    ~OutputDatabase();
+    ~OutputDatabase() noexcept = default;
 
-    void create_layer_error_points();
-    void create_layer_error_lines();
-    void create_layer_rings();
-    void create_layer_land_polygons();
-    void create_layer_water_polygons();
-    void create_layer_lines();
-
-    LayerErrorPoints* layer_error_points()   const { return m_layer_error_points.get(); }
-    LayerErrorLines*  layer_error_lines()    const { return m_layer_error_lines.get(); }
-    LayerRings*       layer_rings()          const { return m_layer_rings.get(); }
-    LayerPolygons*    layer_land_polygons()  const { return m_layer_land_polygons.get(); }
-    LayerPolygons*    layer_water_polygons() const { return m_layer_water_polygons.get(); }
-    LayerLines*       layer_lines()          const { return m_layer_lines.get(); }
-
-    void add_error_point(std::unique_ptr<OGRPoint> point, const char* error, osmium::object_id_type id=0);
-    void add_error_point(OGRPoint* point, const char* error, osmium::object_id_type id=0);
-    void add_error_line(std::unique_ptr<OGRLineString> linestring, const char* error, osmium::object_id_type id=0);
-    void add_error_line(OGRLineString* linestring, const char* error, osmium::object_id_type id=0);
-    void add_ring(std::unique_ptr<OGRPolygon> polygon, int id, int nways, int npoints, bool fixed);
-    void add_ring(OGRPolygon* polygon, int id, int nways, int npoints, bool fixed);
-    void add_land_polygon(OGRPolygon* polygon);
-    void add_water_polygon(OGRPolygon* polygon);
-    void add_line(std::unique_ptr<OGRLineString> linestring);
+    void add_error_point(std::unique_ptr<OGRPoint>&& point, const char* error, osmium::object_id_type id=0);
+    void add_error_line(std::unique_ptr<OGRLineString>&& linestring, const char* error, osmium::object_id_type id=0);
+    void add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id, int nways, int npoints, bool fixed);
+    void add_land_polygon(std::unique_ptr<OGRPolygon>&& polygon);
+    void add_water_polygon(std::unique_ptr<OGRPolygon>&& polygon);
+    void add_line(std::unique_ptr<OGRLineString>&& linestring);
 
     void set_options(const Options& options);
     void set_meta(int runtime, int memory_usage, const Stats& stats);

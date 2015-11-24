@@ -27,17 +27,17 @@
 #include <osmium/io/any_input.hpp>
 #include <osmium/visitor.hpp>
 
-#include "osmcoastline.hpp"
+#include "return_codes.hpp"
 #include "coastline_ring.hpp"
 #include "coastline_ring_collection.hpp"
 #include "coastline_polygons.hpp"
 #include "output_database.hpp"
-#include "output_layers.hpp"
 
 #include "options.hpp"
 #include "stats.hpp"
 #include "coastline_handlers.hpp"
 #include "srs.hpp"
+#include "util.hpp"
 #include "verbose_output.hpp"
 
 // The global SRS object is used in many places to transform
@@ -56,8 +56,7 @@ const unsigned int max_warnings = 500;
  * This function assembles all the coastline rings into one huge multipolygon.
  */
 polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, OutputDatabase& output, unsigned int* warnings, unsigned int* errors) {
-    std::vector<OGRGeometry*> all_polygons;
-    coastline_rings.add_polygons_to_vector(all_polygons);
+    std::vector<OGRGeometry*> all_polygons = coastline_rings.add_polygons_to_vector();
 
     int is_valid;
     const char* options[] = { "METHOD=ONLY_CCW", nullptr };
@@ -69,8 +68,10 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
         std::cerr << "organizePolygons() done\n";
     }
 
-    assert(mega_geometry->getGeometryType() == wkbMultiPolygon);
-    OGRMultiPolygon* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.get());
+    if (mega_geometry->getGeometryType() != wkbMultiPolygon) {
+        throw std::runtime_error("mega geometry isn't a multipolygon. Something is very wrong!");
+    }
+    OGRMultiPolygon* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.release());
 
     polygon_vector_type polygons;
     polygons.reserve(mega_multipolygon->getNumGeometries());
@@ -79,13 +80,13 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
         assert(geom->getGeometryType() == wkbPolygon);
         std::unique_ptr<OGRPolygon> p { static_cast<OGRPolygon*>(geom) };
         if (p->IsValid()) {
-            polygons.push_back(p.release());
+            polygons.push_back(std::move(p));
         } else {
-            output.add_error_line(static_cast<OGRLineString*>(p->getExteriorRing()->clone()), "invalid");
+            output.add_error_line(make_unique_ptr_clone<OGRLineString>(p->getExteriorRing()), "invalid");
             std::unique_ptr<OGRGeometry> buf0 { p->Buffer(0) };
             if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
                 buf0->assignSpatialReference(srs.wgs84());
-                polygons.emplace_back(static_cast<OGRPolygon*>(buf0.release()));
+                polygons.push_back(static_cast_unique_ptr<OGRPolygon>(std::move(buf0)));
                 (*warnings)++;
             } else {
                 std::cerr << "Ignoring invalid polygon geometry.\n";
@@ -95,6 +96,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     }
 
     mega_multipolygon->removeGeometry(-1, FALSE);
+    delete mega_multipolygon;
 
     return polygons;
 }
@@ -183,7 +185,7 @@ int main(int argc, char *argv[]) {
     } else {
         vout << "Will NOT create geometry index (because you told me to using --no-index/-i).\n";
     }
-    OutputDatabase output_database(options.output_database, options.create_index);
+    OutputDatabase output_database(options.output_database, srs, options.create_index);
 
     // The collection of all coastline rings we will be filling and then
     // operating on.

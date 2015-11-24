@@ -38,6 +38,8 @@ set(AUTHOR "Jochen Topf <jochen@topf.org>")
 #
 #-----------------------------------------------------------------------------
 
+include_directories(include)
+
 find_package(Osmium COMPONENTS io gdal)
 include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
 
