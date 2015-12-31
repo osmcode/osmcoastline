@@ -238,6 +238,12 @@ bool CoastlinePolygons::add_segment_to_line(OGRLineString* line, OGRPoint* point
     return true;
 }
 
+void CoastlinePolygons::add_line_to_output(std::unique_ptr<OGRLineString> line, OGRSpatialReference* srs) const {
+    line->setCoordinateDimension(2);
+    line->assignSpatialReference(srs);
+    m_output.add_line(std::move(line));
+}
+
 // Add a coastline ring as LineString to output. Segments in this line that are
 // near the southern edge of the map or near the antimeridian are suppressed.
 void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLinearRing* ring) const {
@@ -256,12 +262,10 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLi
 
         if (line->getNumPoints() >= max_points || !added) {
             if (line->getNumPoints() >= 2) {
-                line->setCoordinateDimension(2);
-                line->assignSpatialReference(ring->getSpatialReference());
                 std::unique_ptr<OGRLineString> new_line { new OGRLineString };
                 using std::swap;
                 swap(line, new_line);
-                m_output.add_line(std::move(new_line));
+                add_line_to_output(std::move(new_line), ring->getSpatialReference());
             }
         }
 
@@ -270,9 +274,7 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLi
     }
 
     if (line->getNumPoints() >= 2) {
-        line->setCoordinateDimension(2);
-        line->assignSpatialReference(ring->getSpatialReference());
-        m_output.add_line(std::move(line));
+        add_line_to_output(std::move(line), ring->getSpatialReference());
     }
 }
 

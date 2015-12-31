@@ -78,6 +78,7 @@ class CoastlinePolygons {
     void split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int level);
     void split_bbox(OGREnvelope e, polygon_vector_type&& v);
 
+    void add_line_to_output(std::unique_ptr<OGRLineString> line, OGRSpatialReference* srs) const;
     bool add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2) const;
     void output_polygon_ring_as_lines(int max_points, const OGRLinearRing* ring) const;
 
