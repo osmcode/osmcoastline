@@ -370,11 +370,16 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
             it has no measurable impact. */
             OGREnvelope e;
             polygon->getEnvelope(&e);
-            if (e1.Intersects(e)) {
-                v1.push_back(std::move(polygon));
-            }
 
-            if (e2.Intersects(e)) {
+            bool e1_intersects_e = e1.Intersects(e);
+            bool e2_intersects_e = e2.Intersects(e);
+
+            if (e1_intersects_e && e2_intersects_e) {
+                v1.emplace_back(static_cast<OGRPolygon*>(polygon->clone()));
+                v2.push_back(std::move(polygon));
+            } else if (e1_intersects_e) {
+                v1.push_back(std::move(polygon));
+            } else if (e2_intersects_e) {
                 v2.push_back(std::move(polygon));
             }
         }
