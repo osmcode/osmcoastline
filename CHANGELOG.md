@@ -8,6 +8,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+
+## [2.1.2] - 2016-01-05
+
+### Added
+
 - Add --help/-h and --version/-V options to all programs.
 
 ### Changed
@@ -20,6 +29,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Improved internal code using unique_ptr where possible.
 
 ### Fixed
+
+- "Fixed" flag in rings layer now correct.
 
 
 ## [2.1.1] - 2015-08-31
@@ -48,7 +59,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added man pages
 
 
-[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.1.1...HEAD
+[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/osmcode/osmium-tool/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/osmcode/osmium-tool/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/osmcode/osmium-tool/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/osmcode/osmium-tool/compare/v2.0.0...v2.0.1
