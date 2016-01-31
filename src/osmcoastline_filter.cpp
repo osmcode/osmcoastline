@@ -20,9 +20,10 @@
 */
 
 #include <algorithm>
-#include <iostream>
-#include <set>
 #include <getopt.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/input_iterator.hpp>
