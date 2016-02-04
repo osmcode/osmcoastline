@@ -31,6 +31,8 @@
 #include <osmium/io/pbf_output.hpp>
 #include <osmium/handler.hpp>
 #include <osmium/osm/entity_bits.hpp>
+#include <osmium/util/memory.hpp>
+#include <osmium/util/verbose_output.hpp>
 
 #include "return_codes.hpp"
 
@@ -39,22 +41,25 @@ void print_help() {
               << "\nOptions:\n"
               << "  -h, --help           - This help message\n"
               << "  -o, --output=OSMFILE - Where to write output (default: none)\n"
+              << "  -v, --verbose        - Verbose output\n"
               << "  -V, --version        - Show version and exit\n"
               << "\n";
 }
 
 int main(int argc, char* argv[]) {
     std::string output_filename;
+    bool verbose = false;
 
     static struct option long_options[] = {
         {"help",         no_argument, 0, 'h'},
         {"output", required_argument, 0, 'o'},
+        {"verbose",      no_argument, 0, 'v'},
         {"version",      no_argument, 0, 'V'},
         {0, 0, 0, 0}
     };
 
     while (1) {
-        int c = getopt_long(argc, argv, "ho:V", long_options, 0);
+        int c = getopt_long(argc, argv, "ho:vV", long_options, 0);
         if (c == -1)
             break;
 
@@ -64,6 +69,9 @@ int main(int argc, char* argv[]) {
                 exit(return_code_ok);
             case 'o':
                 output_filename = optarg;
+                break;
+            case 'v':
+                verbose = true;
                 break;
             case 'V':
                 std::cout << "osmcoastline_filter version " OSMCOASTLINE_VERSION "\n"
@@ -76,6 +84,11 @@ int main(int argc, char* argv[]) {
                 exit(return_code_fatal);
         }
     }
+
+    // The vout object is an output stream we can write to instead of
+    // std::cerr. Nothing is written if we are not in verbose mode.
+    // The running time will be prepended to output lines.
+    osmium::util::VerboseOutput vout(verbose);
 
     if (output_filename.empty()) {
         std::cerr << "Missing -o/--output=OSMFILE option\n";
@@ -99,6 +112,7 @@ int main(int argc, char* argv[]) {
 
         std::vector<osmium::object_id_type> ids;
 
+        vout << "Reading ways (1st pass through input file)...\n";
         {
             osmium::io::Reader reader(infile, osmium::osm_entity_bits::way);
             auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
@@ -114,9 +128,11 @@ int main(int argc, char* argv[]) {
             reader.close();
         }
 
+        vout << "Preparing node ID list...\n";
         std::sort(ids.begin(), ids.end());
         auto last = std::unique(ids.begin(), ids.end());
 
+        vout << "Reading nodes (2nd pass through input file)...\n";
         {
             osmium::io::Reader reader(infile, osmium::osm_entity_bits::node);
             auto nodes = osmium::io::make_input_iterator_range<const osmium::Node>(reader);
@@ -145,6 +161,13 @@ int main(int argc, char* argv[]) {
     } catch (osmium::io_error& e) {
         std::cerr << "io error: " << e.what() << "'\n";
         exit(return_code_fatal);
+    }
+
+    vout << "All done.\n";
+    osmium::MemoryUsage mem;
+    if (mem.current() > 0) {
+        vout << "Memory used: current: " << mem.current() << " MBytes\n"
+             << "             peak:    " << mem.peak() << " MBytes\n";
     }
 }
 

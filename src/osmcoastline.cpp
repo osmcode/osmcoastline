@@ -25,6 +25,8 @@
 #include <unistd.h>
 
 #include <osmium/io/any_input.hpp>
+#include <osmium/util/memory.hpp>
+#include <osmium/util/verbose_output.hpp>
 #include <osmium/visitor.hpp>
 
 #include "return_codes.hpp"
@@ -38,7 +40,6 @@
 #include "coastline_handlers.hpp"
 #include "srs.hpp"
 #include "util.hpp"
-#include "verbose_output.hpp"
 
 // The global SRS object is used in many places to transform
 // from WGS84 to the output SRS etc.
@@ -104,38 +105,10 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
 
 /* ================================================== */
 
-std::pair<int, int> get_memory_usage() {
-    char filename[100];
-    sprintf(filename, "/proc/%d/status", getpid());
-    std::ifstream status_file(filename);
-    std::string line;
-
-    int vmpeak = 0;
-    int vmsize = 0;
-    if (status_file.is_open()) {
-        while (! status_file.eof() ) {
-            std::getline(status_file, line);
-            if (line.substr(0, 6) == "VmPeak") {
-                int f = line.find_first_of("0123456789");
-                int l = line.find_last_of("0123456789");
-                vmpeak = atoi(line.substr(f, l-f+1).c_str());
-            }
-            if (line.substr(0, 6) == "VmSize") {
-                int f = line.find_first_of("0123456789");
-                int l = line.find_last_of("0123456789");
-                vmsize = atoi(line.substr(f, l-f+1).c_str());
-            }
-        }
-        status_file.close();
-    }
-
-    return std::make_pair(vmsize / 1024, vmpeak / 1024);
-}
-
 std::string memory_usage() {
-    std::pair<int, int> mem = get_memory_usage();
+    osmium::MemoryUsage mem;
     std::ostringstream s;
-    s << "Memory used currently: " << mem.first << " MB (Peak was: " << mem.second << " MB).\n";
+    s << "Memory used: current: " << mem.current() << " MBytes, peak: " << mem.peak() << " MBytes\n";
     return s.str();
 }
 
@@ -152,7 +125,7 @@ int main(int argc, char *argv[]) {
     // The vout object is an output stream we can write to instead of
     // std::cerr. Nothing is written if we are not in verbose mode.
     // The running time will be prepended to output lines.
-    VerboseOutput vout(options.verbose);
+    osmium::util::VerboseOutput vout(options.verbose);
 
     debug = options.debug;
 
@@ -320,7 +293,7 @@ int main(int argc, char *argv[]) {
     vout << memory_usage();
 
     vout << "Committing database transactions...\n";
-    output_database.set_meta(vout.runtime(), get_memory_usage().second, stats);
+    output_database.set_meta(vout.runtime(), osmium::MemoryUsage{}.peak(), stats);
     output_database.commit();
     vout << "All done.\n";
     vout << memory_usage();

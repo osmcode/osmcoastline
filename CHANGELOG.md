@@ -8,9 +8,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Add verbose option to osmcoastline_filter.
+- osmcoastline_filter now shows memory used in verbose mode.
+
 ### Changed
 
-- Optimized osmcoastline_filter program
+- Optimized osmcoastline_filter program.
+- Use more features from newest libosmium.
 
 ### Fixed
 
