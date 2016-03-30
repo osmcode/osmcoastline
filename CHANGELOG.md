@@ -8,6 +8,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+
+## [2.1.3] - 2016-03-30
+
+### Added
+
 - Add verbose option to osmcoastline_filter.
 - osmcoastline_filter now shows memory used in verbose mode.
 
@@ -19,7 +28,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Setting the sqlite output to unsynchronized speeds up writing to database.
-- Transaction support now also works on GDAL 2.
+- Now also works on GDAL 2. Fixes an error in the transaction handling.
 
 
 ## [2.1.2] - 2016-01-05
@@ -68,7 +77,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added man pages
 
 
-[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.1.2...HEAD
+[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.1.3...HEAD
+[2.1.3]: https://github.com/osmcode/osmium-tool/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/osmcode/osmium-tool/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/osmcode/osmium-tool/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/osmcode/osmium-tool/compare/v2.0.1...v2.1.0
