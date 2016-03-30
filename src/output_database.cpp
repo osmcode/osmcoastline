@@ -43,11 +43,9 @@ OutputDatabase::OutputDatabase(const std::string& outdb, SRS& srs, bool with_ind
 
     m_layer_error_points.add_field("osm_id", OFTString, 10);
     m_layer_error_points.add_field("error", OFTString, 16);
-    m_layer_error_points.start_transaction();
 
     m_layer_error_lines.add_field("osm_id", OFTString, 10);
     m_layer_error_lines.add_field("error", OFTString, 16);
-    m_layer_error_lines.start_transaction();
 
     m_layer_rings.add_field("osm_id",  OFTString, 10);
     m_layer_rings.add_field("nways",   OFTInteger, 6);
@@ -55,13 +53,6 @@ OutputDatabase::OutputDatabase(const std::string& outdb, SRS& srs, bool with_ind
     m_layer_rings.add_field("fixed",   OFTInteger, 1);
     m_layer_rings.add_field("land",    OFTInteger, 1);
     m_layer_rings.add_field("valid",   OFTInteger, 1);
-    m_layer_rings.start_transaction();
-
-    m_layer_land_polygons.start_transaction();
-
-    m_layer_water_polygons.start_transaction();
-
-    m_layer_lines.start_transaction();
 
     m_dataset.exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER)");
     m_dataset.exec("CREATE TABLE meta ("
@@ -76,6 +67,14 @@ OutputDatabase::OutputDatabase(const std::string& outdb, SRS& srs, bool with_ind
          "num_rings_turned_around        INTEGER, "
          "num_land_polygons_before_split INTEGER, "
          "num_land_polygons_after_split  INTEGER)");
+
+    m_dataset.start_transaction();
+    m_layer_rings.start_transaction();
+    m_layer_land_polygons.start_transaction();
+    m_layer_water_polygons.start_transaction();
+    m_layer_lines.start_transaction();
+    m_layer_error_points.start_transaction();
+    m_layer_error_lines.start_transaction();
 }
 
 void OutputDatabase::set_options(const Options& options) {
@@ -119,12 +118,13 @@ void OutputDatabase::set_meta(int runtime, int memory_usage, const Stats& stats)
 }
 
 void OutputDatabase::commit() {
+    m_layer_error_lines.commit_transaction();
+    m_layer_error_points.commit_transaction();
     m_layer_lines.commit_transaction();
     m_layer_water_polygons.commit_transaction();
     m_layer_land_polygons.commit_transaction();
     m_layer_rings.commit_transaction();
-    m_layer_error_lines.commit_transaction();
-    m_layer_error_points.commit_transaction();
+    m_dataset.commit_transaction();
 }
 
 void OutputDatabase::add_error_point(std::unique_ptr<OGRPoint>&& point, const char* error, osmium::object_id_type id) {

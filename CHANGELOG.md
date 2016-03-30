@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Setting the sqlite output to unsynchronized speeds up writing to database.
+- Transaction support now also works on GDAL 2.
 
 
 ## [2.1.2] - 2016-01-05
