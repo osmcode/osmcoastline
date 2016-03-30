@@ -130,6 +130,7 @@ int main(int argc, char *argv[]) {
     debug = options.debug;
 
     CPLSetConfigOption("OGR_ENABLE_PARTIAL_REPROJECTION", "TRUE");
+    CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");
     vout << "Using SRS " << options.epsg << " for output. (Change with the --srs/s option.)\n";
     if (!srs.set_output(options.epsg)) {
         std::cerr << "Setting up output transformation failed\n";

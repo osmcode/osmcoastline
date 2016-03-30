@@ -33,7 +33,7 @@
 OutputDatabase::OutputDatabase(const std::string& outdb, SRS& srs, bool with_index) :
     m_with_index(with_index),
     m_srs(srs),
-    m_dataset("SQLite", outdb, gdalcpp::SRS(*srs.out()), { "SPATIALITE=TRUE", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no" }),
+    m_dataset("SQLite", outdb, gdalcpp::SRS(*srs.out()), { "SPATIALITE=TRUE", "INIT_WITH_EPSG=no" }),
     m_layer_error_points(m_dataset, "error_points", wkbPoint, layer_options()),
     m_layer_error_lines(m_dataset, "error_lines", wkbLineString, layer_options()),
     m_layer_rings(m_dataset, "rings", wkbPolygon, layer_options()),
