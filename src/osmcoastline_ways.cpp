@@ -51,7 +51,7 @@ public:
 
     CoastlineWaysHandler(const std::string& db_filename) :
         m_length(0.0),
-        m_dataset("SQLite", db_filename, gdalcpp::SRS{}, {"SPATIALITE=TRUE", "OGR_SQLITE_SYNCHRONOUS=OFF", "INIT_WITH_EPSG=no" }),
+        m_dataset("SQLite", db_filename, gdalcpp::SRS{}, {"SPATIALITE=TRUE", "INIT_WITH_EPSG=no" }),
         m_layer_ways(m_dataset, "ways", wkbLineString) {
 
         m_layer_ways.add_field("way_id", OFTString, 10);
@@ -109,6 +109,8 @@ int main(int argc, char* argv[]) {
         std::cerr << "Usage: osmcoastline_ways OSMFILE [WAYSDB]\n";
         exit(return_code_cmdline);
     }
+
+    CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");
 
     std::string input_osm_filename { argv[1] };
     std::string output_db_filename { "coastline-ways.db" };
