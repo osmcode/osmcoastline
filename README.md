@@ -8,6 +8,7 @@ http://wiki.openstreetmap.org/wiki/OSMCoastline
 
 https://github.com/osmcode/osmcoastline
 
+[![Build Status](https://secure.travis-ci.org/osmcode/osmcoastline.svg)](http://travis-ci.org/osmcode/osmcoastline)
 
 ## Prerequisites
 
