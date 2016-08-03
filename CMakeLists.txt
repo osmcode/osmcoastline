@@ -148,7 +148,7 @@ if(CPPCHECK)
     # cpp doesn't find system includes for some reason, suppress that report
     set(CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --suppress=missingIncludeSystem)
 
-    file(GLOB ALL_CODE *.cpp)
+    file(GLOB ALL_CODE src/*.cpp)
 
     set(CPPCHECK_FILES ${ALL_CODE})
 
