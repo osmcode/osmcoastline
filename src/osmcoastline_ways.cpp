@@ -49,7 +49,7 @@ class CoastlineWaysHandler : public osmium::handler::Handler {
 
 public:
 
-    CoastlineWaysHandler(const std::string& db_filename) :
+    explicit CoastlineWaysHandler(const std::string& db_filename) :
         m_length(0.0),
         m_dataset("SQLite", db_filename, gdalcpp::SRS{}, {"SPATIALITE=TRUE", "INIT_WITH_EPSG=no" }),
         m_layer_ways(m_dataset, "ways", wkbLineString) {

@@ -42,7 +42,7 @@ class CoastlineHandlerPass1 : public osmium::handler::Handler {
 
 public:
 
-    CoastlineHandlerPass1(CoastlineRingCollection& coastline_rings) :
+    explicit CoastlineHandlerPass1(CoastlineRingCollection& coastline_rings) :
         m_coastline_rings(coastline_rings) {
     }
 

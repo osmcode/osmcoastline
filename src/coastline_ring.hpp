@@ -88,7 +88,7 @@ public:
     /**
      * Create CoastlineRing from a way.
      */
-    CoastlineRing(const osmium::Way& way) :
+    explicit CoastlineRing(const osmium::Way& way) :
         m_way_node_list(),
         m_ring_id(way.id()),
         m_nways(1),

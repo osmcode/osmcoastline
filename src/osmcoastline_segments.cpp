@@ -48,7 +48,7 @@ class InputFile {
 
 public:
 
-    InputFile(const std::string& filename) :
+    explicit InputFile(const std::string& filename) :
         m_filename(filename),
         m_fd(::open(filename.c_str(), O_RDONLY)) {
         if (m_fd == -1) {
