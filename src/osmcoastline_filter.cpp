@@ -20,17 +20,25 @@
 */
 
 #include <algorithm>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
 #include <iostream>
 #include <string>
 #include <vector>
 
 #include <osmium/io/any_input.hpp>
+#include <osmium/io/error.hpp>
+#include <osmium/io/file.hpp>
+#include <osmium/io/header.hpp>
 #include <osmium/io/input_iterator.hpp>
 #include <osmium/io/output_iterator.hpp>
 #include <osmium/io/pbf_output.hpp>
-#include <osmium/handler.hpp>
+#include <osmium/osm.hpp>
+#include <osmium/osm/box.hpp>
 #include <osmium/osm/entity_bits.hpp>
+#include <osmium/osm/node_ref.hpp>
+#include <osmium/osm/types.hpp>
 #include <osmium/util/memory.hpp>
 #include <osmium/util/verbose_output.hpp>
 

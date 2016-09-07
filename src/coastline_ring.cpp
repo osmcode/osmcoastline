@@ -19,9 +19,14 @@
 
 */
 
+#include <cassert>
 #include <iostream>
+#include <utility>
+
+#include <ogr_geometry.h>
 
 #include <osmium/geom/ogr.hpp>
+#include <osmium/osm/undirected_segment.hpp>
 
 #include "coastline_ring.hpp"
 

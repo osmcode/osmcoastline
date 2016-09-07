@@ -20,17 +20,20 @@
 */
 
 #include <algorithm>
-#include <cassert>
+#include <cerrno>
+#include <cstdlib>
 #include <fcntl.h>
 #include <getopt.h>
 #include <iostream>
+#include <iterator>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <system_error>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 
 #include <osmium/osm/undirected_segment.hpp>
 #include <osmium/util/memory_mapping.hpp>

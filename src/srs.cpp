@@ -19,6 +19,7 @@
 
 */
 
+#include <ogr_core.h>
 #include <ogr_geometry.h>
 
 #include "srs.hpp"

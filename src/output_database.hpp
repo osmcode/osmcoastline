@@ -30,8 +30,11 @@
 
 #include <gdalcpp.hpp>
 
-class SRS;
+class OGRLineString;
+class OGRPoint;
+class OGRPolygon;
 class Options;
+class SRS;
 struct Stats;
 
 /**

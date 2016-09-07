@@ -165,6 +165,23 @@ endif(CPPCHECK)
 
 #-----------------------------------------------------------------------------
 #
+#  Optional "iwyu" target to check headers
+#  http://include-what-you-use.org/
+#
+#-----------------------------------------------------------------------------
+find_program(IWYU_TOOL iwyu_tool.py)
+
+if(IWYU_TOOL)
+    message(STATUS "Looking for iwyu_tool.py - found")
+    add_custom_target(iwyu ${IWYU_TOOL} -p ${CMAKE_BINARY_DIR})
+else()
+    message(STATUS "Looking for iwyu_tool.py - not found")
+    message(STATUS "  Make target iwyu not available")
+endif()
+
+
+#-----------------------------------------------------------------------------
+#
 #  Optional "man" target to generate man pages
 #
 #-----------------------------------------------------------------------------

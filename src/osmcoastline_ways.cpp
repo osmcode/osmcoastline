@@ -19,17 +19,28 @@
 
 */
 
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <osmium/geom/haversine.hpp>
 #include <osmium/geom/ogr.hpp>
+#include <osmium/handler.hpp>
 #include <osmium/handler/node_locations_for_ways.hpp>
-#include <osmium/index/map/sparse_mem_array.hpp>
+#include <osmium/index/map/sparse_mem_array.hpp> // IWYU pragma: keep
 #include <osmium/io/any_input.hpp>
+#include <osmium/io/file.hpp>
+#include <osmium/osm/entity_bits.hpp>
+#include <osmium/osm/location.hpp>
+#include <osmium/osm/way.hpp>
+#include <osmium/osm/types.hpp>
 #include <osmium/visitor.hpp>
+
+#include <ogr_core.h>
+#include <ogr_geometry.h>
 
 #include <gdalcpp.hpp>
 

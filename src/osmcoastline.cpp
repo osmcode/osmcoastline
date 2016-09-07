@@ -19,18 +19,30 @@
 
 */
 
-#include <fstream>
-#include <list>
-#include <time.h>
+#include <cassert>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <unistd.h>
+#include <utility>
+#include <vector>
+
+#include <ogr_core.h>
+#include <ogr_geometry.h>
 
 #include <osmium/io/any_input.hpp>
+#include <osmium/io/file.hpp>
+#include <osmium/osm/entity_bits.hpp>
 #include <osmium/util/memory.hpp>
 #include <osmium/util/verbose_output.hpp>
 #include <osmium/visitor.hpp>
 
 #include "return_codes.hpp"
-#include "coastline_ring.hpp"
 #include "coastline_ring_collection.hpp"
 #include "coastline_polygons.hpp"
 #include "output_database.hpp"

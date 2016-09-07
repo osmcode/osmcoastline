@@ -22,6 +22,7 @@
 
 */
 
+#include <cstddef>
 #include <list>
 #include <map>
 #include <memory>
@@ -29,11 +30,11 @@
 
 #include <osmium/geom/ogr.hpp>
 #include <osmium/osm/way.hpp>
+#include <osmium/osm/types.hpp>
 
 #include "coastline_ring.hpp"
 
 class OGRGeometry;
-class OGRPolygon;
 class OutputDatabase;
 class CoastlinePolygons;
 

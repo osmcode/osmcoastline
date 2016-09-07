@@ -20,15 +20,15 @@
 */
 
 #include <cassert>
-#include <cmath>
 #include <iostream>
 #include <vector>
 
 #include <ogr_geometry.h>
 
+class OGRSpatialReference;
+
 #include "coastline_polygons.hpp"
 #include "output_database.hpp"
-#include "return_codes.hpp"
 #include "srs.hpp"
 #include "util.hpp"
 

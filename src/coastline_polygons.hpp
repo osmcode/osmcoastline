@@ -23,15 +23,12 @@
 */
 
 #include <memory>
+#include <utility>
 #include <vector>
 
-class OGRGeometry;
-class OGRLinearRing;
-class OGRLineString;
-class OGRPoint;
-class OGRPolygon;
-class OGRMultiPolygon;
-class OGREnvelope;
+#include <ogr_geometry.h>
+
+class OGRSpatialReference;
 class OutputDatabase;
 
 typedef std::vector<std::unique_ptr<OGRPolygon>> polygon_vector_type;

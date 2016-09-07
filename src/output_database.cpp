@@ -19,11 +19,15 @@
 
 */
 
+#include <cstddef>
 #include <iostream>
 #include <sstream>
+#include <utility>
 
 #include <gdal_version.h>
 #include <geos_c.h>
+#include <ogr_core.h>
+#include <ogr_geometry.h>
 
 #include "options.hpp"
 #include "output_database.hpp"
