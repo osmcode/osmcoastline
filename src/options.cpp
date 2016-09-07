@@ -90,7 +90,7 @@ Options::Options(int argc, char* argv[]) :
                 break;
             case 'h':
                 print_help();
-                exit(return_code_ok);
+                std::exit(return_code_ok);
             case 'l':
                 output_lines = true;
                 break;
@@ -101,17 +101,17 @@ Options::Options(int argc, char* argv[]) :
                 }
                 break;
             case 'p':
-                if (!strcmp(optarg, "none")) {
+                if (!std::strcmp(optarg, "none")) {
                     output_polygons = output_polygon_type::none;
-                } else if (!strcmp(optarg, "land")) {
+                } else if (!std::strcmp(optarg, "land")) {
                     output_polygons = output_polygon_type::land;
-                } else if (!strcmp(optarg, "water")) {
+                } else if (!std::strcmp(optarg, "water")) {
                     output_polygons = output_polygon_type::water;
-                } else if (!strcmp(optarg, "both")) {
+                } else if (!std::strcmp(optarg, "both")) {
                     output_polygons = output_polygon_type::both;
                 } else {
                     std::cerr << "Unknown argument '" << optarg << "' for -p/--output-polygon option\n";
-                    exit(return_code_cmdline);
+                    std::exit(return_code_cmdline);
                 }
                 break;
             case 'o':
@@ -138,25 +138,25 @@ Options::Options(int argc, char* argv[]) :
                           << "License: GNU GENERAL PUBLIC LICENSE Version 3 <http://gnu.org/licenses/gpl.html>.\n"
                           << "This is free software: you are free to change and redistribute it.\n"
                           << "There is NO WARRANTY, to the extent permitted by law.\n";
-                exit(return_code_ok);
+                std::exit(return_code_ok);
             default:
-                exit(return_code_cmdline);
+                std::exit(return_code_cmdline);
         }
     }
 
     if (!split_large_polygons && (output_polygons == output_polygon_type::water || output_polygons == output_polygon_type::both)) {
         std::cerr << "Can not use -m/--max-points=0 when writing out water polygons\n";
-        exit(return_code_cmdline);
+        std::exit(return_code_cmdline);
     }
 
     if (optind != argc - 1) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        exit(return_code_cmdline);
+        std::exit(return_code_cmdline);
     }
 
     if (output_database.empty()) {
         std::cerr << "Missing --output-database/-o option.\n";
-        exit(return_code_cmdline);
+        std::exit(return_code_cmdline);
     }
 
     if (bbox_overlap == -1) {
@@ -171,18 +171,18 @@ Options::Options(int argc, char* argv[]) :
 }
 
 int Options::get_epsg(const char* text) {
-    if (!strcasecmp(text, "WGS84") || !strcmp(text, "4326")) {
+    if (!strcasecmp(text, "WGS84") || !std::strcmp(text, "4326")) {
         return 4326;
     }
-    if (!strcmp(text, "3857")) {
+    if (!std::strcmp(text, "3857")) {
         return 3857;
     }
-    if (!strcmp(text, "3785") || !strcmp(text, "900913")) {
+    if (!std::strcmp(text, "3785") || !std::strcmp(text, "900913")) {
         std::cerr << "Please use code 3857 for the 'Google Mercator' projection!\n";
-        exit(return_code_cmdline);
+        std::exit(return_code_cmdline);
     }
     std::cerr << "Unknown SRS '" << text << "'. Currently only 4326 (WGS84) and 3857 ('Google Mercator') are supported.\n";
-    exit(return_code_cmdline);
+    std::exit(return_code_cmdline);
 }
 
 void Options::print_help() const {

@@ -176,8 +176,8 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
 #endif
 
         if (!reason.empty()) {
-            size_t left_bracket = reason.find('[');
-            size_t right_bracket = reason.find(']');
+            std::size_t left_bracket = reason.find('[');
+            std::size_t right_bracket = reason.find(']');
 
             std::istringstream iss(reason.substr(left_bracket+1, right_bracket-left_bracket-1), std::istringstream::in);
             double x;

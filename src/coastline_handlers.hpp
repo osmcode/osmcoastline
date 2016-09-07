@@ -49,9 +49,9 @@ public:
     void way(const osmium::Way& way) {
         // We are only interested in ways tagged with natural=coastline.
         const char* natural = way.tags().get_value_by_key("natural");
-        if (natural && !strcmp(natural, "coastline")) {
+        if (natural && !std::strcmp(natural, "coastline")) {
             const char* bogus = way.tags().get_value_by_key("coastline");
-            if (bogus && !strcmp(bogus, "bogus")) {
+            if (bogus && !std::strcmp(bogus, "bogus")) {
                 return; // ignore bogus coastline in Antarctica
             }
             m_coastline_rings.add_way(way);
@@ -90,10 +90,10 @@ public:
 
     void node(const osmium::Node& node) {
         const char* natural = node.tags().get_value_by_key("natural");
-        if (natural && !strcmp(natural, "coastline")) {
+        if (natural && !std::strcmp(natural, "coastline")) {
             try {
                 m_output.add_error_point(m_factory.create_point(node), "tagged_node", node.id());
-            } catch (osmium::geometry_error&) {
+            } catch (const osmium::geometry_error&) {
                 std::cerr << "Ignoring illegal geometry for node " << node.id() << ".\n";
             }
         }

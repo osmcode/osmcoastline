@@ -110,7 +110,7 @@ void CoastlineRing::close_antarctica_ring(int epsg) {
 
 std::unique_ptr<OGRPolygon> CoastlineRing::ogr_polygon(osmium::geom::OGRFactory<>& geom_factory, bool reverse) const {
     geom_factory.polygon_start();
-    size_t num_points = 0;
+    std::size_t num_points = 0;
     if (reverse) {
         num_points = geom_factory.fill_polygon(m_way_node_list.crbegin(), m_way_node_list.crend());
     } else {
@@ -121,7 +121,7 @@ std::unique_ptr<OGRPolygon> CoastlineRing::ogr_polygon(osmium::geom::OGRFactory<
 
 std::unique_ptr<OGRLineString> CoastlineRing::ogr_linestring(osmium::geom::OGRFactory<>& geom_factory, bool reverse) const {
     geom_factory.linestring_start();
-    size_t num_points = 0;
+    std::size_t num_points = 0;
     if (reverse) {
         num_points = geom_factory.fill_linestring(m_way_node_list.crbegin(), m_way_node_list.crend());
     } else {

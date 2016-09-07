@@ -77,7 +77,7 @@ public:
             const char* coastline = way.tags().get_value_by_key("coastline");
             feature.set_field("bogus", (coastline && !std::strcmp(coastline, "bogus")) ? "t" : "f");
             feature.add_to_layer();
-        } catch (osmium::geometry_error&) {
+        } catch (const osmium::geometry_error&) {
             std::cerr << "Ignoring illegal geometry for way " << way.id() << ".\n";
         }
     }
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     if (argc >= 2) {
         if (!std::strcmp(argv[1], "--help") || !std::strcmp(argv[1], "-h")) {
             std::cout << "Usage: osmcoastline_ways OSMFILE [WAYSDB]\n";
-            exit(return_code_ok);
+            std::exit(return_code_ok);
         }
 
         if (!std::strcmp(argv[1], "--version") || !std::strcmp(argv[1], "-V")) {
@@ -101,13 +101,13 @@ int main(int argc, char* argv[]) {
                       << "License: GNU GENERAL PUBLIC LICENSE Version 3 <http://gnu.org/licenses/gpl.html>.\n"
                       << "This is free software: you are free to change and redistribute it.\n"
                       << "There is NO WARRANTY, to the extent permitted by law.\n";
-            exit(return_code_ok);
+            std::exit(return_code_ok);
         }
     }
 
     if (argc != 2 && argc != 3) {
         std::cerr << "Usage: osmcoastline_ways OSMFILE [WAYSDB]\n";
-        exit(return_code_cmdline);
+        std::exit(return_code_cmdline);
     }
 
     CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");

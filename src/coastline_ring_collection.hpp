@@ -67,7 +67,7 @@ public:
     CoastlineRingCollection();
 
     /// Return the number of CoastlineRings in the collection.
-    size_t size() const {
+    std::size_t size() const noexcept {
         return m_list.size();
     }
 

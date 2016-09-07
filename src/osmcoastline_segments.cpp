@@ -60,12 +60,12 @@ public:
         return m_fd;
     }
 
-    size_t size() const {
+    std::size_t size() const {
         struct stat s;
         if (::fstat(m_fd, &s) != 0) {
             throw std::system_error(errno, std::system_category(), std::string("Can't get file size for '") + m_filename + "'");
         }
-        return size_t(s.st_size);
+        return std::size_t(s.st_size);
     }
 
 }; // class InputFile
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
             case 'h': {
                 std::cout << "Usage: " << argv[0] << " [OPTIONS] SEGFILE1 SEGFILE2\n";
                 print_help();
-                exit(return_code_ok);
+                std::exit(return_code_ok);
             }
             case 'V':
                 std::cout << "osmcoastline_segments version " OSMCOASTLINE_VERSION "\n"
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
                           << "License: GNU GENERAL PUBLIC LICENSE Version 3 <http://gnu.org/licenses/gpl.html>.\n"
                           << "This is free software: you are free to change and redistribute it.\n"
                           << "There is NO WARRANTY, to the extent permitted by law.\n";
-                exit(return_code_ok);
+                std::exit(return_code_ok);
             default:
                 break;
         }
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
 
     if (optind != argc - 2) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] SEGFILE1 SEGFILE2\n";
-        exit(return_code_cmdline);
+        std::exit(return_code_cmdline);
     }
 
     segvec removed_segments;
@@ -164,9 +164,9 @@ int main(int argc, char *argv[]) {
 
         std::set_difference(m1.cbegin(), m1.cend(), m2.cbegin(), m2.cend(), std::back_inserter(removed_segments));
         std::set_difference(m2.cbegin(), m2.cend(), m1.cbegin(), m1.cend(), std::back_inserter(added_segments));
-    } catch (std::runtime_error& e) {
+    } catch (const std::runtime_error& e) {
         std::cerr << e.what() << "\n";
-        exit(return_code_fatal);
+        std::exit(return_code_fatal);
     }
 
     if (dump) {

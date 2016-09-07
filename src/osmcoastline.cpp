@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
     vout << "Using SRS " << options.epsg << " for output. (Change with the --srs/s option.)\n";
     if (!srs.set_output(options.epsg)) {
         std::cerr << "Setting up output transformation failed\n";
-        exit(return_code_fatal);
+        std::exit(return_code_fatal);
     }
 
     // Optionally set up segments file
@@ -143,8 +143,8 @@ int main(int argc, char *argv[]) {
         vout << "Writing segments to file '" << options.segmentfile << "' (because you told me to with --write-segments/-S option).\n";
         segments_fd = ::open(options.segmentfile.c_str(), O_WRONLY | O_CREAT, 0666);
         if (segments_fd == -1) {
-            std::cerr << "Couldn't open file '" << options.segmentfile << "' (" << strerror(errno) << ")\n";
-            exit(return_code_fatal);
+            std::cerr << "Couldn't open file '" << options.segmentfile << "' (" << std::strerror(errno) << ")\n";
+            std::exit(return_code_fatal);
         }
     }
 
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
     unsigned int missing_positions = coastline_rings.check_positions(options.debug);
     if (missing_positions) {
         vout << "  There are " << missing_positions << " positions missing. Check that input file contains all nodes needed.\n";
-        exit(return_code_error);
+        std::exit(return_code_error);
     } else {
         vout << "  All positions are there.\n";
     }

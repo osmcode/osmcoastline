@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                exit(return_code_ok);
+                std::exit(return_code_ok);
             case 'o':
                 output_filename = optarg;
                 break;
@@ -79,9 +79,9 @@ int main(int argc, char* argv[]) {
                           << "License: GNU GENERAL PUBLIC LICENSE Version 3 <http://gnu.org/licenses/gpl.html>.\n"
                           << "This is free software: you are free to change and redistribute it.\n"
                           << "There is NO WARRANTY, to the extent permitted by law.\n";
-                exit(return_code_ok);
+                std::exit(return_code_ok);
             default:
-                exit(return_code_fatal);
+                std::exit(return_code_fatal);
         }
     }
 
@@ -92,12 +92,12 @@ int main(int argc, char* argv[]) {
 
     if (output_filename.empty()) {
         std::cerr << "Missing -o/--output=OSMFILE option\n";
-        exit(return_code_cmdline);
+        std::exit(return_code_cmdline);
     }
 
     if (optind != argc - 1) {
         std::cerr << "Usage: osmcoastline_filter [OPTIONS] OSMFILE\n";
-        exit(return_code_cmdline);
+        std::exit(return_code_cmdline);
     }
 
     osmium::io::Header header;
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
             auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
             for (const osmium::Way& way : ways) {
                 const char* natural = way.get_value_by_key("natural");
-                if (natural && !strcmp(natural, "coastline")) {
+                if (natural && !std::strcmp(natural, "coastline")) {
                     *output_it++ = way;
                     for (const auto& nr : way.nodes()) {
                         ids.push_back(nr.ref());
@@ -151,16 +151,16 @@ int main(int argc, char* argv[]) {
                 }
 
                 const char* natural = node.get_value_by_key("natural");
-                return natural && !strcmp(natural, "coastline");
+                return natural && !std::strcmp(natural, "coastline");
             });
 
             reader.close();
         }
 
         writer.close();
-    } catch (osmium::io_error& e) {
+    } catch (const osmium::io_error& e) {
         std::cerr << "io error: " << e.what() << "'\n";
-        exit(return_code_fatal);
+        std::exit(return_code_fatal);
     }
 
     vout << "All done.\n";
