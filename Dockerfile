@@ -8,3 +8,5 @@ RUN mkdir -p /usr/lib/osmcoastline/build
 WORKDIR /usr/lib/osmcoastline/build
 RUN cmake ..
 RUN make
+WORKDIR /usr/lib/osmcoastline
+
