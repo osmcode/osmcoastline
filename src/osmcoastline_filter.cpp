@@ -110,23 +110,22 @@ int main(int argc, char* argv[]) {
 
     osmium::io::Header header;
     header.set("generator", "osmcoastline_filter");
-    header.add_box(osmium::Box(-180.0, -90.0, 180.0, 90.0));
+    header.add_box(osmium::Box{-180.0, -90.0, 180.0, 90.0});
 
-    osmium::io::File infile(argv[optind]);
+    osmium::io::File infile{argv[optind]};
 
     try {
-        osmium::io::Writer writer(output_filename, header);
+        osmium::io::Writer writer{output_filename, header};
         auto output_it = osmium::io::make_output_iterator(writer);
 
         std::vector<osmium::object_id_type> ids;
 
         vout << "Reading ways (1st pass through input file)...\n";
         {
-            osmium::io::Reader reader(infile, osmium::osm_entity_bits::way);
+            osmium::io::Reader reader{infile, osmium::osm_entity_bits::way};
             auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
             for (const osmium::Way& way : ways) {
-                const char* natural = way.get_value_by_key("natural");
-                if (natural && !std::strcmp(natural, "coastline")) {
+                if (way.tags().has_tag("natural", "coastline")) {
                     *output_it++ = way;
                     for (const auto& nr : way.nodes()) {
                         ids.push_back(nr.ref());
@@ -142,7 +141,7 @@ int main(int argc, char* argv[]) {
 
         vout << "Reading nodes (2nd pass through input file)...\n";
         {
-            osmium::io::Reader reader(infile, osmium::osm_entity_bits::node);
+            osmium::io::Reader reader{infile, osmium::osm_entity_bits::node};
             auto nodes = osmium::io::make_input_iterator_range<const osmium::Node>(reader);
 
             auto first = ids.begin();
@@ -158,8 +157,7 @@ int main(int argc, char* argv[]) {
                     return true;
                 }
 
-                const char* natural = node.get_value_by_key("natural");
-                return natural && !std::strcmp(natural, "coastline");
+                return node.tags().has_tag("natural", "coastline");
             });
 
             reader.close();

@@ -77,7 +77,7 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
         // way at the front. This means that the way together with the
         // ring at front and the ring at back are now a complete ring.
         if (mnext != m_start_nodes.end()) {
-            coastline_rings_list_t::iterator next = mnext->second;
+            auto next = mnext->second;
             (*prev)->join(**next);
             m_start_nodes.erase(mnext);
             if ((*prev)->is_closed()) {
@@ -99,7 +99,7 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
 
     // We found a CoastlineRing where we can add the way at the front.
     if (mnext != m_start_nodes.end()) {
-        coastline_rings_list_t::iterator next = mnext->second;
+        auto next = mnext->second;
         (*next)->add_at_front(way);
         m_start_nodes.erase(mnext);
         if ((*next)->is_closed()) {
@@ -145,7 +145,7 @@ std::vector<OGRGeometry*> CoastlineRingCollection::add_polygons_to_vector() {
                 p->assignSpatialReference(srs.wgs84());
                 vector.push_back(p.release());
             } else {
-                std::unique_ptr<OGRGeometry> geom { p->Buffer(0) };
+                std::unique_ptr<OGRGeometry> geom{p->Buffer(0)};
                 if (is_valid_polygon(geom.get())) {
                     geom->assignSpatialReference(srs.wgs84());
                     vector.push_back(geom.release());
@@ -194,21 +194,21 @@ osmium::Location intersection(const osmium::Segment& s1, const osmium::Segment&s
         return osmium::Location();
     }
 
-    double denom = ((s2.second().lat() - s2.first().lat())*(s1.second().lon() - s1.first().lon())) -
+    const double denom = ((s2.second().lat() - s2.first().lat())*(s1.second().lon() - s1.first().lon())) -
                    ((s2.second().lon() - s2.first().lon())*(s1.second().lat() - s1.first().lat()));
 
     if (denom != 0) {
-        double nume_a = ((s2.second().lon() - s2.first().lon())*(s1.first().lat() - s2.first().lat())) -
-                        ((s2.second().lat() - s2.first().lat())*(s1.first().lon() - s2.first().lon()));
+        const double nume_a = ((s2.second().lon() - s2.first().lon())*(s1.first().lat() - s2.first().lat())) -
+                              ((s2.second().lat() - s2.first().lat())*(s1.first().lon() - s2.first().lon()));
 
-        double nume_b = ((s1.second().lon() - s1.first().lon())*(s1.first().lat() - s2.first().lat())) -
-                        ((s1.second().lat() - s1.first().lat())*(s1.first().lon() - s2.first().lon()));
+        const double nume_b = ((s1.second().lon() - s1.first().lon())*(s1.first().lat() - s2.first().lat())) -
+                              ((s1.second().lat() - s1.first().lat())*(s1.first().lon() - s2.first().lon()));
 
         if ((denom > 0 && nume_a >= 0 && nume_a <= denom && nume_b >= 0 && nume_b <= denom) ||
             (denom < 0 && nume_a <= 0 && nume_a >= denom && nume_b <= 0 && nume_b >= denom)) {
-            double ua = nume_a / denom;
-            double ix = s1.first().lon() + ua*(s1.second().lon() - s1.first().lon());
-            double iy = s1.first().lat() + ua*(s1.second().lat() - s1.first().lat());
+            const double ua = nume_a / denom;
+            const double ix = s1.first().lon() + ua*(s1.second().lon() - s1.first().lon());
+            const double iy = s1.first().lat() + ua*(s1.second().lat() - s1.first().lat());
             return osmium::Location(ix, iy);
         }
     }
@@ -224,10 +224,10 @@ bool outside_x_range(const osmium::UndirectedSegment& s1, const osmium::Undirect
 }
 
 bool y_range_overlap(const osmium::UndirectedSegment& s1, const osmium::UndirectedSegment& s2) {
-    int tmin = s1.first().y() < s1.second().y() ? s1.first().y( ) : s1.second().y();
-    int tmax = s1.first().y() < s1.second().y() ? s1.second().y() : s1.first().y();
-    int omin = s2.first().y() < s2.second().y() ? s2.first().y()  : s2.second().y();
-    int omax = s2.first().y() < s2.second().y() ? s2.second().y() : s2.first().y();
+    const int tmin = s1.first().y() < s1.second().y() ? s1.first().y( ) : s1.second().y();
+    const int tmax = s1.first().y() < s1.second().y() ? s1.second().y() : s1.first().y();
+    const int omin = s2.first().y() < s2.second().y() ? s2.first().y()  : s2.second().y();
+    const int omax = s2.first().y() < s2.second().y() ? s2.second().y() : s2.first().y();
     if (tmin > omax || omin > tmax) {
         return false;
     }
@@ -235,7 +235,7 @@ bool y_range_overlap(const osmium::UndirectedSegment& s1, const osmium::Undirect
 }
 
 std::unique_ptr<OGRLineString> create_ogr_linestring(const osmium::Segment& segment) {
-    std::unique_ptr<OGRLineString> line { new OGRLineString };
+    std::unique_ptr<OGRLineString> line{new OGRLineString};
     line->setNumPoints(2);
     line->setPoint(0, segment.first().lon(), segment.first().lat());
     line->setPoint(1, segment.second().lon(), segment.second().lat());
@@ -264,7 +264,7 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
         if (debug) std::cerr << "Writing segments to file...\n";
         ssize_t length = segments.size() * sizeof(osmium::UndirectedSegment);
         if (::write(segments_fd, segments.data(), length) != length) {
-            throw std::runtime_error("Write error");
+            throw std::runtime_error{"Write error"};
         }
     }
 
@@ -293,7 +293,7 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
     }
 
     for (const auto& intersection : intersections) {
-        std::unique_ptr<OGRPoint> point { new OGRPoint(intersection.lon(), intersection.lat()) };
+        std::unique_ptr<OGRPoint> point{new OGRPoint(intersection.lon(), intersection.lat())};
         output.add_error_point(std::move(point), "intersection");
     }
 
@@ -302,8 +302,8 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
 
 bool CoastlineRingCollection::close_antarctica_ring(int epsg) {
     for (const auto& ring : m_list) {
-        osmium::Location fpos = ring->first_position();
-        osmium::Location lpos = ring->last_position();
+        const osmium::Location fpos = ring->first_position();
+        const osmium::Location lpos = ring->last_position();
         if (fpos.lon() > 179.99 && lpos.lon() < -179.99 &&
             fpos.lat() <  -77.0 && fpos.lat() >  -78.0 &&
             lpos.lat() <  -77.0 && lpos.lat() >  -78.0) {
@@ -323,7 +323,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
     // Create vector with all possible combinations of connections between rings.
     for (idmap_type::iterator eit = m_end_nodes.begin(); eit != m_end_nodes.end(); ++eit) {
         for (idmap_type::iterator sit = m_start_nodes.begin(); sit != m_start_nodes.end(); ++sit) {
-            double distance = (*sit->second)->distance_to_start_position((*eit->second)->last_position());
+            const double distance = (*sit->second)->distance_to_start_position((*eit->second)->last_position());
             if (distance < max_distance) {
                 connections.emplace_back(distance, eit->first, sit->first);
             }
@@ -359,7 +359,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
             output.add_error_point(s->ogr_first_point(), "fixed_end_point", s->first_node_id());
 
             if (e->last_position() != s->first_position()) {
-                std::unique_ptr<OGRLineString> linestring { new OGRLineString };
+                std::unique_ptr<OGRLineString> linestring{new OGRLineString};
                 linestring->addPoint(e->last_position().lon(), e->last_position().lat());
                 linestring->addPoint(s->first_position().lon(), s->first_position().lat());
                 output.add_error_line(std::move(linestring), "added_line");
@@ -406,8 +406,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     const unsigned int max_nodes_to_be_considered_questionable = 10000;
     unsigned int warnings = 0;
 
-    typedef std::pair<osmium::Location, CoastlineRing*> pos_ring_ptr_t;
-    std::vector<pos_ring_ptr_t> rings;
+    std::vector<std::pair<osmium::Location, CoastlineRing*>> rings;
     rings.reserve(m_list.size());
 
     // put all rings in a vector...
@@ -422,7 +421,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     for (const auto& polygon : polygons) {
         const OGRLinearRing* exterior_ring = polygon->getExteriorRing();
         osmium::Location pos(exterior_ring->getX(0), exterior_ring->getY(0));
-        std::vector<pos_ring_ptr_t>::iterator rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<osmium::Location, CoastlineRing*>(std::move(pos), nullptr));
+        auto rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<osmium::Location, CoastlineRing*>(std::move(pos), nullptr));
         if (rings_it != rings.end()) {
             rings_it->second->set_outer();
         }

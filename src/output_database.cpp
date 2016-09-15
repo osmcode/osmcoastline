@@ -87,7 +87,7 @@ void OutputDatabase::set_options(const Options& options) {
     sql << "INSERT INTO options (overlap, close_distance, max_points_in_polygons, split_large_polygons) VALUES ("
         << options.bbox_overlap << ", ";
 
-    if (options.close_distance==0) {
+    if (options.close_distance == 0) {
         sql << "NULL, ";
     } else {
         sql << options.close_distance << ", ";
@@ -133,7 +133,7 @@ void OutputDatabase::commit() {
 
 void OutputDatabase::add_error_point(std::unique_ptr<OGRPoint>&& point, const char* error, osmium::object_id_type id) {
     m_srs.transform(point.get());
-    gdalcpp::Feature feature(m_layer_error_points, std::move(point));
+    gdalcpp::Feature feature{m_layer_error_points, std::move(point)};
     feature.set_field("osm_id", std::to_string(id).c_str());
     feature.set_field("error", error);
     feature.add_to_layer();
@@ -141,7 +141,7 @@ void OutputDatabase::add_error_point(std::unique_ptr<OGRPoint>&& point, const ch
 
 void OutputDatabase::add_error_line(std::unique_ptr<OGRLineString>&& linestring, const char* error, osmium::object_id_type id) {
     m_srs.transform(linestring.get());
-    gdalcpp::Feature feature(m_layer_error_lines, std::move(linestring));
+    gdalcpp::Feature feature{m_layer_error_lines, std::move(linestring)};
     feature.set_field("osm_id", std::to_string(id).c_str());
     feature.set_field("error", error);
     feature.add_to_layer();
@@ -150,8 +150,8 @@ void OutputDatabase::add_error_line(std::unique_ptr<OGRLineString>&& linestring,
 void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id, int nways, int npoints, bool fixed) {
     m_srs.transform(polygon.get());
 
-    bool land = polygon->getExteriorRing()->isClockwise();
-    bool valid = polygon->IsValid();
+    const bool land = polygon->getExteriorRing()->isClockwise();
+    const bool valid = polygon->IsValid();
 
     if (!valid) {
         /*
@@ -180,8 +180,8 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
 #endif
 
         if (!reason.empty()) {
-            std::size_t left_bracket = reason.find('[');
-            std::size_t right_bracket = reason.find(']');
+            const std::size_t left_bracket = reason.find('[');
+            const std::size_t right_bracket = reason.find(']');
 
             std::istringstream iss(reason.substr(left_bracket+1, right_bracket-left_bracket-1), std::istringstream::in);
             double x;
@@ -190,7 +190,7 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
             iss >> y;
             reason = reason.substr(0, left_bracket);
 
-            std::unique_ptr<OGRPoint> point { new OGRPoint() };
+            std::unique_ptr<OGRPoint> point{new OGRPoint()};
             point->assignSpatialReference(polygon->getSpatialReference());
             point->setX(x);
             point->setY(y);
@@ -204,7 +204,7 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
         }
     }
 
-    gdalcpp::Feature feature(m_layer_rings, std::move(polygon));
+    gdalcpp::Feature feature{m_layer_rings, std::move(polygon)};
     feature.set_field("osm_id", osm_id);
     feature.set_field("nways", nways);
     feature.set_field("npoints", npoints);
@@ -216,19 +216,19 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
 
 void OutputDatabase::add_land_polygon(std::unique_ptr<OGRPolygon>&& polygon) {
     m_srs.transform(polygon.get());
-    gdalcpp::Feature feature(m_layer_land_polygons, std::move(polygon));
+    gdalcpp::Feature feature{m_layer_land_polygons, std::move(polygon)};
     feature.add_to_layer();
 }
 
 void OutputDatabase::add_water_polygon(std::unique_ptr<OGRPolygon>&& polygon) {
     m_srs.transform(polygon.get());
-    gdalcpp::Feature feature(m_layer_water_polygons, std::move(polygon));
+    gdalcpp::Feature feature{m_layer_water_polygons, std::move(polygon)};
     feature.add_to_layer();
 }
 
 void OutputDatabase::add_line(std::unique_ptr<OGRLineString>&& linestring) {
     m_srs.transform(linestring.get());
-    gdalcpp::Feature feature(m_layer_lines, std::move(linestring));
+    gdalcpp::Feature feature{m_layer_lines, std::move(linestring)};
     feature.add_to_layer();
 }
 

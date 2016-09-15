@@ -108,6 +108,6 @@ private:
 
     void print_help() const;
 
-};
+}; // class Options
 
 #endif // OPTIONS_HPP

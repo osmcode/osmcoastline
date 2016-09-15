@@ -48,7 +48,7 @@
 
 #include "return_codes.hpp"
 
-typedef std::vector<osmium::UndirectedSegment> segvec;
+using segvec = std::vector<osmium::UndirectedSegment>;
 
 class InputFile {
 
@@ -61,7 +61,7 @@ public:
         m_filename(filename),
         m_fd(::open(filename.c_str(), O_RDONLY)) {
         if (m_fd == -1) {
-            throw std::system_error(errno, std::system_category(), std::string("Opening '") + filename + "' failed");
+            throw std::system_error{errno, std::system_category(), std::string{"Opening '"} + filename + "' failed"};
         }
     }
 
@@ -72,7 +72,7 @@ public:
     std::size_t size() const {
         struct stat s;
         if (::fstat(m_fd, &s) != 0) {
-            throw std::system_error(errno, std::system_category(), std::string("Can't get file size for '") + m_filename + "'");
+            throw std::system_error{errno, std::system_category(), std::string{"Can't get file size for '"} + m_filename + "'"};
         }
         return std::size_t(s.st_size);
     }
@@ -83,7 +83,7 @@ void print_help() {
 }
 
 void add_segment(gdalcpp::Layer& layer, int change, const osmium::UndirectedSegment& segment) {
-    auto linestring = std::unique_ptr<OGRLineString>(new OGRLineString());
+    auto linestring = std::unique_ptr<OGRLineString>{new OGRLineString()};
     linestring->addPoint(segment.first().lon(), segment.first().lat());
     linestring->addPoint(segment.second().lon(), segment.second().lat());
 
@@ -165,11 +165,11 @@ int main(int argc, char *argv[]) {
     segvec added_segments;
 
     try {
-        InputFile file1(argv[optind]);
-        InputFile file2(argv[optind+1]);
+        InputFile file1{argv[optind]};
+        InputFile file2{argv[optind+1]};
 
-        osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m1(file1.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file1.fd());
-        osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m2(file2.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file2.fd());
+        osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m1{file1.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file1.fd()};
+        osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m2{file2.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file2.fd()};
 
         std::set_difference(m1.cbegin(), m1.cend(), m2.cbegin(), m2.cend(), std::back_inserter(removed_segments));
         std::set_difference(m2.cbegin(), m2.cend(), m1.cbegin(), m1.cend(), std::back_inserter(added_segments));

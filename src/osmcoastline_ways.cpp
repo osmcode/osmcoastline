@@ -46,8 +46,8 @@
 
 #include "return_codes.hpp"
 
-typedef osmium::index::map::SparseMemArray<osmium::unsigned_object_id_type, osmium::Location> index_type;
-typedef osmium::handler::NodeLocationsForWays<index_type, index_type> node_location_handler_type;
+using index_type = osmium::index::map::SparseMemArray<osmium::unsigned_object_id_type, osmium::Location>;
+using location_handler_type = osmium::handler::NodeLocationsForWays<index_type, index_type>;
 
 class CoastlineWaysHandler : public osmium::handler::Handler {
 
@@ -76,7 +76,7 @@ public:
         m_layer_ways.commit_transaction();
     }
 
-    void way(osmium::Way& way) {
+    void way(const osmium::Way& way) {
         m_length += osmium::geom::haversine::distance(way.nodes());
         try {
             std::unique_ptr<OGRLineString> ogrlinestring = m_factory.create_linestring(way);
@@ -85,19 +85,19 @@ public:
             feature.set_field("name", way.tags().get_value_by_key("name"));
             feature.set_field("source", way.tags().get_value_by_key("source"));
 
-            const char* coastline = way.tags().get_value_by_key("coastline");
-            feature.set_field("bogus", (coastline && !std::strcmp(coastline, "bogus")) ? "t" : "f");
+            const bool bogus = way.tags().has_tag("coastline", "bogus");
+            feature.set_field("bogus", bogus ? "t" : "f");
             feature.add_to_layer();
         } catch (const osmium::geometry_error&) {
             std::cerr << "Ignoring illegal geometry for way " << way.id() << ".\n";
         }
     }
 
-    double sum_length() const {
+    double sum_length() const noexcept {
         return m_length;
     }
 
-};
+}; // class CoastlineWaysHandler
 
 int main(int argc, char* argv[]) {
     if (argc >= 2) {
@@ -123,24 +123,24 @@ int main(int argc, char* argv[]) {
 
     CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");
 
-    std::string input_osm_filename { argv[1] };
-    std::string output_db_filename { "coastline-ways.db" };
+    const std::string input_osm_filename{argv[1]};
 
+    std::string output_db_filename{"coastline-ways.db"};
     if (argc >= 3) {
         output_db_filename = argv[2];
     }
 
-    index_type store_pos;
-    index_type store_neg;
-    node_location_handler_type location_handler(store_pos, store_neg);
+    index_type index_pos;
+    index_type index_neg;
+    location_handler_type location_handler{index_pos, index_neg};
 
-    osmium::io::File infile(input_osm_filename);
-    osmium::io::Reader reader1(infile, osmium::osm_entity_bits::node);
+    osmium::io::File infile{input_osm_filename};
+    osmium::io::Reader reader1{infile, osmium::osm_entity_bits::node};
     osmium::apply(reader1, location_handler);
     reader1.close();
 
-    CoastlineWaysHandler coastline_ways_handler(output_db_filename);
-    osmium::io::Reader reader2(infile, osmium::osm_entity_bits::way);
+    CoastlineWaysHandler coastline_ways_handler{output_db_filename};
+    osmium::io::Reader reader2{infile, osmium::osm_entity_bits::way};
     osmium::apply(reader2, location_handler, coastline_ways_handler);
     reader2.close();
 

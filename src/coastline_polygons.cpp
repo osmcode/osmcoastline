@@ -46,14 +46,14 @@ std::unique_ptr<OGRPolygon> CoastlinePolygons::create_rectangular_polygon(double
     // make sure we are inside the bounds for the output SRS
     e.Intersect(srs.max_extent());
 
-    std::unique_ptr<OGRLinearRing> ring { new OGRLinearRing() };
+    std::unique_ptr<OGRLinearRing> ring{new OGRLinearRing()};
     ring->addPoint(e.MinX, e.MinY);
     ring->addPoint(e.MinX, e.MaxY);
     ring->addPoint(e.MaxX, e.MaxY);
     ring->addPoint(e.MaxX, e.MinY);
     ring->closeRings();
 
-    std::unique_ptr<OGRPolygon> polygon { new OGRPolygon() };
+    std::unique_ptr<OGRPolygon> polygon{new OGRPolygon()};
     polygon->addRingDirectly(ring.release());
     polygon->assignSpatialReference(srs.out());
 
@@ -95,7 +95,7 @@ void CoastlinePolygons::split_geometry(std::unique_ptr<OGRGeometry>&& geom, int 
     } else { // wkbMultiPolygon
         const auto mp = static_cast_unique_ptr<OGRMultiPolygon>(std::move(geom));
         while (mp->getNumGeometries() > 0) {
-            std::unique_ptr<OGRPolygon> polygon { static_cast<OGRPolygon*>(mp->getGeometryRef(0)) };
+            std::unique_ptr<OGRPolygon> polygon{static_cast<OGRPolygon*>(mp->getGeometryRef(0))};
             mp->removeGeometry(0, false);
             polygon->assignSpatialReference(srs.out());
             split_polygon(std::move(polygon), level);
@@ -108,7 +108,7 @@ void CoastlinePolygons::split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int
         m_max_split_depth = level;
     }
 
-    int num_points = polygon->getExteriorRing()->getNumPoints();
+    const int num_points = polygon->getExteriorRing()->getNumPoints();
     if (num_points <= m_max_points_in_polygon) {
         // do not split the polygon if it is small enough
         m_polygons.push_back(std::move(polygon));
@@ -139,7 +139,7 @@ void CoastlinePolygons::split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int
             }
 
             // split vertically
-            double MidY = (envelope.MaxY+envelope.MinY) / 2;
+            const double MidY = (envelope.MaxY+envelope.MinY) / 2;
 
             b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, MidY, m_expand);
             b2 = create_rectangular_polygon(envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, m_expand);
@@ -151,15 +151,15 @@ void CoastlinePolygons::split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int
             }
 
             // split horizontally
-            double MidX = (envelope.MaxX+envelope.MinX) / 2;
+            const double MidX = (envelope.MaxX+envelope.MinX) / 2;
 
             b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, MidX, envelope.MaxY, m_expand);
             b2 = create_rectangular_polygon(MidX, envelope.MinY, envelope.MaxX, envelope.MaxY, m_expand);
         }
 
         // Use intersection with bbox polygons to split polygon into two halfes
-        std::unique_ptr<OGRGeometry> geom1 { polygon->Intersection(b1.get()) };
-        std::unique_ptr<OGRGeometry> geom2 { polygon->Intersection(b2.get()) };
+        std::unique_ptr<OGRGeometry> geom1{polygon->Intersection(b1.get())};
+        std::unique_ptr<OGRGeometry> geom2{polygon->Intersection(b2.get())};
 
         if (geom1 && (geom1->getGeometryType() == wkbPolygon || geom1->getGeometryType() == wkbMultiPolygon) &&
             geom2 && (geom2->getGeometryType() == wkbPolygon || geom2->getGeometryType() == wkbMultiPolygon)) {
@@ -247,12 +247,12 @@ void CoastlinePolygons::add_line_to_output(std::unique_ptr<OGRLineString> line, 
 // Add a coastline ring as LineString to output. Segments in this line that are
 // near the southern edge of the map or near the antimeridian are suppressed.
 void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLinearRing* ring) const {
-    int num = ring->getNumPoints();
+    const int num = ring->getNumPoints();
     assert(num > 2);
 
-    std::unique_ptr<OGRPoint> point1 { new OGRPoint };
-    std::unique_ptr<OGRPoint> point2 { new OGRPoint };
-    std::unique_ptr<OGRLineString> line { new OGRLineString };
+    std::unique_ptr<OGRPoint> point1{new OGRPoint};
+    std::unique_ptr<OGRPoint> point2{new OGRPoint};
+    std::unique_ptr<OGRLineString> line{new OGRLineString};
 
     ring->getPoint(0, point1.get());
     for (int i=1; i < num; ++i) {
@@ -262,7 +262,7 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLi
 
         if (line->getNumPoints() >= max_points || !added) {
             if (line->getNumPoints() >= 2) {
-                std::unique_ptr<OGRLineString> new_line { new OGRLineString };
+                std::unique_ptr<OGRLineString> new_line{new OGRLineString};
                 using std::swap;
                 swap(line, new_line);
                 add_line_to_output(std::move(new_line), ring->getSpatialReference());
@@ -333,7 +333,7 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
 
         if (e.MaxX - e.MinX < e.MaxY-e.MinY) {
             // split vertically
-            double MidY = (e.MaxY+e.MinY) / 2;
+            const double MidY = (e.MaxY+e.MinY) / 2;
 
             e1.MinX = e.MinX;
             e1.MinY = e.MinY;
@@ -347,7 +347,7 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
 
         } else {
             // split horizontally
-            double MidX = (e.MaxX+e.MinX) / 2;
+            const double MidX = (e.MaxX+e.MinX) / 2;
 
             e1.MinX = e.MinX;
             e1.MinY = e.MinY;
@@ -371,8 +371,8 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
             OGREnvelope e;
             polygon->getEnvelope(&e);
 
-            bool e1_intersects_e = e1.Intersects(e);
-            bool e2_intersects_e = e2.Intersects(e);
+            const bool e1_intersects_e = e1.Intersects(e);
+            const bool e2_intersects_e = e2.Intersects(e);
 
             if (e1_intersects_e && e2_intersects_e) {
                 v1.emplace_back(static_cast<OGRPolygon*>(polygon->clone()));

@@ -38,8 +38,8 @@ class OGRGeometry;
 class OutputDatabase;
 class CoastlinePolygons;
 
-typedef std::list<std::shared_ptr<CoastlineRing>> coastline_rings_list_t;
-typedef std::map<osmium::object_id_type, coastline_rings_list_t::iterator> idmap_type;
+using coastline_rings_list_t = std::list<std::shared_ptr<CoastlineRing>>;
+using idmap_type = std::map<osmium::object_id_type, coastline_rings_list_t::iterator>;
 
 /**
  * A collection of CoastlineRing objects. Keeps a list of all start and end
@@ -63,7 +63,7 @@ class CoastlineRingCollection {
 
 public:
 
-    typedef coastline_rings_list_t::const_iterator const_iterator;
+    using const_iterator = coastline_rings_list_t::const_iterator;
 
     CoastlineRingCollection();
 
@@ -86,19 +86,19 @@ public:
         }
     }
 
-    unsigned int num_ways() const {
+    unsigned int num_ways() const noexcept {
         return m_ways;
     }
 
-    unsigned int num_rings_from_single_way() const {
+    unsigned int num_rings_from_single_way() const noexcept {
         return m_rings_from_single_way;
     }
 
-    unsigned int num_unconnected_nodes() const {
+    unsigned int num_unconnected_nodes() const noexcept {
         return m_start_nodes.size() + m_end_nodes.size();
     }
 
-    unsigned int num_fixed_rings() const {
+    unsigned int num_fixed_rings() const noexcept {
         return m_fixed_rings;
     }
 
@@ -126,23 +126,27 @@ private:
         osmium::object_id_type start_id;
         osmium::object_id_type end_id;
 
-        Connection(double d, osmium::object_id_type s, osmium::object_id_type e) : distance(d), start_id(s), end_id(e) { }
+        Connection(double d, osmium::object_id_type s, osmium::object_id_type e) :
+            distance(d),
+            start_id(s),
+            end_id(e) {
+        }
 
         /**
         * Returns true if start or end ID of this connection is the same as the
         * other connections start or end ID. Used as predicate in std::remove_if().
         */
-        bool operator()(const Connection& other) {
+        bool operator()(const Connection& other) const noexcept {
             return start_id == other.start_id || end_id == other.end_id;
         }
 
         // Used in std::sort
-        static bool sort_by_distance(const Connection& a, const Connection& b) {
+        static bool sort_by_distance(const Connection& a, const Connection& b) noexcept {
             return a.distance > b.distance;
         }
 
-    };
+    }; // struct Connection
 
-};
+}; // class CoastlineRingCollection
 
 #endif // COASTLINE_RING_COLLECTION_HPP

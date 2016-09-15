@@ -48,17 +48,15 @@ public:
 
     void way(const osmium::Way& way) {
         // We are only interested in ways tagged with natural=coastline.
-        const char* natural = way.tags().get_value_by_key("natural");
-        if (natural && !std::strcmp(natural, "coastline")) {
-            const char* bogus = way.tags().get_value_by_key("coastline");
-            if (bogus && !std::strcmp(bogus, "bogus")) {
+        if (way.tags().has_tag("natural", "coastline")) {
+            if (way.tags().has_tag("coastline", "bogus")) {
                 return; // ignore bogus coastline in Antarctica
             }
             m_coastline_rings.add_way(way);
         }
     }
 
-};
+}; // class CoastlineHandlerPass1
 
 /**
  * Osmium handler for the second pass over the input file in which
@@ -89,8 +87,7 @@ public:
     }
 
     void node(const osmium::Node& node) {
-        const char* natural = node.tags().get_value_by_key("natural");
-        if (natural && !std::strcmp(natural, "coastline")) {
+        if (node.tags().has_tag("natural", "coastline")) {
             try {
                 m_output.add_error_point(m_factory.create_point(node), "tagged_node", node.id());
             } catch (const osmium::geometry_error&) {
@@ -104,6 +101,6 @@ public:
         }
     }
 
-};
+}; // class CoastlineHandlerPass2
 
 #endif // COASTLINE_HANDLERS_HPP

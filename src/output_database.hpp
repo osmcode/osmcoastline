@@ -94,6 +94,6 @@ public:
 
     void commit();
 
-};
+}; // class OutputDatabase
 
 #endif // OUTPUT_DATABASE_HPP

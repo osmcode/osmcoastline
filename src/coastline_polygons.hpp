@@ -31,7 +31,7 @@
 class OGRSpatialReference;
 class OutputDatabase;
 
-typedef std::vector<std::unique_ptr<OGRPolygon>> polygon_vector_type;
+using polygon_vector_type = std::vector<std::unique_ptr<OGRPolygon>>;
 
 /**
  * A collection of land polygons created out of coastlines.
@@ -120,6 +120,6 @@ public:
     /// Write all coastlines to the output database (as lines).
     void output_lines(int max_points) const;
 
-};
+}; // class CoastlinePolygons
 
 #endif // COASTLINE_POLYGONS_HPP

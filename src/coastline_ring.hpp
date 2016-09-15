@@ -22,6 +22,7 @@
 
 */
 
+#include <cassert>
 #include <map>
 #include <memory>
 #include <ostream>
@@ -35,7 +36,7 @@ class OGRPoint;
 class OGRLineString;
 class OGRPolygon;
 
-typedef std::multimap<osmium::object_id_type, osmium::Location*> posmap_type;
+using posmap_type = std::multimap<osmium::object_id_type, osmium::Location*>;
 
 /**
  * The CoastlineRing class models a (possibly unfinished) ring of
@@ -108,26 +109,30 @@ public:
 
     /// ID of first node in the ring.
     osmium::object_id_type first_node_id() const {
+        assert(!m_way_node_list.empty());
         return m_way_node_list.front().ref();
     }
 
     /// ID of last node in the ring.
     osmium::object_id_type last_node_id() const {
+        assert(!m_way_node_list.empty());
         return m_way_node_list.back().ref();
     }
 
     /// Position of the first node in the ring.
     osmium::Location first_position() const {
+        assert(!m_way_node_list.empty());
         return m_way_node_list.front().location();
     }
 
     /// Position of the last node in the ring.
     osmium::Location last_position() const {
+        assert(!m_way_node_list.empty());
         return m_way_node_list.back().location();
     }
 
     /// Return ID of this ring (defined as smallest ID of the ways making up the ring).
-    osmium::object_id_type ring_id() const {
+    osmium::object_id_type ring_id() const noexcept {
         return m_ring_id;
     }
 
@@ -135,14 +140,14 @@ public:
      * Set ring ID. The ring will only get the new ID if it is smaller than the
      * old one.
      */
-    void update_ring_id(osmium::object_id_type new_id) {
+    void update_ring_id(osmium::object_id_type new_id) noexcept {
         if (new_id < m_ring_id) {
             m_ring_id = new_id;
         }
     }
 
     /// Returns the number of ways making up this ring.
-    unsigned int nways() const {
+    unsigned int nways() const noexcept {
         return m_nways;
     }
 
@@ -157,7 +162,7 @@ public:
     }
 
     /// Was this ring fixed because of missing/wrong OSM data?
-    bool is_fixed() const {
+    bool is_fixed() const noexcept {
         return m_fixed;
     }
 
@@ -170,6 +175,7 @@ public:
      * method does this.
      */
     void fake_close() {
+        assert(!m_way_node_list.empty());
         m_way_node_list.back().set_ref(first_node_id());
     }
 
@@ -258,7 +264,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const CoastlineRing& cp);
 
-};
+}; // class CoastlineRing
 
 inline bool operator<(const CoastlineRing& lhs, const CoastlineRing& rhs) {
     return lhs.first_position() < rhs.first_position();

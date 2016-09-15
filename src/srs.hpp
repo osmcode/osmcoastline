@@ -63,6 +63,7 @@ public:
     OGRSpatialReference* wgs84() {
         return &m_srs_wgs84;
     }
+
     OGRSpatialReference* out()   {
         return &m_srs_out;
     }
@@ -86,13 +87,15 @@ public:
     double max_x() const {
         return m_transform ?  20037500.0 :  179.9999;
     }
+
     double min_x() const {
         return m_transform ? -20037500.0 : -179.9999;
     }
+
     double min_y() const {
         return m_transform ? -20037400.0 :  -85.049;
     }
 
-};
+}; // class SRS
 
 #endif // SRS_HPP

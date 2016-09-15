@@ -88,7 +88,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     }
 
     if (mega_geometry->getGeometryType() != wkbMultiPolygon) {
-        throw std::runtime_error("mega geometry isn't a multipolygon. Something is very wrong!");
+        throw std::runtime_error{"mega geometry isn't a multipolygon. Something is very wrong!"};
     }
     OGRMultiPolygon* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.release());
 
@@ -97,7 +97,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     for (int i=0; i < mega_multipolygon->getNumGeometries(); ++i) {
         OGRGeometry* geom = mega_multipolygon->getGeometryRef(i);
         assert(geom->getGeometryType() == wkbPolygon);
-        std::unique_ptr<OGRPolygon> p { static_cast<OGRPolygon*>(geom) };
+        std::unique_ptr<OGRPolygon> p{static_cast<OGRPolygon*>(geom)};
         if (p->IsValid()) {
             polygons.push_back(std::move(p));
         } else {
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     } else {
         vout << "Will NOT create geometry index (because you told me to using --no-index/-i).\n";
     }
-    OutputDatabase output_database(options.output_database, srs, options.create_index);
+    OutputDatabase output_database{options.output_database, srs, options.create_index};
 
     // The collection of all coastline rings we will be filling and then
     // operating on.
@@ -187,11 +187,11 @@ int main(int argc, char *argv[]) {
         // This is in an extra scope so that the considerable amounts of memory
         // held by the handlers is recovered after we don't need them any more.
         vout << "Reading from file '" << options.inputfile << "'.\n";
-        osmium::io::File infile(options.inputfile);
+        osmium::io::File infile{options.inputfile};
 
         vout << "Reading ways (1st pass through input file)...\n";
-        CoastlineHandlerPass1 handler_pass1(coastline_rings);
-        osmium::io::Reader reader1(infile, osmium::osm_entity_bits::way);
+        CoastlineHandlerPass1 handler_pass1{coastline_rings};
+        osmium::io::Reader reader1{infile, osmium::osm_entity_bits::way};
         osmium::apply(reader1, handler_pass1);
         reader1.close();
         stats.ways = coastline_rings.num_ways();
@@ -205,8 +205,8 @@ int main(int argc, char *argv[]) {
         vout << memory_usage();
 
         vout << "Reading nodes (2nd pass through input file)...\n";
-        CoastlineHandlerPass2 handler_pass2(coastline_rings, output_database);
-        osmium::io::Reader reader2(infile, osmium::osm_entity_bits::node);
+        CoastlineHandlerPass2 handler_pass2{coastline_rings, output_database};
+        osmium::io::Reader reader2{infile, osmium::osm_entity_bits::node};
         osmium::apply(reader2, handler_pass2);
         reader2.close();
     }

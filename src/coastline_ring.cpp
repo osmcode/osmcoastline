@@ -95,7 +95,7 @@ void CoastlineRing::close_ring() {
 }
 
 void CoastlineRing::close_antarctica_ring(int epsg) {
-    double min = epsg == 4326 ? -90.0 : -85.0511288;
+    const double min = epsg == 4326 ? -90.0 : -85.0511288;
 
     for (int lat = -78; lat > int(min); --lat) {
         m_way_node_list.emplace_back(0, osmium::Location(-179.99999, double(lat)));
@@ -137,18 +137,18 @@ std::unique_ptr<OGRLineString> CoastlineRing::ogr_linestring(osmium::geom::OGRFa
 
 std::unique_ptr<OGRPoint> CoastlineRing::ogr_first_point() const {
     const osmium::NodeRef& node_ref = m_way_node_list.front();
-    return std::unique_ptr<OGRPoint>(new OGRPoint(node_ref.lon(), node_ref.lat()));
+    return std::unique_ptr<OGRPoint>{new OGRPoint(node_ref.lon(), node_ref.lat())};
 }
 
 std::unique_ptr<OGRPoint> CoastlineRing::ogr_last_point() const {
     const osmium::NodeRef& node_ref = m_way_node_list.back();
-    return std::unique_ptr<OGRPoint>(new OGRPoint(node_ref.lon(), node_ref.lat()));
+    return std::unique_ptr<OGRPoint>{new OGRPoint(node_ref.lon(), node_ref.lat())};
 }
 
 // Pythagoras doesn't work on a round earth but that is ok here, we only need a
 // rough measure anyway
 double CoastlineRing::distance_to_start_position(osmium::Location pos) const {
-    osmium::Location p = m_way_node_list.front().location();
+    const osmium::Location p = m_way_node_list.front().location();
     return (pos.lon() - p.lon()) * (pos.lon() - p.lon()) + (pos.lat() - p.lat()) * (pos.lat() - p.lat());
 }
 
