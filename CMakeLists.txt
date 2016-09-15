@@ -48,7 +48,6 @@ if(MSVC)
     find_library(GETOPT_LIBRARY NAMES wingetopt)
     if(GETOPT_INCLUDE_DIR AND GETOPT_LIBRARY)
         include_directories(${GETOPT_INCLUDE_DIR})
-        list(APPEND OSMIUM_LIBRARIES ${GETOPT_LIBRARY})
     else()
         set(GETOPT_MISSING 1)
     endif()
@@ -240,6 +239,7 @@ endif(PANDOC)
 #-----------------------------------------------------------------------------
 
 find_library(GEOS_C_LIBRARIES NAMES geos_c)
+include_directories (SYSTEM ${GEOS_C_INCLUDE_DIR})
 
 add_definitions(${OSMIUM_WARNING_OPTIONS})
 
