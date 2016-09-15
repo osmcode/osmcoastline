@@ -35,7 +35,6 @@
 # include <unistd.h>
 #else
 # include <io.h>
-# include <windows.h>
 #endif
 
 #include <ogr_core.h>
