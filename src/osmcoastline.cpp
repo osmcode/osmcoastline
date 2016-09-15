@@ -28,9 +28,15 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <unistd.h>
 #include <utility>
 #include <vector>
+
+#ifndef _MSC_VER
+# include <unistd.h>
+#else
+# include <io.h>
+# include <windows.h>
+#endif
 
 #include <ogr_core.h>
 #include <ogr_geometry.h>

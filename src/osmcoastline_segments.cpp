@@ -32,8 +32,14 @@
 #include <system_error>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <vector>
+
+#ifndef _MSC_VER
+# include <unistd.h>
+#else
+# include <io.h>
+# include <windows.h>
+#endif
 
 #include <osmium/osm/undirected_segment.hpp>
 #include <osmium/util/memory_mapping.hpp>
