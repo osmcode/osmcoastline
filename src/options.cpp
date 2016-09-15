@@ -28,6 +28,10 @@
 #include "return_codes.hpp"
 #include "options.hpp"
 
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#endif
+
 Options::Options(int argc, char* argv[]) :
     inputfile(),
     bbox_overlap(-1),
