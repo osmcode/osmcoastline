@@ -38,7 +38,6 @@
 # include <unistd.h>
 #else
 # include <io.h>
-# include <windows.h>
 #endif
 
 #include <osmium/osm/undirected_segment.hpp>
