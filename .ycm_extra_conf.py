@@ -29,6 +29,11 @@ flags = [
 '-x',
 'c++',
 
+# workaround for https://github.com/Valloric/YouCompleteMe/issues/303
+# also see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=800618
+'-isystem',
+'/usr/lib/ycmd/clang_includes/',
+
 '-Iinclude',
 '-I%s/../libosmium/include' % basedir,
 '-I/usr/include/gdal',
