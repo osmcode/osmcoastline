@@ -13,16 +13,27 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 
+## [2.1.4] - 2016-09-16
+
+### Changed
+
+- Miscellaneous code cleanups.
+
+### Fixed
+
+- Windows build.
+
+
 ## [2.1.3] - 2016-03-30
 
 ### Added
 
-- Add verbose option to osmcoastline_filter.
-- osmcoastline_filter now shows memory used in verbose mode.
+- Add verbose option to `osmcoastline_filter`.
+- `osmcoastline_filter` now shows memory used in verbose mode.
 
 ### Changed
 
-- Optimized osmcoastline_filter program.
+- Optimized `osmcoastline_filter` program.
 - Use more features from newest libosmium.
 
 ### Fixed
@@ -44,7 +55,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated for newest libosmium version (2.5.2).
 - Uses gdalcpp.hpp from https://github.com/joto/gdalcpp instead of directly
   talking to GDAL/OGR. Makes this compatible with GDAL 2.
-- Improved internal code using unique_ptr where possible.
+- Improved internal code using `unique_ptr` where possible.
 
 ### Fixed
 
@@ -77,7 +88,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added man pages
 
 
-[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.1.3...HEAD
+[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.1.4...HEAD
+[2.1.4]: https://github.com/osmcode/osmium-tool/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/osmcode/osmium-tool/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/osmcode/osmium-tool/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/osmcode/osmium-tool/compare/v2.1.0...v2.1.1
