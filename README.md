@@ -10,7 +10,23 @@ https://github.com/osmcode/osmcoastline
 
 [![Build Status](https://secure.travis-ci.org/osmcode/osmcoastline.svg)](http://travis-ci.org/osmcode/osmcoastline)
 
-## Prerequisites
+## Using Docker
+
+### Create image
+    cd /PATH/TO/osmcoastline/clone
+    docker build -t osmcoastline .
+
+### Run container
+    Download planet.osm.pbf into /tmp/osm
+    If you want to generate water polygons :
+    docker run  -v /tmp/osm:/data -it osmcoastline ./osmcoastline.sh /data/planet.osm.pbf water
+
+    If you want to generate land polygons :
+    docker run  -v /tmp/osm:/data -it osmcoastline ./osmcoastline.sh /data/planet.osm.pbf land
+
+    The output will be in /tmp/osm/coastlineoutput
+
+## From scratch install prerequisites
 
 ### Libosmium
 
