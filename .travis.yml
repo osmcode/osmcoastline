@@ -8,45 +8,80 @@ language: generic
 
 sudo: false
 
+dist: trusty
+
 #-----------------------------------------------------------------------------
 
 matrix:
   include:
 
     # 1/ Linux Clang Builds
-
-    - os: linux
-      compiler: linux-clang36-release
-      addons:
-        apt:
-          sources: ['llvm-toolchain-precise-3.6', 'ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['clang-3.6', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-3.6' BUILD_TYPE='Release'
-
-    - os: linux
-      compiler: linux-clang37-dev
-      addons:
-        apt:
-          sources: ['llvm-toolchain-precise-3.6', 'ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['clang-3.6', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-3.6' BUILD_TYPE='Dev'
-
-
     - os: linux
       compiler: linux-clang38-release
       addons:
         apt:
-          sources: ['llvm-toolchain-precise-3.8', 'ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['clang-3.8', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['clang-3.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
       env: COMPILER='clang++-3.8' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-clang38-dev
       addons:
         apt:
-          sources: ['llvm-toolchain-precise-3.8', 'ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['clang-3.8', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['clang-3.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
       env: COMPILER='clang++-3.8' BUILD_TYPE='Dev'
+
+
+    - os: linux
+      compiler: linux-clang39-release
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['clang-3.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+      env: COMPILER='clang++-3.9' BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: linux-clang39-dev
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['clang-3.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+      env: COMPILER='clang++-3.9' BUILD_TYPE='Dev'
+
+
+    - os: linux
+      compiler: linux-clang40-release
+      addons:
+        apt:
+          sources: ['llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test']
+          packages: ['clang-4.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+      env: COMPILER='clang++-4.0' BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: linux-clang40-dev
+      addons:
+        apt:
+          sources: ['llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test']
+          packages: ['clang-4.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+      env: COMPILER='clang++-4.0' BUILD_TYPE='Dev'
+
+
+    - os: linux
+      compiler: linux-clang50-release
+      addons:
+        apt:
+          sources: ['llvm-toolchain-trusty-5.0', 'ubuntu-toolchain-r-test']
+          packages: ['clang-5.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+      env: COMPILER='clang++-5.0' BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: linux-clang50-dev
+      addons:
+        apt:
+          sources: ['llvm-toolchain-trusty-5.0', 'ubuntu-toolchain-r-test']
+          packages: ['clang-5.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+      env: COMPILER='clang++-5.0' BUILD_TYPE='Dev'
 
 
     # 2/ Linux GCC Builds
@@ -54,16 +89,16 @@ matrix:
       compiler: linux-gcc48-release
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['g++-4.8', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
       env: COMPILER='g++-4.8' COMPILER_FLAGS='-Wno-return-type' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-gcc48-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['g++-4.8', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
       env: COMPILER='g++-4.8' COMPILER_FLAGS='-Wno-return-type' BUILD_TYPE='Dev'
 
 
@@ -71,16 +106,16 @@ matrix:
       compiler: linux-gcc49-release
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['g++-4.9', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
       env: COMPILER='g++-4.9' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-gcc49-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['g++-4.9', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
       env: COMPILER='g++-4.9' BUILD_TYPE='Dev'
 
 
@@ -88,17 +123,34 @@ matrix:
       compiler: linux-gcc5-release
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['g++-5', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-5', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
       env: COMPILER='g++-5' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-gcc5-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test', 'boost-latest']
-          packages: ['g++-5', 'libboost1.55-all-dev', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-5', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
       env: COMPILER='g++-5' BUILD_TYPE='Dev'
+
+
+    - os: linux
+      compiler: linux-gcc6-release
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-6', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+      env: COMPILER='g++-6' BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: linux-gcc6-dev
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-6', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
+      env: COMPILER='g++-6' BUILD_TYPE='Dev'
 
 
     # 3/ OSX Clang Builds
@@ -123,13 +175,24 @@ matrix:
       compiler: xcode7-clang-dev
       env: COMPILER='clang++' BUILD_TYPE='Dev'
 
+
+    - os: osx
+      osx_image: xcode8.3
+      compiler: xcode8-clang-release
+      env: COMPILER='clang++' BUILD_TYPE='Release'
+
+    - os: osx
+      osx_image: xcode8.3
+      compiler: xcode8-clang-dev
+      env: COMPILER='clang++' BUILD_TYPE='Dev'
+
 #-----------------------------------------------------------------------------
 
 install:
   - git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git ../libosmium
   - |
     if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      brew install cmake boost || true
+      brew install cmake || true
     fi
   - cmake --version
 
