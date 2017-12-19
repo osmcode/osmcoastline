@@ -21,8 +21,8 @@ https://github.com/osmcode/osmcoastline
 ### Protozero
 
     https://github.com/mapbox/protozero
-    Debian/Ubuntu: protozero
-    Also included in the libosmium repository.
+    Debian/Ubuntu: libprotozero-dev
+    At least version 1.5.1 is needed.
 
 ### Utfcpp
 
