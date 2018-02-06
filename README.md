@@ -16,7 +16,7 @@ https://github.com/osmcode/osmcoastline
 
     https://github.com/osmcode/libosmium
     http://osmcode.org/libosmium
-    At least version 2.5.0 is needed.
+    At least version 2.7.0 is needed.
 
 ### Protozero
 
@@ -28,7 +28,7 @@ https://github.com/osmcode/osmcoastline
 
     http://utfcpp.sourceforge.net/
     Debian/Ubuntu: libutfcpp-dev
-    Also included in the libosmium repository.
+    Included in the libosmium repository.
 
 ### zlib (for PBF support)
 

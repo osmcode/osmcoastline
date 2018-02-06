@@ -40,7 +40,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(include)
 
-find_package(Osmium 2.5.0 COMPONENTS io gdal)
+find_package(Osmium 2.7.0 COMPONENTS io gdal)
 include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
 
 if(MSVC)
