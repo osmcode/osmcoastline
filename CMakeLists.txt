@@ -134,6 +134,30 @@ set(CMAKE_BUILD_TYPE ${build_type}
 
 #-----------------------------------------------------------------------------
 #
+#  Optional "clang-tidy" target
+#
+#-----------------------------------------------------------------------------
+message(STATUS "Looking for clang-tidy")
+find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-6.0 clang-tidy-5.0)
+
+if(CLANG_TIDY)
+    message(STATUS "Looking for clang-tidy - found ${CLANG_TIDY}")
+
+    file(GLOB _all_code src/*.cpp)
+
+    add_custom_target(clang-tidy
+        ${CLANG_TIDY}
+        -p ${CMAKE_BINARY_DIR}
+        ${_all_code}
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/src"
+    )
+else()
+    message(STATUS "Looking for clang-tidy - not found")
+    message(STATUS "  Build target 'clang-tidy' will not be available.")
+endif()
+
+#-----------------------------------------------------------------------------
+#
 #  Optional "cppcheck" target that checks C++ code
 #
 #-----------------------------------------------------------------------------
