@@ -42,55 +42,55 @@ public:
     std::string inputfile;
 
     /// Overlap when splitting polygons.
-    double bbox_overlap;
+    double bbox_overlap = -1.0;
 
     /**
      * If the distance between two ring-endnodes is smaller than this the ring
      * can be closed there.
      */
-    double close_distance;
+    double close_distance = 1.0;
 
     /// Attempt to close unclosed rings?
-    bool close_rings;
+    bool close_rings = true;
 
     /// Add spatial index to Spatialite database tables?
-    bool create_index;
+    bool create_index = true;
 
     /// Show debug output?
-    bool debug;
+    bool debug = false;
 
     /// Maximum number of points in polygons.
-    int max_points_in_polygon;
+    int max_points_in_polygon = 1000;
 
     /// Should large polygons be split?
-    bool split_large_polygons;
+    bool split_large_polygons = true;
 
     /// What polygons should be written out?
-    output_polygon_type output_polygons;
+    output_polygon_type output_polygons = output_polygon_type::land;
 
     /// Output Spatialite database file name.
     std::string output_database;
 
     /// Should output database be overwritten
-    bool overwrite_output;
+    bool overwrite_output = false;
 
     /// Should the rings output table be populated?
-    bool output_rings;
+    bool output_rings = false;
 
     /// Should the lines output table be populated?
-    bool output_lines;
+    bool output_lines = false;
 
     /// EPSG code of output SRS.
-    int epsg;
+    int epsg = 4326;
 
     /// Should the coastline be simplified?
-    bool simplify;
+    bool simplify = false;
 
     /// Tolerance for simplification
-    double tolerance;
+    double tolerance = 0.0;
 
     /// Verbose output?
-    bool verbose;
+    bool verbose = false;
 
     /// Name of optional segment file
     std::string segmentfile;

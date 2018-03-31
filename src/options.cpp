@@ -32,25 +32,7 @@
 #define strcasecmp _stricmp
 #endif
 
-Options::Options(int argc, char* argv[]) :
-    inputfile(),
-    bbox_overlap(-1),
-    close_distance(1.0),
-    close_rings(true),
-    create_index(true),
-    debug(false),
-    max_points_in_polygon(1000),
-    split_large_polygons(true),
-    output_polygons(output_polygon_type::land),
-    output_database(),
-    overwrite_output(false),
-    output_rings(false),
-    output_lines(false),
-    epsg(4326),
-    simplify(false),
-    tolerance(0),
-    verbose(false),
-    segmentfile() {
+Options::Options(int argc, char* argv[]) {
     static struct option long_options[] = {
         {"bbox-overlap",    required_argument, nullptr, 'b'},
         {"close-distance",  required_argument, nullptr, 'c'},
