@@ -22,17 +22,17 @@
 
 */
 
-#include <cstddef>
-#include <list>
-#include <map>
-#include <memory>
-#include <vector>
+#include "coastline_ring.hpp"
 
 #include <osmium/geom/ogr.hpp>
 #include <osmium/osm/way.hpp>
 #include <osmium/osm/types.hpp>
 
-#include "coastline_ring.hpp"
+#include <cstddef>
+#include <list>
+#include <map>
+#include <memory>
+#include <vector>
 
 class OGRGeometry;
 class OutputDatabase;

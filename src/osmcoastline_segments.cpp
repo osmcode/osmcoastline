@@ -19,6 +19,13 @@
 
 */
 
+#include "return_codes.hpp"
+
+#include <osmium/osm/undirected_segment.hpp>
+#include <osmium/util/memory_mapping.hpp>
+
+#include <gdalcpp.hpp>
+
 #include <algorithm>
 #include <cerrno>
 #include <cstdlib>
@@ -29,9 +36,9 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <system_error>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <system_error>
 #include <vector>
 
 #ifndef _MSC_VER
@@ -39,13 +46,6 @@
 #else
 # include <io.h>
 #endif
-
-#include <osmium/osm/undirected_segment.hpp>
-#include <osmium/util/memory_mapping.hpp>
-
-#include <gdalcpp.hpp>
-
-#include "return_codes.hpp"
 
 using segvec = std::vector<osmium::UndirectedSegment>;
 

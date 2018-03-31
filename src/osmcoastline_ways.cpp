@@ -19,12 +19,7 @@
 
 */
 
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <utility>
+#include "return_codes.hpp"
 
 #include <osmium/geom/haversine.hpp>
 #include <osmium/geom/ogr.hpp>
@@ -35,16 +30,21 @@
 #include <osmium/io/file.hpp>
 #include <osmium/osm/entity_bits.hpp>
 #include <osmium/osm/location.hpp>
-#include <osmium/osm/way.hpp>
 #include <osmium/osm/types.hpp>
+#include <osmium/osm/way.hpp>
 #include <osmium/visitor.hpp>
+
+#include <gdalcpp.hpp>
 
 #include <ogr_core.h>
 #include <ogr_geometry.h>
 
-#include <gdalcpp.hpp>
-
-#include "return_codes.hpp"
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
 
 using index_type = osmium::index::map::SparseMemArray<osmium::unsigned_object_id_type, osmium::Location>;
 using location_handler_type = osmium::handler::NodeLocationsForWays<index_type, index_type>;

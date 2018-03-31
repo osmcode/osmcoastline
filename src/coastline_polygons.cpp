@@ -19,18 +19,18 @@
 
 */
 
-#include <cassert>
-#include <iostream>
-#include <vector>
+#include "coastline_polygons.hpp"
+#include "output_database.hpp"
+#include "srs.hpp"
+#include "util.hpp"
 
 #include <ogr_geometry.h>
 
 class OGRSpatialReference;
 
-#include "coastline_polygons.hpp"
-#include "output_database.hpp"
-#include "srs.hpp"
-#include "util.hpp"
+#include <cassert>
+#include <iostream>
+#include <vector>
 
 extern SRS srs;
 extern bool debug;

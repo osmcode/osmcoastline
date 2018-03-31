@@ -19,16 +19,16 @@
 
 */
 
-#include <cassert>
-#include <iostream>
-#include <utility>
-
-#include <ogr_geometry.h>
+#include "coastline_ring.hpp"
 
 #include <osmium/geom/ogr.hpp>
 #include <osmium/osm/undirected_segment.hpp>
 
-#include "coastline_ring.hpp"
+#include <ogr_geometry.h>
+
+#include <cassert>
+#include <iostream>
+#include <utility>
 
 void CoastlineRing::setup_positions(posmap_type& posmap) {
     for (auto& wn : m_way_node_list) {

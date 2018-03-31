@@ -19,13 +19,7 @@
 
 */
 
-#include <algorithm>
-#include <cstdlib>
-#include <cstring>
-#include <getopt.h>
-#include <iostream>
-#include <string>
-#include <vector>
+#include "return_codes.hpp"
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/error.hpp>
@@ -42,7 +36,13 @@
 #include <osmium/util/memory.hpp>
 #include <osmium/util/verbose_output.hpp>
 
-#include "return_codes.hpp"
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <getopt.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
 void print_help() {
     std::cout << "osmcoastline_filter [OPTIONS] OSMFILE\n"

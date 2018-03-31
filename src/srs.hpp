@@ -22,9 +22,9 @@
 
 */
 
-#include <memory>
-
 #include <ogr_spatialref.h>
+
+#include <memory>
 
 class OGRGeometry;
 class OGREnvelope;

@@ -19,10 +19,10 @@
 
 */
 
+#include "srs.hpp"
+
 #include <ogr_core.h>
 #include <ogr_geometry.h>
-
-#include "srs.hpp"
 
 bool SRS::set_output(int epsg) {
     m_srs_out.importFromEPSG(epsg);

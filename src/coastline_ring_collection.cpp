@@ -19,15 +19,15 @@
 
 */
 
-#include <iostream>
-#include <memory>
-
-#include <ogr_geometry.h>
-
 #include "coastline_polygons.hpp"
 #include "coastline_ring_collection.hpp"
 #include "output_database.hpp"
 #include "srs.hpp"
+
+#include <ogr_geometry.h>
+
+#include <iostream>
+#include <memory>
 
 #ifdef _MSC_VER
 #include <io.h>

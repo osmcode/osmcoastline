@@ -22,13 +22,13 @@
 
 */
 
-#include <memory>
-#include <string>
-#include <vector>
-
 #include <osmium/osm/types.hpp>
 
 #include <gdalcpp.hpp>
+
+#include <memory>
+#include <string>
+#include <vector>
 
 class OGRLineString;
 class OGRPoint;

@@ -22,11 +22,11 @@
 
 */
 
+#include <ogr_geometry.h>
+
 #include <memory>
 #include <utility>
 #include <vector>
-
-#include <ogr_geometry.h>
 
 class OGRSpatialReference;
 class OutputDatabase;

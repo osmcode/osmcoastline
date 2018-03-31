@@ -19,20 +19,20 @@
 
 */
 
-#include <cstddef>
-#include <iostream>
-#include <sstream>
-#include <utility>
+#include "options.hpp"
+#include "output_database.hpp"
+#include "srs.hpp"
+#include "stats.hpp"
 
 #include <gdal_version.h>
 #include <geos_c.h>
 #include <ogr_core.h>
 #include <ogr_geometry.h>
 
-#include "options.hpp"
-#include "output_database.hpp"
-#include "srs.hpp"
-#include "stats.hpp"
+#include <cstddef>
+#include <iostream>
+#include <sstream>
+#include <utility>
 
 OutputDatabase::OutputDatabase(const std::string& outdb, SRS& srs, bool with_index) :
     m_with_index(with_index),

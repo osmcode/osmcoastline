@@ -19,14 +19,14 @@
 
 */
 
-#include <iostream>
-#include <string>
-#include <cstring>
-#include <cstdlib>
-#include <getopt.h>
-
 #include "return_codes.hpp"
 #include "options.hpp"
+
+#include <cstdlib>
+#include <cstring>
+#include <getopt.h>
+#include <iostream>
+#include <string>
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
