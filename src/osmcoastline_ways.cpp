@@ -72,6 +72,12 @@ public:
         m_layer_ways.start_transaction();
     }
 
+    CoastlineWaysHandler(const CoastlineWaysHandler&) = delete;
+    CoastlineWaysHandler operator=(const CoastlineWaysHandler&) = delete;
+
+    CoastlineWaysHandler(CoastlineWaysHandler&&) = delete;
+    CoastlineWaysHandler operator=(CoastlineWaysHandler&&) = delete;
+
     ~CoastlineWaysHandler() {
         m_layer_ways.commit_transaction();
     }
