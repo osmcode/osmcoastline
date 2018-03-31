@@ -50,7 +50,7 @@ public:
      */
     class TransformationException {};
 
-    SRS() {
+    SRS() noexcept {
         m_srs_wgs84.SetWellKnownGeogCS("WGS84");
     }
 

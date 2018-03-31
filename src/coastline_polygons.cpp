@@ -255,10 +255,10 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLi
     std::unique_ptr<OGRLineString> line{new OGRLineString};
 
     ring->getPoint(0, point1.get());
-    for (int i=1; i < num; ++i) {
+    for (int i = 1; i < num; ++i) {
         ring->getPoint(i, point2.get());
 
-        bool added = add_segment_to_line(line.get(), point1.get(), point2.get());
+        const bool added = add_segment_to_line(line.get(), point1.get(), point2.get());
 
         if (line->getNumPoints() >= max_points || !added) {
             if (line->getNumPoints() >= 2) {

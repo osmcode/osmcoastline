@@ -132,17 +132,17 @@ std::string memory_usage() {
 /* ================================================== */
 
 int main(int argc, char *argv[]) {
-    Stats stats;
+    Stats stats{};
     unsigned int warnings = 0;
     unsigned int errors = 0;
 
     // Parse command line and setup 'options' object with them.
-    Options options(argc, argv);
+    Options options{argc, argv};
 
     // The vout object is an output stream we can write to instead of
     // std::cerr. Nothing is written if we are not in verbose mode.
     // The running time will be prepended to output lines.
-    osmium::util::VerboseOutput vout(options.verbose);
+    osmium::util::VerboseOutput vout{options.verbose};
 
     debug = options.debug;
 
@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
     int segments_fd = -1;
     if (!options.segmentfile.empty()) {
         vout << "Writing segments to file '" << options.segmentfile << "' (because you told me to with --write-segments/-S option).\n";
-        segments_fd = ::open(options.segmentfile.c_str(), O_WRONLY | O_CREAT, 0666);
+        segments_fd = ::open(options.segmentfile.c_str(), O_WRONLY | O_CREAT, 0666); // NOLINT(hicpp-signed-bitwise)
         if (segments_fd == -1) {
             std::cerr << "Couldn't open file '" << options.segmentfile << "' (" << std::strerror(errno) << ")\n";
             std::exit(return_code_fatal);
@@ -321,10 +321,12 @@ int main(int argc, char *argv[]) {
 
     if (errors || warnings > max_warnings) {
         return return_code_error;
-    } else if (warnings) {
-        return return_code_warning;
-    } else {
-        return return_code_ok;
     }
+
+    if (warnings) {
+        return return_code_warning;
+    }
+
+    return return_code_ok;
 }
 

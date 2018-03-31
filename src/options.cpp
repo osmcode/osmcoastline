@@ -52,28 +52,29 @@ Options::Options(int argc, char* argv[]) :
     verbose(false),
     segmentfile() {
     static struct option long_options[] = {
-        {"bbox-overlap",    required_argument, 0, 'b'},
-        {"close-distance",  required_argument, 0, 'c'},
-        {"no-index",              no_argument, 0, 'i'},
-        {"debug",                 no_argument, 0, 'd'},
-        {"help",                  no_argument, 0, 'h'},
-        {"output-lines",          no_argument, 0, 'l'},
-        {"max-points",      required_argument, 0, 'm'},
-        {"output-database", required_argument, 0, 'o'},
-        {"output-polygons", required_argument, 0, 'p'},
-        {"output-rings",          no_argument, 0, 'r'},
-        {"overwrite",             no_argument, 0, 'f'},
-        {"srs",             required_argument, 0, 's'},
-        {"write-segments",  required_argument, 0, 'S'},
-        {"verbose",               no_argument, 0, 'v'},
-        {"version",               no_argument, 0, 'V'},
-        {0, 0, 0, 0}
+        {"bbox-overlap",    required_argument, nullptr, 'b'},
+        {"close-distance",  required_argument, nullptr, 'c'},
+        {"no-index",              no_argument, nullptr, 'i'},
+        {"debug",                 no_argument, nullptr, 'd'},
+        {"help",                  no_argument, nullptr, 'h'},
+        {"output-lines",          no_argument, nullptr, 'l'},
+        {"max-points",      required_argument, nullptr, 'm'},
+        {"output-database", required_argument, nullptr, 'o'},
+        {"output-polygons", required_argument, nullptr, 'p'},
+        {"output-rings",          no_argument, nullptr, 'r'},
+        {"overwrite",             no_argument, nullptr, 'f'},
+        {"srs",             required_argument, nullptr, 's'},
+        {"write-segments",  required_argument, nullptr, 'S'},
+        {"verbose",               no_argument, nullptr, 'v'},
+        {"version",               no_argument, nullptr, 'V'},
+        {nullptr,                           0, nullptr, 0}
     };
 
-    while (1) {
-        int c = getopt_long(argc, argv, "b:c:idhlm:o:p:rfs:S:vV", long_options, 0);
-        if (c == -1)
+    while (true) {
+        const int c = getopt_long(argc, argv, "b:c:idhlm:o:p:rfs:S:vV", long_options, nullptr);
+        if (c == -1) {
             break;
+        }
 
         switch (c) {
             case 'b':

@@ -53,9 +53,9 @@ class CoastlineRingCollection {
     idmap_type m_start_nodes;
     idmap_type m_end_nodes;
 
-    unsigned int m_ways;
-    unsigned int m_rings_from_single_way;
-    unsigned int m_fixed_rings;
+    unsigned int m_ways = 0;
+    unsigned int m_rings_from_single_way = 0;
+    unsigned int m_fixed_rings = 0;
 
     void add_partial_ring(const osmium::Way& way);
 
@@ -65,7 +65,8 @@ public:
 
     using const_iterator = coastline_rings_list_t::const_iterator;
 
-    CoastlineRingCollection();
+    CoastlineRingCollection() {
+    }
 
     /// Return the number of CoastlineRings in the collection.
     std::size_t size() const noexcept {

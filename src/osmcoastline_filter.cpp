@@ -59,17 +59,18 @@ int main(int argc, char* argv[]) {
     bool verbose = false;
 
     static struct option long_options[] = {
-        {"help",         no_argument, 0, 'h'},
-        {"output", required_argument, 0, 'o'},
-        {"verbose",      no_argument, 0, 'v'},
-        {"version",      no_argument, 0, 'V'},
-        {0, 0, 0, 0}
+        {"help",         no_argument, nullptr, 'h'},
+        {"output", required_argument, nullptr, 'o'},
+        {"verbose",      no_argument, nullptr, 'v'},
+        {"version",      no_argument, nullptr, 'V'},
+        {nullptr,                  0, nullptr, 0}
     };
 
-    while (1) {
-        int c = getopt_long(argc, argv, "ho:vV", long_options, 0);
-        if (c == -1)
+    while (true) {
+        const int c = getopt_long(argc, argv, "ho:vV", long_options, nullptr);
+        if (c == -1) {
             break;
+        }
 
         switch (c) {
             case 'h':
@@ -96,7 +97,7 @@ int main(int argc, char* argv[]) {
     // The vout object is an output stream we can write to instead of
     // std::cerr. Nothing is written if we are not in verbose mode.
     // The running time will be prepended to output lines.
-    osmium::util::VerboseOutput vout(verbose);
+    osmium::util::VerboseOutput vout{verbose};
 
     if (output_filename.empty()) {
         std::cerr << "Missing -o/--output=OSMFILE option\n";

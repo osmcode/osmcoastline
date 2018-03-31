@@ -69,7 +69,7 @@ public:
     }
 
     std::size_t size() const {
-        struct stat s;
+        struct stat s{};
         if (::fstat(m_fd, &s) != 0) {
             throw std::system_error{errno, std::system_category(), std::string{"Can't get file size for '"} + m_filename + "'"};
         }
@@ -115,18 +115,19 @@ int main(int argc, char *argv[]) {
     std::string geom;
 
     static struct option long_options[] = {
-        {"dump",         no_argument, 0, 'd'},
-        {"format", required_argument, 0, 'f'},
-        {"geom",   required_argument, 0, 'g'},
-        {"help",         no_argument, 0, 'h'},
-        {"version",      no_argument, 0, 'V'},
-        {0, 0, 0, 0}
+        {"dump",         no_argument, nullptr, 'd'},
+        {"format", required_argument, nullptr, 'f'},
+        {"geom",   required_argument, nullptr, 'g'},
+        {"help",         no_argument, nullptr, 'h'},
+        {"version",      no_argument, nullptr, 'V'},
+        {nullptr,                  0, nullptr, 0}
     };
 
-    while (1) {
-        int c = getopt_long(argc, argv, "df:g:hV", long_options, 0);
-        if (c == -1)
+    while (true) {
+        const int c = getopt_long(argc, argv, "df:g:hV", long_options, nullptr);
+        if (c == -1) {
             break;
+        }
 
         switch (c) {
             case 'd':

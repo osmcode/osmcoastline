@@ -38,15 +38,6 @@ typedef SSIZE_T ssize_t;
 extern SRS srs;
 extern bool debug;
 
-CoastlineRingCollection::CoastlineRingCollection() :
-    m_list(),
-    m_start_nodes(),
-    m_end_nodes(),
-    m_ways(0),
-    m_rings_from_single_way(0),
-    m_fixed_rings(0) {
-}
-
 /**
  * If a way is not closed adding it to the coastline collection is a bit
  * complicated.
@@ -55,14 +46,14 @@ CoastlineRingCollection::CoastlineRingCollection() :
  * CoastlineRing for it and add that to the collection.
  */
 void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
-    idmap_type::iterator mprev = m_end_nodes.find(way.nodes().front().ref());
-    idmap_type::iterator mnext = m_start_nodes.find(way.nodes().back().ref());
+    auto mprev = m_end_nodes.find(way.nodes().front().ref());
+    auto mnext = m_start_nodes.find(way.nodes().back().ref());
 
     // There is no CoastlineRing yet where this way could fit. So we
     // create one and add it to the collection.
     if (mprev == m_end_nodes.end() &&
         mnext == m_start_nodes.end()) {
-        coastline_rings_list_t::iterator added = m_list.insert(m_list.end(), std::make_shared<CoastlineRing>(way));
+        const auto added = m_list.insert(m_list.end(), std::make_shared<CoastlineRing>(way));
         m_start_nodes[way.nodes().front().ref()] = added;
         m_end_nodes[way.nodes().back().ref()] = added;
         return;
@@ -70,7 +61,7 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
 
     // We found a CoastlineRing where we can add the way at the end.
     if (mprev != m_end_nodes.end()) {
-        coastline_rings_list_t::iterator prev = mprev->second;
+        auto prev = mprev->second;
         (*prev)->add_at_end(way);
         m_end_nodes.erase(mprev);
 
@@ -87,7 +78,7 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
             (*prev)->join(**next);
             m_start_nodes.erase(mnext);
             if ((*prev)->is_closed()) {
-                idmap_type::iterator x = m_start_nodes.find((*prev)->first_node_id());
+                auto x = m_start_nodes.find((*prev)->first_node_id());
                 if (x != m_start_nodes.end()) {
                     m_start_nodes.erase(x);
                 }
@@ -201,7 +192,7 @@ osmium::Location intersection(const osmium::Segment& s1, const osmium::Segment&s
     }
 
     const double denom = ((s2.second().lat() - s2.first().lat())*(s1.second().lon() - s1.first().lon())) -
-                   ((s2.second().lon() - s2.first().lon())*(s1.second().lat() - s1.first().lat()));
+                         ((s2.second().lon() - s2.first().lon())*(s1.second().lat() - s1.first().lat()));
 
     if (denom != 0) {
         const double nume_a = ((s2.second().lon() - s2.first().lon())*(s1.first().lat() - s2.first().lat())) -
@@ -215,18 +206,15 @@ osmium::Location intersection(const osmium::Segment& s1, const osmium::Segment&s
             const double ua = nume_a / denom;
             const double ix = s1.first().lon() + ua*(s1.second().lon() - s1.first().lon());
             const double iy = s1.first().lat() + ua*(s1.second().lat() - s1.first().lat());
-            return osmium::Location(ix, iy);
+            return {ix, iy};
         }
     }
 
-    return osmium::Location();
+    return osmium::Location{};
 }
 
 bool outside_x_range(const osmium::UndirectedSegment& s1, const osmium::UndirectedSegment& s2) {
-    if (s1.first().x() > s2.second().x()) {
-        return true;
-    }
-    return false;
+    return s1.first().x() > s2.second().x();
 }
 
 bool y_range_overlap(const osmium::UndirectedSegment& s1, const osmium::UndirectedSegment& s2) {
@@ -258,16 +246,25 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
     unsigned int overlaps = 0;
 
     std::vector<osmium::UndirectedSegment> segments;
-    if (debug) std::cerr << "Setting up segments...\n";
+    if (debug) {
+        std::cerr << "Setting up segments...\n";
+    }
+
     for (const auto& ring : m_list) {
         ring->add_segments_to_vector(segments);
     }
 
-    if (debug) std::cerr << "Sorting...\n";
+    if (debug) {
+        std::cerr << "Sorting...\n";
+    }
+
     std::sort(segments.begin(), segments.end());
 
     if (segments_fd >= 0) {
-        if (debug) std::cerr << "Writing segments to file...\n";
+        if (debug) {
+            std::cerr << "Writing segments to file...\n";
+        }
+
         ssize_t length = segments.size() * sizeof(osmium::UndirectedSegment);
 #ifndef _MSC_VER
         if (::write(segments_fd, segments.data(), length) != length) {
@@ -278,7 +275,10 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
         }
     }
 
-    if (debug) std::cerr << "Finding intersections...\n";
+    if (debug) {
+        std::cerr << "Finding intersections...\n";
+    }
+
     std::vector<osmium::Location> intersections;
     for (auto it1 = segments.cbegin(); it1 != segments.cend()-1; ++it1) {
         const osmium::UndirectedSegment& s1 = *it1;
@@ -331,11 +331,11 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
     std::vector<Connection> connections;
 
     // Create vector with all possible combinations of connections between rings.
-    for (idmap_type::iterator eit = m_end_nodes.begin(); eit != m_end_nodes.end(); ++eit) {
-        for (idmap_type::iterator sit = m_start_nodes.begin(); sit != m_start_nodes.end(); ++sit) {
-            const double distance = (*sit->second)->distance_to_start_position((*eit->second)->last_position());
+    for (const auto& end_node : m_end_nodes) {
+        for (const auto& start_node : m_start_nodes) {
+            const double distance = (*start_node.second)->distance_to_start_position((*end_node.second)->last_position());
             if (distance < max_distance) {
-                connections.emplace_back(distance, eit->first, sit->first);
+                connections.emplace_back(distance, end_node.first, start_node.first);
             }
         }
     }
@@ -352,8 +352,8 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
         // Invalidate all other connections using one of the same end points.
         connections.erase(remove_if(connections.begin(), connections.end(), conn), connections.end());
 
-        idmap_type::iterator eit = m_end_nodes.find(conn.start_id);
-        idmap_type::iterator sit = m_start_nodes.find(conn.end_id);
+        auto eit = m_end_nodes.find(conn.start_id);
+        auto sit = m_start_nodes.find(conn.end_id);
 
         if (eit != m_end_nodes.end() && sit != m_start_nodes.end()) {
             if (debug) {
@@ -430,7 +430,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     // go through all the polygons that have been created before and mark the outer rings
     for (const auto& polygon : polygons) {
         const OGRLinearRing* exterior_ring = polygon->getExteriorRing();
-        osmium::Location pos(exterior_ring->getX(0), exterior_ring->getY(0));
+        osmium::Location pos{exterior_ring->getX(0), exterior_ring->getY(0)};
         auto rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<osmium::Location, CoastlineRing*>(std::move(pos), nullptr));
         if (rings_it != rings.end()) {
             rings_it->second->set_outer();
