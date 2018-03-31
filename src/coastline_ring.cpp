@@ -1,6 +1,6 @@
 /*
 
-  Copyright 2012-2016 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2018 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
