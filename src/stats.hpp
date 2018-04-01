@@ -23,14 +23,14 @@
 */
 
 struct Stats {
-    unsigned int ways;
-    unsigned int unconnected_nodes;
-    unsigned int rings;
-    unsigned int rings_from_single_way;
-    unsigned int rings_fixed;
-    unsigned int rings_turned_around;
-    unsigned int land_polygons_before_split;
-    unsigned int land_polygons_after_split;
+    unsigned int ways = 0;
+    unsigned int unconnected_nodes = 0;
+    unsigned int rings = 0;
+    unsigned int rings_from_single_way = 0;
+    unsigned int rings_fixed = 0;
+    unsigned int rings_turned_around = 0;
+    unsigned int land_polygons_before_split = 0;
+    unsigned int land_polygons_after_split = 0;
 };
 
 #endif // STATS_HPP
