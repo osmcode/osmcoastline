@@ -25,7 +25,7 @@ INSERT INTO tmp_square_grid (geometry)
 
 .elemgeo tmp_square_grid geometry tmp_square_grid_elem id_new id;
 
-CREATE TABLE grid (id INTEGER PRIMARY KEY AUTOINCREMENT);
+CREATE TABLE grid (OGC_FID INTEGER PRIMARY KEY AUTOINCREMENT);
 SELECT AddGeometryColumn('grid', 'geometry', 4326, 'POLYGON', 'XY');
 
 INSERT INTO grid (geometry)
