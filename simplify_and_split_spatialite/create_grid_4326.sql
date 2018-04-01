@@ -21,7 +21,7 @@ CREATE TABLE tmp_square_grid (id INTEGER PRIMARY KEY AUTOINCREMENT);
 SELECT AddGeometryColumn('tmp_square_grid', 'geometry', 4326, 'MULTIPOLYGON', 'XY');
 
 INSERT INTO tmp_square_grid (geometry)
-    SELECT ST_SquareGrid(BuildMbr(-180.0, -90.0, 179.9999999999, 89.9999999, 4326), 1);
+    SELECT ST_SquareGrid(BuildMbr(-180.0, -90.0, 179.99999999, 89.99999999, 4326), 1);
 
 .elemgeo tmp_square_grid geometry tmp_square_grid_elem id_new id;
 
