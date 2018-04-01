@@ -152,9 +152,10 @@ larger, but faster to use. You can use the option `--no-index` to suppress
 this, for instance if you never use the data directly anyway but want to
 transform it into something else.
 
-Coastlines and polygons are never simplified, but contain the full detail.
-See `simplify.sql` for a way to simplify polygons. See the `simplify_and_split`
-directory for some more ways of doing this.
+Coastlines and polygons are never simplified, but contain the full detail. See
+the `simplify_and_split_spatialite` or the `simplify_and_split_postgis`
+directories for scripts that help with simplifying and splitting geometries
+using Spatialite or PostGIS, respectively.
 
 The database tables `options` and `meta` contain the command line options
 used to create the database and some metadata. You can use the script
