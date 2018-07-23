@@ -69,7 +69,7 @@ unsigned int CoastlinePolygons::fix_direction() {
             er->reverseWindingOrder();
             // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
             er->setCoordinateDimension(2);
-            for (int i=0; i < polygon->getNumInteriorRings(); ++i) {
+            for (int i = 0; i < polygon->getNumInteriorRings(); ++i) {
                 polygon->getInteriorRing(i)->reverseWindingOrder();
                 // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
                 polygon->getInteriorRing(i)->setCoordinateDimension(2);

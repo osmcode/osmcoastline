@@ -93,7 +93,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
 
     polygon_vector_type polygons;
     polygons.reserve(mega_multipolygon->getNumGeometries());
-    for (int i=0; i < mega_multipolygon->getNumGeometries(); ++i) {
+    for (int i = 0; i < mega_multipolygon->getNumGeometries(); ++i) {
         OGRGeometry* geom = mega_multipolygon->getGeometryRef(i);
         assert(geom->getGeometryType() == wkbPolygon);
         std::unique_ptr<OGRPolygon> p{static_cast<OGRPolygon*>(geom)};
