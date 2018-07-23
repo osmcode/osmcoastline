@@ -25,6 +25,7 @@
 #include <ogr_spatialref.h>
 
 #include <memory>
+#include <stdexcept>
 
 class OGRGeometry;
 class OGREnvelope;
@@ -48,7 +49,15 @@ public:
     /**
      * This exception is thrown when a transformation to the output SRS fails.
      */
-    class TransformationException {};
+    class TransformationException : public std::runtime_error {
+
+    public:
+
+        TransformationException() :
+            runtime_error("SRS transformation failed") {
+        }
+
+    }; // class TransformationException
 
     SRS() noexcept {
         m_srs_wgs84.SetWellKnownGeogCS("WGS84");

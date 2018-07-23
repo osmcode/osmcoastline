@@ -46,7 +46,7 @@ void SRS::transform(OGRGeometry* geometry) {
     OGRSpatialReference* srs = geometry->getSpatialReference();
     if (srs == nullptr || srs->IsSame(&m_srs_wgs84)) {
         if (geometry->transform(m_transform.get()) != OGRERR_NONE) {
-            throw TransformationException();
+            throw TransformationException{};
         }
     }
 }
