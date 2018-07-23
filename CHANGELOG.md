@@ -8,9 +8,22 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Add spatialite scripts for creating grids for splitting.
+- CMake config adds `clang-tidy` target.
+
 ### Changed
 
+- Use `OGC_FID` instead of `ID` as id column in SQL scripts, that's how ogr
+  expects it.
+- Update to newest Protozero and Libosmium.
+- Various small code-cleanup changes.
+
 ### Fixed
+
+- Initialize stats with 0.
+- `osmcoastline_ways`: Delete the copy and move constructor/assignment because
+  we have a special destructor.
+- Add `-pthread` compiler and linker options.
 
 
 ## [2.1.4] - 2016-09-16
