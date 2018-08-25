@@ -51,7 +51,7 @@ using location_handler_type = osmium::handler::NodeLocationsForWays<index_type, 
 
 class CoastlineWaysHandler : public osmium::handler::Handler {
 
-    double m_length;
+    double m_length = 0.0;
 
     gdalcpp::Dataset m_dataset;
     gdalcpp::Layer m_layer_ways;
@@ -61,7 +61,6 @@ class CoastlineWaysHandler : public osmium::handler::Handler {
 public:
 
     explicit CoastlineWaysHandler(const std::string& db_filename) :
-        m_length(0.0),
         m_dataset("SQLite", db_filename, gdalcpp::SRS{}, {"SPATIALITE=TRUE", "INIT_WITH_EPSG=no" }),
         m_layer_ways(m_dataset, "ways", wkbLineString) {
 

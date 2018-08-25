@@ -64,7 +64,7 @@ public:
         }
     }
 
-    int fd() const {
+    int fd() const noexcept {
         return m_fd;
     }
 
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
 
     try {
         InputFile file1{argv[optind]};
-        InputFile file2{argv[optind+1]};
+        InputFile file2{argv[optind + 1]};
 
         osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m1{file1.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file1.fd()};
         osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m2{file2.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file2.fd()};

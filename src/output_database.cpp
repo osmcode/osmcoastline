@@ -167,7 +167,7 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
         */
 
 #if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR <= 10
-        GEOSGeom p { polygon->exportToGEOS() };
+        GEOSGeom p{polygon->exportToGEOS()};
         char* r = GEOSisValidReason(p);
         std::string reason = r ? r : "";
         GEOSFree(r);
@@ -183,7 +183,7 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
             const std::size_t left_bracket = reason.find('[');
             const std::size_t right_bracket = reason.find(']');
 
-            std::istringstream iss(reason.substr(left_bracket+1, right_bracket-left_bracket-1), std::istringstream::in);
+            std::istringstream iss{reason.substr(left_bracket+1, right_bracket-left_bracket-1), std::istringstream::in};
             double x;
             double y;
             iss >> x;

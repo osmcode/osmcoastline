@@ -73,7 +73,7 @@ public:
         return &m_srs_wgs84;
     }
 
-    OGRSpatialReference* out()   {
+    OGRSpatialReference* out() {
         return &m_srs_out;
     }
 
@@ -93,15 +93,15 @@ public:
      * bogus. They are near the antimeridian or southern edge of the
      * map and only there to close the coastline polygons.
      */
-    double max_x() const {
+    double max_x() const noexcept {
         return m_transform ?  20037500.0 :  179.9999;
     }
 
-    double min_x() const {
+    double min_x() const noexcept {
         return m_transform ? -20037500.0 : -179.9999;
     }
 
-    double min_y() const {
+    double min_y() const noexcept {
         return m_transform ? -20037400.0 :  -85.049;
     }
 

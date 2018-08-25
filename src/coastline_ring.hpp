@@ -64,7 +64,7 @@ using posmap_type = std::multimap<osmium::object_id_type, osmium::Location*>;
  */
 class CoastlineRing {
 
-    std::vector<osmium::NodeRef> m_way_node_list;
+    std::vector<osmium::NodeRef> m_way_node_list{};
 
     /**
      * Smallest ID of all the ways making up the ring. Can be used as somewhat
@@ -76,13 +76,13 @@ class CoastlineRing {
      * The number of ways making up this ring. This is not actually needed for
      * anything, but kept to create statistics.
      */
-    unsigned int m_nways;
+    unsigned int m_nways = 1;
 
     /// Ring was fixed because of missing/wrong OSM data.
-    bool m_fixed;
+    bool m_fixed = false;
 
     /// Is this an outer ring?
-    bool m_outer;
+    bool m_outer = false;
 
 public:
 
@@ -90,43 +90,39 @@ public:
      * Create CoastlineRing from a way.
      */
     explicit CoastlineRing(const osmium::Way& way) :
-        m_way_node_list(),
-        m_ring_id(way.id()),
-        m_nways(1),
-        m_fixed(false),
-        m_outer(false) {
+        m_ring_id(way.id()) {
         m_way_node_list.reserve(way.is_closed() ? way.nodes().size() : 1000);
         m_way_node_list.insert(m_way_node_list.begin(), way.nodes().begin(), way.nodes().end());
     }
 
-    bool is_outer() const {
+    bool is_outer() const noexcept {
         return m_outer;
     }
 
-    void set_outer() {
+    void set_outer() noexcept {
         m_outer = true;
     }
 
     /// ID of first node in the ring.
-    osmium::object_id_type first_node_id() const {
+    osmium::object_id_type first_node_id() const noexcept {
         assert(!m_way_node_list.empty());
         return m_way_node_list.front().ref();
     }
 
     /// ID of last node in the ring.
-    osmium::object_id_type last_node_id() const {
+    osmium::object_id_type last_node_id() const noexcept {
         assert(!m_way_node_list.empty());
         return m_way_node_list.back().ref();
     }
 
     /// Position of the first node in the ring.
-    osmium::Location first_position() const {
+    osmium::Location first_position() const noexcept {
         assert(!m_way_node_list.empty());
         return m_way_node_list.front().location();
     }
 
     /// Position of the last node in the ring.
-    osmium::Location last_position() const {
+    osmium::Location last_position() const noexcept {
         assert(!m_way_node_list.empty());
         return m_way_node_list.back().location();
     }
@@ -152,12 +148,12 @@ public:
     }
 
     /// Returns the number of points in this ring.
-    unsigned int npoints() const {
+    unsigned int npoints() const noexcept {
         return m_way_node_list.size();
     }
 
     /// Returns true if the ring is closed.
-    bool is_closed() const {
+    bool is_closed() const noexcept {
         return first_node_id() == last_node_id();
     }
 
@@ -174,7 +170,7 @@ public:
      * last node in the ring to be the same as the first. This
      * method does this.
      */
-    void fake_close() {
+    void fake_close() noexcept {
         assert(!m_way_node_list.empty());
         m_way_node_list.back().set_ref(first_node_id());
     }
@@ -266,7 +262,7 @@ public:
 
 }; // class CoastlineRing
 
-inline bool operator<(const CoastlineRing& lhs, const CoastlineRing& rhs) {
+inline bool operator<(const CoastlineRing& lhs, const CoastlineRing& rhs) noexcept {
     return lhs.first_position() < rhs.first_position();
 }
 

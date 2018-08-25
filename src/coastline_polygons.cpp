@@ -139,7 +139,7 @@ void CoastlinePolygons::split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int
             }
 
             // split vertically
-            const double MidY = (envelope.MaxY+envelope.MinY) / 2;
+            const double MidY = (envelope.MaxY + envelope.MinY) / 2;
 
             b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, MidY, m_expand);
             b2 = create_rectangular_polygon(envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, m_expand);
@@ -151,7 +151,7 @@ void CoastlinePolygons::split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int
             }
 
             // split horizontally
-            const double MidX = (envelope.MaxX+envelope.MinX) / 2;
+            const double MidX = (envelope.MaxX + envelope.MinX) / 2;
 
             b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, MidX, envelope.MaxY, m_expand);
             b2 = create_rectangular_polygon(MidX, envelope.MinY, envelope.MaxX, envelope.MaxY, m_expand);
@@ -164,8 +164,8 @@ void CoastlinePolygons::split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int
         if (geom1 && (geom1->getGeometryType() == wkbPolygon || geom1->getGeometryType() == wkbMultiPolygon) &&
             geom2 && (geom2->getGeometryType() == wkbPolygon || geom2->getGeometryType() == wkbMultiPolygon)) {
             // split was successful, go on recursively
-            split_geometry(std::move(geom1), level+1);
-            split_geometry(std::move(geom2), level+1);
+            split_geometry(std::move(geom1), level + 1);
+            split_geometry(std::move(geom2), level + 1);
         } else {
             // split was not successful, output some debugging info and keep polygon before split
             std::cerr << "Polygon split at depth " << level << " was not successful. Keeping un-split polygon.\n";
@@ -281,7 +281,7 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLi
 void CoastlinePolygons::output_lines(int max_points) const {
     for (const auto& polygon : m_polygons) {
         output_polygon_ring_as_lines(max_points, polygon->getExteriorRing());
-        for (int i=0; i < polygon->getNumInteriorRings(); ++i) {
+        for (int i = 0; i < polygon->getNumInteriorRings(); ++i) {
             output_polygon_ring_as_lines(max_points, polygon->getInteriorRing(i));
         }
     }
@@ -291,7 +291,7 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
 //    std::cerr << "envelope = (" << e.MinX << ", " << e.MinY << "), (" << e.MaxX << ", " << e.MaxY << ") v.size()=" << v.size() << "\n";
     if (v.size() < 100) {
         try {
-            std::unique_ptr<OGRGeometry> geom { create_rectangular_polygon(e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand) };
+            std::unique_ptr<OGRGeometry> geom{create_rectangular_polygon(e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand)};
             assert(geom->getSpatialReference() != nullptr);
             for (const auto& polygon : v) {
                 std::unique_ptr<OGRGeometry> diff { geom->Difference(polygon.get()) };
@@ -331,9 +331,9 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
         OGREnvelope e1;
         OGREnvelope e2;
 
-        if (e.MaxX - e.MinX < e.MaxY-e.MinY) {
+        if (e.MaxX - e.MinX < e.MaxY - e.MinY) {
             // split vertically
-            const double MidY = (e.MaxY+e.MinY) / 2;
+            const double MidY = (e.MaxY + e.MinY) / 2;
 
             e1.MinX = e.MinX;
             e1.MinY = e.MinY;
@@ -347,7 +347,7 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
 
         } else {
             // split horizontally
-            const double MidX = (e.MaxX+e.MinX) / 2;
+            const double MidX = (e.MaxX + e.MinX) / 2;
 
             e1.MinX = e.MinX;
             e1.MinY = e.MinY;
@@ -387,7 +387,6 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
         split_bbox(e2, std::move(v2));
     }
 }
-
 
 unsigned int CoastlinePolygons::output_water_polygons() {
     unsigned int warnings = 0;

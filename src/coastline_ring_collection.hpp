@@ -65,8 +65,7 @@ public:
 
     using const_iterator = coastline_rings_list_t::const_iterator;
 
-    CoastlineRingCollection() {
-    }
+    CoastlineRingCollection() = default;
 
     /// Return the number of CoastlineRings in the collection.
     std::size_t size() const noexcept {

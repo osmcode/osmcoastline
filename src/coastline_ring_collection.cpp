@@ -46,8 +46,8 @@ extern bool debug;
  * CoastlineRing for it and add that to the collection.
  */
 void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
-    auto mprev = m_end_nodes.find(way.nodes().front().ref());
-    auto mnext = m_start_nodes.find(way.nodes().back().ref());
+    const auto mprev = m_end_nodes.find(way.nodes().front().ref());
+    const auto mnext = m_start_nodes.find(way.nodes().back().ref());
 
     // There is no CoastlineRing yet where this way could fit. So we
     // create one and add it to the collection.
@@ -61,7 +61,7 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
 
     // We found a CoastlineRing where we can add the way at the end.
     if (mprev != m_end_nodes.end()) {
-        auto prev = mprev->second;
+        const auto prev = mprev->second;
         (*prev)->add_at_end(way);
         m_end_nodes.erase(mprev);
 
@@ -74,7 +74,7 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
         // way at the front. This means that the way together with the
         // ring at front and the ring at back are now a complete ring.
         if (mnext != m_start_nodes.end()) {
-            auto next = mnext->second;
+            const auto next = mnext->second;
             (*prev)->join(**next);
             m_start_nodes.erase(mnext);
             if ((*prev)->is_closed()) {
@@ -96,7 +96,7 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
 
     // We found a CoastlineRing where we can add the way at the front.
     if (mnext != m_start_nodes.end()) {
-        auto next = mnext->second;
+        const auto next = mnext->second;
         (*next)->add_at_front(way);
         m_start_nodes.erase(mnext);
         if ((*next)->is_closed()) {
@@ -188,7 +188,7 @@ osmium::Location intersection(const osmium::Segment& s1, const osmium::Segment&s
         s1.first()  == s2.second() ||
         s1.second() == s2.first()  ||
         s1.second() == s2.second()) {
-        return osmium::Location();
+        return osmium::Location{};
     }
 
     const double denom = ((s2.second().lat() - s2.first().lat())*(s1.second().lon() - s1.first().lon())) -
@@ -263,7 +263,7 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
             std::cerr << "Writing segments to file...\n";
         }
 
-        ssize_t length = segments.size() * sizeof(osmium::UndirectedSegment);
+        const ssize_t length = segments.size() * sizeof(osmium::UndirectedSegment);
 #ifndef _MSC_VER
         if (::write(segments_fd, segments.data(), length) != length) {
 #else
@@ -350,8 +350,8 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
         // Invalidate all other connections using one of the same end points.
         connections.erase(remove_if(connections.begin(), connections.end(), conn), connections.end());
 
-        auto eit = m_end_nodes.find(conn.start_id);
-        auto sit = m_start_nodes.find(conn.end_id);
+        const auto eit = m_end_nodes.find(conn.start_id);
+        const auto sit = m_start_nodes.find(conn.end_id);
 
         if (eit != m_end_nodes.end() && sit != m_start_nodes.end()) {
             if (debug) {
@@ -429,7 +429,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     for (const auto& polygon : polygons) {
         const OGRLinearRing* exterior_ring = polygon->getExteriorRing();
         osmium::Location pos{exterior_ring->getX(0), exterior_ring->getY(0)};
-        auto rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<osmium::Location, CoastlineRing*>(std::move(pos), nullptr));
+        const auto rings_it = lower_bound(rings.begin(), rings.end(), std::make_pair<osmium::Location, CoastlineRing*>(std::move(pos), nullptr));
         if (rings_it != rings.end()) {
             rings_it->second->set_outer();
         }
@@ -447,3 +447,4 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
 
     return warnings;
 }
+

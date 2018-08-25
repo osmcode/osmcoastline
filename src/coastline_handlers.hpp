@@ -60,7 +60,7 @@ public:
 
 /**
  * Osmium handler for the second pass over the input file in which
- * node coordinates are added to the CoastlineRings.
+ * node locations are added to the CoastlineRings.
  */
 class CoastlineHandlerPass2 : public osmium::handler::Handler {
 
@@ -73,7 +73,7 @@ class CoastlineHandlerPass2 : public osmium::handler::Handler {
      * is set up first thing when the handler is instantiated and
      * thereafter used for each node coming in.
      */
-    posmap_type m_posmap;
+    posmap_type m_posmap{};
     OutputDatabase& m_output;
     osmium::geom::OGRFactory<> m_factory;
 
@@ -81,7 +81,6 @@ public:
 
     CoastlineHandlerPass2(CoastlineRingCollection& coastline_rings, OutputDatabase& output) :
         m_coastline_rings(coastline_rings),
-        m_posmap(),
         m_output(output) {
         m_coastline_rings.setup_positions(m_posmap);
     }
@@ -95,8 +94,8 @@ public:
             }
         }
 
-        std::pair<posmap_type::iterator, posmap_type::iterator> ret = m_posmap.equal_range(node.id());
-        for (auto it=ret.first; it != ret.second; ++it) {
+        const auto ret = m_posmap.equal_range(node.id());
+        for (auto it = ret.first; it != ret.second; ++it) {
             *(it->second) = node.location();
         }
     }

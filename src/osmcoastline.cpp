@@ -77,11 +77,11 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     std::vector<OGRGeometry*> all_polygons = coastline_rings.add_polygons_to_vector();
 
     int is_valid;
-    const char* options[] = { "METHOD=ONLY_CCW", nullptr };
+    const char* options[] = {"METHOD=ONLY_CCW", nullptr};
     if (debug) {
         std::cerr << "Calling organizePolygons()\n";
     }
-    std::unique_ptr<OGRGeometry> mega_geometry { OGRGeometryFactory::organizePolygons(&all_polygons[0], all_polygons.size(), &is_valid, options) };
+    std::unique_ptr<OGRGeometry> mega_geometry{OGRGeometryFactory::organizePolygons(&all_polygons[0], all_polygons.size(), &is_valid, options)};
     if (debug) {
         std::cerr << "organizePolygons() done\n";
     }
@@ -101,7 +101,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
             polygons.push_back(std::move(p));
         } else {
             output.add_error_line(make_unique_ptr_clone<OGRLineString>(p->getExteriorRing()), "invalid");
-            std::unique_ptr<OGRGeometry> buf0 { p->Buffer(0) };
+            std::unique_ptr<OGRGeometry> buf0{p->Buffer(0)};
             if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
                 buf0->assignSpatialReference(srs.wgs84());
                 polygons.push_back(static_cast_unique_ptr<OGRPolygon>(std::move(buf0)));
@@ -171,6 +171,7 @@ int main(int argc, char *argv[]) {
         vout << "Removing database output file (if it exists) (because you told me to with --overwrite/-f).\n";
         unlink(options.output_database.c_str());
     }
+
     if (options.create_index) {
         vout << "Will create geometry index. (If you do not want an index use --no-index/-i.)\n";
     } else {

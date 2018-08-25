@@ -60,10 +60,10 @@ Options::Options(int argc, char* argv[]) {
 
         switch (c) {
             case 'b':
-                bbox_overlap = atof(optarg);
+                bbox_overlap = std::atof(optarg);
                 break;
             case 'c':
-                close_distance = atoi(optarg);
+                close_distance = std::atoi(optarg);
                 if (close_distance == 0) {
                     close_rings = false;
                 }
@@ -82,7 +82,7 @@ Options::Options(int argc, char* argv[]) {
                 output_lines = true;
                 break;
             case 'm':
-                max_points_in_polygon = atoi(optarg);
+                max_points_in_polygon = std::atoi(optarg);
                 if (max_points_in_polygon == 0) {
                     split_large_polygons = false;
                 }

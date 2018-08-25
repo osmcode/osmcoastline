@@ -67,9 +67,9 @@ class CoastlinePolygons {
     /**
      * Max depth after recursive splitting.
      */
-    int m_max_split_depth;
+    int m_max_split_depth = 0;
 
-    std::unique_ptr<OGRPolygon> create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand=0) const;
+    std::unique_ptr<OGRPolygon> create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand = 0) const;
 
     void split_geometry(std::unique_ptr<OGRGeometry>&& geom, int level);
     void split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int level);
@@ -85,20 +85,19 @@ public:
         m_output(output),
         m_expand(expand),
         m_max_points_in_polygon(max_points_in_polygon),
-        m_polygons(std::move(polygons)),
-        m_max_split_depth(0) {
+        m_polygons(std::move(polygons)) {
     }
 
     /// Number of polygons
-    int num_polygons() const {
+    int num_polygons() const noexcept {
         return m_polygons.size();
     }
 
-    polygon_vector_type::const_iterator begin() const {
+    polygon_vector_type::const_iterator begin() const noexcept {
         return m_polygons.begin();
     }
 
-    polygon_vector_type::const_iterator end() const {
+    polygon_vector_type::const_iterator end() const noexcept {
         return m_polygons.end();
     }
 

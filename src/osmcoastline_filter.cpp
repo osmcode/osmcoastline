@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
         vout << "Reading ways (1st pass through input file)...\n";
         {
             osmium::io::Reader reader{infile, osmium::osm_entity_bits::way};
-            auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
+            const auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
             for (const osmium::Way& way : ways) {
                 if (way.tags().has_tag("natural", "coastline")) {
                     *output_it++ = way;
@@ -138,12 +138,12 @@ int main(int argc, char* argv[]) {
 
         vout << "Preparing node ID list...\n";
         std::sort(ids.begin(), ids.end());
-        auto last = std::unique(ids.begin(), ids.end());
+        const auto last = std::unique(ids.begin(), ids.end());
 
         vout << "Reading nodes (2nd pass through input file)...\n";
         {
             osmium::io::Reader reader{infile, osmium::osm_entity_bits::node};
-            auto nodes = osmium::io::make_input_iterator_range<const osmium::Node>(reader);
+            const auto nodes = osmium::io::make_input_iterator_range<const osmium::Node>(reader);
 
             auto first = ids.begin();
             std::copy_if(nodes.cbegin(), nodes.cend(), output_it, [&first, &last](const osmium::Node& node){

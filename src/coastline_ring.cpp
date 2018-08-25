@@ -98,19 +98,19 @@ void CoastlineRing::close_antarctica_ring(int epsg) {
     const double min = epsg == 4326 ? -90.0 : -85.0511288;
 
     for (int lat = -78; lat > int(min); --lat) {
-        m_way_node_list.emplace_back(0, osmium::Location(-179.99999, double(lat)));
+        m_way_node_list.emplace_back(0, osmium::Location{-179.99999, double(lat)});
     }
 
     for (int lon = -180; lon < 180; ++lon) {
-        m_way_node_list.emplace_back(0, osmium::Location(double(lon), min));
+        m_way_node_list.emplace_back(0, osmium::Location{double(lon), min});
     }
 
     if (epsg == 3857) {
-        m_way_node_list.emplace_back(0, osmium::Location(179.99999, min));
+        m_way_node_list.emplace_back(0, osmium::Location{179.99999, min});
     }
 
     for (auto lat = static_cast<int>(min); lat < -78; ++lat) {
-        m_way_node_list.emplace_back(0, osmium::Location(179.99999, double(lat)));
+        m_way_node_list.emplace_back(0, osmium::Location{179.99999, double(lat)});
     }
 
     m_way_node_list.push_back(m_way_node_list.front());
@@ -141,34 +141,41 @@ std::unique_ptr<OGRLineString> CoastlineRing::ogr_linestring(osmium::geom::OGRFa
 
 std::unique_ptr<OGRPoint> CoastlineRing::ogr_first_point() const {
     const osmium::NodeRef& node_ref = m_way_node_list.front();
-    return std::unique_ptr<OGRPoint>{new OGRPoint(node_ref.lon(), node_ref.lat())};
+    return std::unique_ptr<OGRPoint>{new OGRPoint{node_ref.lon(), node_ref.lat()}};
 }
 
 std::unique_ptr<OGRPoint> CoastlineRing::ogr_last_point() const {
     const osmium::NodeRef& node_ref = m_way_node_list.back();
-    return std::unique_ptr<OGRPoint>{new OGRPoint(node_ref.lon(), node_ref.lat())};
+    return std::unique_ptr<OGRPoint>{new OGRPoint{node_ref.lon(), node_ref.lat()}};
 }
 
 // Pythagoras doesn't work on a round earth but that is ok here, we only need a
 // rough measure anyway
 double CoastlineRing::distance_to_start_position(osmium::Location pos) const {
     const osmium::Location p = m_way_node_list.front().location();
-    return (pos.lon() - p.lon()) * (pos.lon() - p.lon()) + (pos.lat() - p.lat()) * (pos.lat() - p.lat());
+    return (pos.lon() - p.lon()) * (pos.lon() - p.lon()) +
+           (pos.lat() - p.lat()) * (pos.lat() - p.lat());
 }
 
 void CoastlineRing::add_segments_to_vector(std::vector<osmium::UndirectedSegment>& segments) const {
     if (m_way_node_list.size() > 1) {
-        for (auto it = m_way_node_list.begin(); it != m_way_node_list.end()-1; ++it) {
+        for (auto it = m_way_node_list.begin(); it != m_way_node_list.end() - 1; ++it) {
             segments.emplace_back(it->location(), (it+1)->location());
         }
     }
 }
 
 std::ostream& operator<<(std::ostream& out, CoastlineRing& cp) {
-    out << "CoastlineRing(ring_id=" << cp.ring_id() << ", nways=" << cp.nways() << ", npoints=" << cp.npoints() << ", first_node_id=" << cp.first_node_id() << ", last_node_id=" << cp.last_node_id();
+    out << "CoastlineRing(ring_id=" << cp.ring_id()
+        << ", nways=" << cp.nways()
+        << ", npoints=" << cp.npoints()
+        << ", first_node_id=" << cp.first_node_id()
+        << ", last_node_id=" << cp.last_node_id();
+
     if (cp.is_closed()) {
         out << " [CLOSED]";
     }
+
     out << ")";
     return out;
 }
