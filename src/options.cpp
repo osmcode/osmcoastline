@@ -15,7 +15,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with OSMCoastline.  If not, see <http://www.gnu.org/licenses/>.
+  along with OSMCoastline.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
@@ -122,7 +122,7 @@ Options::Options(int argc, char* argv[]) {
             case 'V':
                 std::cout << "osmcoastline version " OSMCOASTLINE_VERSION "\n"
                           << "Copyright (C) 2012-2018  Jochen Topf <jochen@topf.org>\n"
-                          << "License: GNU GENERAL PUBLIC LICENSE Version 3 <http://gnu.org/licenses/gpl.html>.\n"
+                          << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
                           << "This is free software: you are free to change and redistribute it.\n"
                           << "There is NO WARRANTY, to the extent permitted by law.\n";
                 std::exit(return_code_ok);

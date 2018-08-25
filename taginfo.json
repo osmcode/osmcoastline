@@ -4,9 +4,9 @@
     "project": {
         "name": "OSMCoastline",
         "description": "Program that assembles continuous coastlines from OSM data and creates land and water polygons.",
-        "project_url": "http://wiki.osm.org/wiki/OSMCoastline",
+        "project_url": "https://wiki.osm.org/wiki/OSMCoastline",
         "doc_url": "https://github.com/osmcode/osmcoastline",
-        "icon_url": "http://osmcode.org/img/logo-osmcoastline.svg",
+        "icon_url": "https://osmcode.org/img/logo-osmcoastline.svg",
         "contact_name": "Jochen Topf",
         "contact_email": "jochen@topf.org",
         "keywords": [

@@ -4,18 +4,18 @@
 OSMCoastline extracts the coastline data from an OSM planet file and assembles
 all the pieces into polygons for use in map renderers etc.
 
-http://wiki.openstreetmap.org/wiki/OSMCoastline
+https://wiki.openstreetmap.org/wiki/OSMCoastline
 
 https://github.com/osmcode/osmcoastline
 
-[![Build Status](https://secure.travis-ci.org/osmcode/osmcoastline.svg)](http://travis-ci.org/osmcode/osmcoastline)
+[![Build Status](https://secure.travis-ci.org/osmcode/osmcoastline.svg)](https://travis-ci.org/osmcode/osmcoastline)
 
 ## Prerequisites
 
 ### Libosmium
 
     https://github.com/osmcode/libosmium
-    http://osmcode.org/libosmium
+    https://osmcode.org/libosmium
     At least version 2.14.1 is needed.
 
 ### Protozero
@@ -26,12 +26,12 @@ https://github.com/osmcode/osmcoastline
 
 ### zlib (for PBF support)
 
-    http://www.zlib.net/
+    https://www.zlib.net/
     Debian/Ubuntu: zlib1g-dev
 
 ### GDAL (for OGR support)
 
-    http://gdal.org/
+    https://gdal.org/
     Debian/Ubuntu: libgdal1-dev
     (Must be built with Spatialite and GEOS support which is true for
     Debian/Ubuntu packages. You need GDAL 1.7.0 or greater, consider using
@@ -40,17 +40,17 @@ https://github.com/osmcode/osmcoastline
 
 ### GEOS
 
-    http://trac.osgeo.org/geos/
+    https://trac.osgeo.org/geos/
     Debian/Ubuntu: libgeos-dev
 
 ### Sqlite/Spatialite
 
-    http://www.gaia-gis.it/gaia-sins/
+    https://www.gaia-gis.it/fossil/libspatialite/index
     Debian/Ubuntu: sqlite3
 
 ### Pandoc (optional, to build documentation)
 
-    http://johnmacfarlane.net/pandoc/
+    https://pandoc.org/
     Debian/Ubuntu: pandoc
     (If pandoc is found by CMake, the manpages will automatically be built.)
 
