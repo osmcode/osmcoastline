@@ -187,10 +187,10 @@ endif(CPPCHECK)
 #-----------------------------------------------------------------------------
 #
 #  Optional "iwyu" target to check headers
-#  http://include-what-you-use.org/
+#  https://include-what-you-use.org/
 #
 #-----------------------------------------------------------------------------
-find_program(IWYU_TOOL iwyu_tool.py)
+find_program(IWYU_TOOL NAMES iwyu_tool iwyu_tool.py)
 
 if(IWYU_TOOL)
     message(STATUS "Looking for iwyu_tool.py - found")
