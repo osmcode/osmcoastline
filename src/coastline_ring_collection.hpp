@@ -38,8 +38,8 @@ class OGRGeometry;
 class OutputDatabase;
 class CoastlinePolygons;
 
-using coastline_rings_list_t = std::list<std::shared_ptr<CoastlineRing>>;
-using idmap_type = std::map<osmium::object_id_type, coastline_rings_list_t::iterator>;
+using coastline_rings_list_type = std::list<std::shared_ptr<CoastlineRing>>;
+using idmap_type = std::map<osmium::object_id_type, coastline_rings_list_type::iterator>;
 
 /**
  * A collection of CoastlineRing objects. Keeps a list of all start and end
@@ -47,7 +47,7 @@ using idmap_type = std::map<osmium::object_id_type, coastline_rings_list_t::iter
  */
 class CoastlineRingCollection {
 
-    coastline_rings_list_t m_list;
+    coastline_rings_list_type m_list;
 
     // Mapping from node IDs to CoastlineRings.
     idmap_type m_start_nodes;
@@ -63,7 +63,7 @@ class CoastlineRingCollection {
 
 public:
 
-    using const_iterator = coastline_rings_list_t::const_iterator;
+    using const_iterator = coastline_rings_list_type::const_iterator;
 
     CoastlineRingCollection() = default;
 
