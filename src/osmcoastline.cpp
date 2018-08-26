@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
 
         if (options.epsg == 4326) {
             vout << "Checking for questionable input data...\n";
-            unsigned int questionable = coastline_rings.output_questionable(coastline_polygons, output_database);
+            const unsigned int questionable = coastline_rings.output_questionable(coastline_polygons, output_database);
             warnings += questionable;
             vout << "  Found " << questionable << " rings in input data.\n";
         } else {

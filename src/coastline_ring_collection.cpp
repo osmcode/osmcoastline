@@ -414,7 +414,9 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     const unsigned int max_nodes_to_be_considered_questionable = 10000;
     unsigned int warnings = 0;
 
-    std::vector<std::pair<osmium::Location, CoastlineRing*>> rings;
+    using lcrp_type = std::pair<osmium::Location, CoastlineRing*>;
+
+    std::vector<lcrp_type> rings;
     rings.reserve(m_list.size());
 
     // put all rings in a vector...
@@ -422,14 +424,19 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
         rings.emplace_back(ring->first_position(), ring.get());
     }
 
+    // comparison function that ignores the second part of the pair
+    const auto comp = [](const lcrp_type& a, const lcrp_type& b){
+        return a.first < b.first;
+    };
+
     // ... and sort it by position of the first node in the ring (this allows binary search in it)
-    std::sort(rings.begin(), rings.end());
+    std::sort(rings.begin(), rings.end(), comp);
 
     // go through all the polygons that have been created before and mark the outer rings
     for (const auto& polygon : polygons) {
         const OGRLinearRing* exterior_ring = polygon->getExteriorRing();
         osmium::Location pos{exterior_ring->getX(0), exterior_ring->getY(0)};
-        const auto rings_it = lower_bound(rings.begin(), rings.end(), std::pair<osmium::Location, CoastlineRing*>{pos, nullptr});
+        const auto rings_it = lower_bound(rings.begin(), rings.end(), lcrp_type{pos, nullptr}, comp);
         if (rings_it != rings.end()) {
             rings_it->second->set_outer();
         }
