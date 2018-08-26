@@ -54,5 +54,5 @@ Run it as follows:
 # SEE ALSO
 
 * **osmcoastline**(1), **osmcoastline_ways**(1)
-* [OSMCoastline in OSM wiki](http://wiki.openstreetmap.org/wiki/OSMCoastline)
+* [OSMCoastline in OSM wiki](https://wiki.openstreetmap.org/wiki/OSMCoastline)
 

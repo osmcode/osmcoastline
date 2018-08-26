@@ -33,5 +33,5 @@ and more.
 # SEE ALSO
 
 * **osmcoastline**(1)
-* [OSMCoastline in OSM wiki](http://wiki.openstreetmap.org/wiki/OSMCoastline)
+* [OSMCoastline in OSM wiki](https://wiki.openstreetmap.org/wiki/OSMCoastline)
 

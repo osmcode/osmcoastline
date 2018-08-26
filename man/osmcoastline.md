@@ -134,5 +134,5 @@ Running **osmcoastline_filter** first:
 * `README.md`
 * **osmcoastline_filter**(1), **osmcoastline_readmeta**(1),
   **osmcoastline_segments**(1), **osmcoastline_ways**(1)
-* [OSMCoastline in OSM wiki](http://wiki.openstreetmap.org/wiki/OSMCoastline)
+* [OSMCoastline in OSM wiki](https://wiki.openstreetmap.org/wiki/OSMCoastline)
 

@@ -39,5 +39,5 @@ of their "name" and "source" tags.
 # SEE ALSO
 
 * **osmcoastline**(1), **osmcoastline_filter**(1)
-* [OSMCoastline in OSM wiki](http://wiki.openstreetmap.org/wiki/OSMCoastline)
+* [OSMCoastline in OSM wiki](https://wiki.openstreetmap.org/wiki/OSMCoastline)
 
