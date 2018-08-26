@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
     // The vout object is an output stream we can write to instead of
     // std::cerr. Nothing is written if we are not in verbose mode.
     // The running time will be prepended to output lines.
-    osmium::util::VerboseOutput vout{verbose};
+    osmium::VerboseOutput vout{verbose};
 
     if (output_filename.empty()) {
         std::cerr << "Missing -o/--output=OSMFILE option\n";
