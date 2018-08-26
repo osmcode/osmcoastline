@@ -166,10 +166,10 @@ int Options::get_epsg(const char* text) {
         return 3857;
     }
     if (!std::strcmp(text, "3785") || !std::strcmp(text, "900913")) {
-        std::cerr << "Please use code 3857 for the 'Google Mercator' projection!\n";
+        std::cerr << "Please use code 3857 for the 'Web Mercator' projection!\n";
         std::exit(return_code_cmdline);
     }
-    std::cerr << "Unknown SRS '" << text << "'. Currently only 4326 (WGS84) and 3857 ('Google Mercator') are supported.\n";
+    std::cerr << "Unknown SRS '" << text << "'. Currently only 4326 (WGS84) and 3857 ('Web Mercator') are supported.\n";
     std::exit(return_code_cmdline);
 }
 

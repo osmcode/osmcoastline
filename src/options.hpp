@@ -101,7 +101,7 @@ private:
 
     /**
      * Get EPSG code from text. This method knows about a few common cases
-     * of specifying WGS84 or the "Google mercator" SRS. More are currently
+     * of specifying WGS84 or the "Web Mercator" SRS. More are currently
      * not supported.
      */
     int get_epsg(const char* text);

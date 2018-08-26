@@ -133,7 +133,7 @@ might contain anything.
   `--output-lines` has been given.
 
 By default all output is in WGS84. You can use the option `--srs=3857` to
-create output in "Google Mercator". (Other projections are currently not
+create output in "Web Mercator". (Other projections are currently not
 supported.)
 
 OSMCoastline always creates only this one database. If you need shapefiles
@@ -213,7 +213,7 @@ case. Default is 1000.
 
     -s, --srs=EPSGCODE
 
-Set spatial reference system/projection. Use 4326 for WGS84 or 3857 for "Google
+Set spatial reference system/projection. Use 4326 for WGS84 or 3857 for "Web
 Mercator". If you want to use the data for the usual tiled web maps, 3857 is
 probably right. For other uses, especially if you want to re-project to some
 other projection, 4326 is probably right. Other projections are currently not
