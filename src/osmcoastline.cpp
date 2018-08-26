@@ -89,7 +89,12 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     if (mega_geometry->getGeometryType() != wkbMultiPolygon) {
         throw std::runtime_error{"mega geometry isn't a multipolygon. Something is very wrong!"};
     }
-    OGRMultiPolygon* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.release());
+
+    // This isn't an owning pointer on purpose. We are going to "steal" parts
+    // of the geometry a few lines below but only mark them as unowned farther
+    // below when we are calling removeGeometry() on it. If this was an
+    // owning pointer we'd get a double free if there is an error.
+    auto* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.release());
 
     polygon_vector_type polygons;
     polygons.reserve(mega_multipolygon->getNumGeometries());
@@ -114,7 +119,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     }
 
     mega_multipolygon->removeGeometry(-1, FALSE);
-    delete mega_multipolygon;
+    delete mega_multipolygon; // NOLINT(cppcoreguidelines-owning-memory)
 
     return polygons;
 }
