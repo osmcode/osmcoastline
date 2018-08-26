@@ -61,10 +61,10 @@ Options::Options(int argc, char* argv[]) {
 
         switch (c) {
             case 'b':
-                bbox_overlap = std::atof(optarg);
+                bbox_overlap = std::atof(optarg); // NOLINT(cert-err34-c) atof is good enough for this use case
                 break;
             case 'c':
-                close_distance = std::atoi(optarg);
+                close_distance = std::atoi(optarg); // NOLINT(cert-err34-c) atoi is good enough for this use case
                 if (close_distance == 0) {
                     close_rings = false;
                 }
@@ -83,7 +83,7 @@ Options::Options(int argc, char* argv[]) {
                 output_lines = true;
                 break;
             case 'm':
-                max_points_in_polygon = std::atoi(optarg);
+                max_points_in_polygon = std::atoi(optarg); // NOLINT(cert-err34-c) atoi is good enough for this use case
                 if (max_points_in_polygon == 0) {
                     split_large_polygons = false;
                 }
