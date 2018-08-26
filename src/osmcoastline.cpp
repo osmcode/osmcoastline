@@ -19,7 +19,6 @@
 
 */
 
-#include "coastline_handlers.hpp"
 #include "coastline_polygons.hpp"
 #include "coastline_ring_collection.hpp"
 #include "options.hpp"
@@ -197,9 +196,18 @@ int main(int argc, char *argv[]) {
         osmium::io::File infile{options.inputfile};
 
         vout << "Reading ways (1st pass through input file)...\n";
-        CoastlineHandlerPass1 handler_pass1{coastline_rings};
         osmium::io::Reader reader1{infile, osmium::osm_entity_bits::way};
-        osmium::apply(reader1, handler_pass1);
+        while (const auto buffer = reader1.read()) {
+            for (const auto& way : buffer.select<osmium::Way>()) {
+                // We are only interested in ways tagged with natural=coastline.
+                if (way.tags().has_tag("natural", "coastline")) {
+                    // ignore bogus coastline in Antarctica
+                    if (!way.tags().has_tag("coastline", "bogus")) {
+                        coastline_rings.add_way(way);
+                    }
+                }
+            }
+        }
         reader1.close();
         stats.ways = coastline_rings.num_ways();
         stats.unconnected_nodes = coastline_rings.num_unconnected_nodes();
@@ -212,9 +220,26 @@ int main(int argc, char *argv[]) {
         vout << memory_usage();
 
         vout << "Reading nodes (2nd pass through input file)...\n";
-        CoastlineHandlerPass2 handler_pass2{coastline_rings, output_database};
+        posmap_type posmap{};
+        coastline_rings.setup_positions(posmap);
+        osmium::geom::OGRFactory<> factory;
         osmium::io::Reader reader2{infile, osmium::osm_entity_bits::node};
-        osmium::apply(reader2, handler_pass2);
+        while (const auto buffer = reader2.read()) {
+            for (const auto& node : buffer.select<osmium::Node>()) {
+                if (node.tags().has_tag("natural", "coastline")) {
+                    try {
+                        output_database.add_error_point(factory.create_point(node), "tagged_node", node.id());
+                    } catch (const osmium::geometry_error&) {
+                        std::cerr << "Ignoring illegal geometry for node " << node.id() << ".\n";
+                    }
+                }
+
+                const auto ret = posmap.equal_range(node.id());
+                for (auto it = ret.first; it != ret.second; ++it) {
+                    *(it->second) = node.location();
+                }
+            }
+        }
         reader2.close();
     }
 
