@@ -20,6 +20,7 @@
 */
 
 #include "return_codes.hpp"
+#include "version.hpp"
 
 #include <osmium/geom/haversine.hpp>
 #include <osmium/geom/ogr.hpp>
@@ -112,7 +113,7 @@ int main(int argc, char* argv[]) {
         }
 
         if (!std::strcmp(argv[1], "--version") || !std::strcmp(argv[1], "-V")) {
-            std::cout << "osmcoastline_ways version " OSMCOASTLINE_VERSION "\n"
+            std::cout << "osmcoastline_ways " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n'
                       << "Copyright (C) 2012-2018  Jochen Topf <jochen@topf.org>\n"
                       << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
                       << "This is free software: you are free to change and redistribute it.\n"

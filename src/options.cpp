@@ -21,6 +21,7 @@
 
 #include "return_codes.hpp"
 #include "options.hpp"
+#include "version.hpp"
 
 #include <cstdlib>
 #include <cstring>
@@ -120,7 +121,7 @@ Options::Options(int argc, char* argv[]) {
                 verbose = true;
                 break;
             case 'V':
-                std::cout << "osmcoastline version " OSMCOASTLINE_VERSION "\n"
+                std::cout << "osmcoastline " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n'
                           << "Copyright (C) 2012-2018  Jochen Topf <jochen@topf.org>\n"
                           << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
                           << "This is free software: you are free to change and redistribute it.\n"
@@ -137,7 +138,7 @@ Options::Options(int argc, char* argv[]) {
     }
 
     if (optind != argc - 1) {
-        std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
+        std::cerr << "Usage: osmcoastline [OPTIONS] OSMFILE\n";
         std::exit(return_code_cmdline);
     }
 
@@ -173,7 +174,7 @@ int Options::get_epsg(const char* text) {
 }
 
 void Options::print_help() const {
-    std::cout << "osmcoastline [OPTIONS] OSMFILE\n"
+    std::cout << "Usage: osmcoastline [OPTIONS] OSMFILE\n"
               << "\nOptions:\n"
               << "  -h, --help                 - This help message\n"
               << "  -c, --close-distance=DIST  - Distance between nodes under which open rings\n"

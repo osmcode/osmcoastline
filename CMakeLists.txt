@@ -25,8 +25,6 @@ set(OSMCOASTLINE_VERSION_PATCH 4)
 set(OSMCOASTLINE_VERSION
     ${OSMCOASTLINE_VERSION_MAJOR}.${OSMCOASTLINE_VERSION_MINOR}.${OSMCOASTLINE_VERSION_PATCH})
 
-add_definitions(-DOSMCOASTLINE_VERSION="${OSMCOASTLINE_VERSION}")
-
 set(AUTHOR "Jochen Topf <jochen@topf.org>")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -40,7 +38,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(include)
 
-find_package(Osmium 2.14.1 COMPONENTS io gdal)
+find_package(Osmium 2.14.2 COMPONENTS io gdal)
 include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
 
 if(MSVC)
@@ -258,6 +256,30 @@ else()
     message(STATUS "Looking for pandoc - not found")
     message(STATUS "  Manual pages will not be built")
 endif(PANDOC)
+
+
+#-----------------------------------------------------------------------------
+#
+#  Version
+#
+#-----------------------------------------------------------------------------
+
+find_package(Git)
+
+if(GIT_FOUND)
+    execute_process(COMMAND "${GIT_EXECUTABLE}" describe --tags --dirty=-changed
+                    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+                    OUTPUT_VARIABLE VERSION_FROM_GIT
+                    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(VERSION_FROM_GIT)
+        set(VERSION_FROM_GIT " (${VERSION_FROM_GIT})")
+    endif()
+endif()
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/src/version.cpp.in
+    ${PROJECT_BINARY_DIR}/src/version.cpp
+)
 
 
 #-----------------------------------------------------------------------------

@@ -1,0 +1,15 @@
+
+#include <osmium/version.hpp>
+
+const char* get_osmcoastline_version() noexcept {
+    return "@OSMCOASTLINE_VERSION@";
+}
+
+const char* get_osmcoastline_long_version() noexcept {
+    return "version @OSMCOASTLINE_VERSION@@VERSION_FROM_GIT@";
+}
+
+const char* get_libosmium_version() noexcept {
+    return "libosmium version " LIBOSMIUM_VERSION_STRING;
+}
+

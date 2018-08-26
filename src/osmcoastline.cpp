@@ -19,16 +19,16 @@
 
 */
 
+#include "coastline_handlers.hpp"
 #include "coastline_polygons.hpp"
 #include "coastline_ring_collection.hpp"
+#include "options.hpp"
 #include "output_database.hpp"
 #include "return_codes.hpp"
-
-#include "coastline_handlers.hpp"
-#include "options.hpp"
 #include "srs.hpp"
 #include "stats.hpp"
 #include "util.hpp"
+#include "version.hpp"
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/file.hpp>
@@ -145,6 +145,8 @@ int main(int argc, char *argv[]) {
     osmium::util::VerboseOutput vout{options.verbose};
 
     debug = options.debug;
+
+    vout << "Started osmcoastline " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n';
 
     CPLSetConfigOption("OGR_ENABLE_PARTIAL_REPROJECTION", "TRUE");
     CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");

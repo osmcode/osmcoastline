@@ -20,6 +20,7 @@
 */
 
 #include "return_codes.hpp"
+#include "version.hpp"
 
 #include <osmium/osm/undirected_segment.hpp>
 #include <osmium/util/memory_mapping.hpp>
@@ -140,12 +141,12 @@ int main(int argc, char *argv[]) {
                 geom = optarg;
                 break;
             case 'h': {
-                std::cout << "Usage: " << argv[0] << " [OPTIONS] SEGFILE1 SEGFILE2\n";
+                std::cout << "Usage: osmcoastline_segments [OPTIONS] SEGFILE1 SEGFILE2\n";
                 print_help();
                 std::exit(return_code_ok);
             }
             case 'V':
-                std::cout << "osmcoastline_segments version " OSMCOASTLINE_VERSION "\n"
+                std::cout << "osmcoastline_segments " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n'
                           << "Copyright (C) 2012-2018  Jochen Topf <jochen@topf.org>\n"
                           << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
                           << "This is free software: you are free to change and redistribute it.\n"

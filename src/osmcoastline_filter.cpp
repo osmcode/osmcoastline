@@ -20,6 +20,7 @@
 */
 
 #include "return_codes.hpp"
+#include "version.hpp"
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/error.hpp>
@@ -45,7 +46,7 @@
 #include <vector>
 
 void print_help() {
-    std::cout << "osmcoastline_filter [OPTIONS] OSMFILE\n"
+    std::cout << "Usage: osmcoastline_filter [OPTIONS] OSMFILE\n"
               << "\nOptions:\n"
               << "  -h, --help           - This help message\n"
               << "  -o, --output=OSMFILE - Where to write output (default: none)\n"
@@ -83,7 +84,7 @@ int main(int argc, char* argv[]) {
                 verbose = true;
                 break;
             case 'V':
-                std::cout << "osmcoastline_filter version " OSMCOASTLINE_VERSION "\n"
+                std::cout << "osmcoastline_filter " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n'
                           << "Copyright (C) 2012-2018  Jochen Topf <jochen@topf.org>\n"
                           << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
                           << "This is free software: you are free to change and redistribute it.\n"
@@ -114,6 +115,8 @@ int main(int argc, char* argv[]) {
     header.add_box(osmium::Box{-180.0, -90.0, 180.0, 90.0});
 
     osmium::io::File infile{argv[optind]};
+
+    vout << "Started osmcoastline_filter " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n';
 
     try {
         osmium::io::Writer writer{output_filename, header};
