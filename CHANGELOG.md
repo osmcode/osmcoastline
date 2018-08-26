@@ -2,7 +2,7 @@
 # Change Log
 
 All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
+This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [unreleased] -
 
@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   expects it.
 - Update to newest Protozero and Libosmium.
 - Various small code-cleanup changes.
+- Output extended version information on `--verbose` and `--version`.
+- Derive exception used from `std::runtime_error`.
 
 ### Fixed
 
@@ -24,6 +26,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - `osmcoastline_ways`: Delete the copy and move constructor/assignment because
   we have a special destructor.
 - Add `-pthread` compiler and linker options.
+- Fix undefined behavior that resulted in more or less coastlines reported
+  as "questionable".
+- Lower right corner of Antarctica was being cut off in EPSG:3857.
 
 
 ## [2.1.4] - 2016-09-16
