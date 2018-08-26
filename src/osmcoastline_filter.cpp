@@ -22,6 +22,7 @@
 #include "return_codes.hpp"
 #include "version.hpp"
 
+#include <osmium/index/id_set.hpp>
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/error.hpp>
 #include <osmium/io/file.hpp>
@@ -122,7 +123,7 @@ int main(int argc, char* argv[]) {
         osmium::io::Writer writer{output_filename, header};
         auto output_it = osmium::io::make_output_iterator(writer);
 
-        std::vector<osmium::object_id_type> ids;
+        osmium::index::IdSetSmall<osmium::object_id_type> ids;
 
         vout << "Reading ways (1st pass through input file)...\n";
         {
@@ -132,7 +133,7 @@ int main(int argc, char* argv[]) {
                 if (way.tags().has_tag("natural", "coastline")) {
                     *output_it++ = way;
                     for (const auto& nr : way.nodes()) {
-                        ids.push_back(nr.ref());
+                        ids.set(nr.ref());
                     }
                 }
             }
@@ -140,15 +141,15 @@ int main(int argc, char* argv[]) {
         }
 
         vout << "Preparing node ID list...\n";
-        std::sort(ids.begin(), ids.end());
-        const auto last = std::unique(ids.begin(), ids.end());
+        ids.sort_unique();
 
         vout << "Reading nodes (2nd pass through input file)...\n";
         {
             osmium::io::Reader reader{infile, osmium::osm_entity_bits::node};
             const auto nodes = osmium::io::make_input_iterator_range<const osmium::Node>(reader);
 
-            auto first = ids.begin();
+            auto first = ids.cbegin();
+            const auto last = ids.cend();
             std::copy_if(nodes.cbegin(), nodes.cend(), output_it, [&first, &last](const osmium::Node& node){
                 while (*first < node.id() && first != last) {
                     ++first;
