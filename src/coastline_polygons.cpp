@@ -294,7 +294,7 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
             std::unique_ptr<OGRGeometry> geom{create_rectangular_polygon(e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand)};
             assert(geom->getSpatialReference() != nullptr);
             for (const auto& polygon : v) {
-                std::unique_ptr<OGRGeometry> diff { geom->Difference(polygon.get()) };
+                std::unique_ptr<OGRGeometry> diff{geom->Difference(polygon.get())};
                 // for some reason there is sometimes no srs on the geometries, so we add them on
                 diff->assignSpatialReference(srs.out());
                 geom = std::move(diff);
@@ -308,8 +308,8 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
                             auto mp = static_cast_unique_ptr<OGRMultiPolygon>(std::move(geom));
                             for (int i = mp->getNumGeometries() - 1; i >= 0; --i) {
                                 auto p = std::unique_ptr<OGRPolygon>(static_cast<OGRPolygon*>(mp->getGeometryRef(i)));
-                                p->assignSpatialReference(mp->getSpatialReference());
                                 mp->removeGeometry(i, FALSE);
+                                p->assignSpatialReference(mp->getSpatialReference());
                                 m_output.add_water_polygon(std::move(p));
                             }
                             break;
