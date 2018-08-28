@@ -22,7 +22,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['clang-3.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-3.8' BUILD_TYPE='Release'
+      env: CXX='clang++-3.8' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-clang38-dev
@@ -30,7 +30,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['clang-3.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-3.8' BUILD_TYPE='Dev'
+      env: CXX='clang++-3.8' BUILD_TYPE='Dev'
 
 
     - os: linux
@@ -39,7 +39,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['clang-3.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-3.9' BUILD_TYPE='Release'
+      env: CXX='clang++-3.9' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-clang39-dev
@@ -47,7 +47,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['clang-3.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-3.9' BUILD_TYPE='Dev'
+      env: CXX='clang++-3.9' BUILD_TYPE='Dev'
 
 
     - os: linux
@@ -56,7 +56,7 @@ matrix:
         apt:
           sources: ['llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test']
           packages: ['clang-4.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-4.0' BUILD_TYPE='Release'
+      env: CXX='clang++-4.0' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-clang40-dev
@@ -64,7 +64,7 @@ matrix:
         apt:
           sources: ['llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test']
           packages: ['clang-4.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-4.0' BUILD_TYPE='Dev'
+      env: CXX='clang++-4.0' BUILD_TYPE='Dev'
 
 
     - os: linux
@@ -73,7 +73,7 @@ matrix:
         apt:
           sources: ['llvm-toolchain-trusty-5.0', 'ubuntu-toolchain-r-test']
           packages: ['clang-5.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-5.0' BUILD_TYPE='Release'
+      env: CXX='clang++-5.0' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-clang50-dev
@@ -81,7 +81,7 @@ matrix:
         apt:
           sources: ['llvm-toolchain-trusty-5.0', 'ubuntu-toolchain-r-test']
           packages: ['clang-5.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='clang++-5.0' BUILD_TYPE='Dev'
+      env: CXX='clang++-5.0' BUILD_TYPE='Dev'
 
 
     # 2/ Linux GCC Builds
@@ -91,7 +91,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='g++-4.8' COMPILER_FLAGS='-Wno-return-type' BUILD_TYPE='Release'
+      env: CXX='g++-4.8' CXXFLAGS='-Wno-return-type' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-gcc48-dev
@@ -99,7 +99,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='g++-4.8' COMPILER_FLAGS='-Wno-return-type' BUILD_TYPE='Dev'
+      env: CXX='g++-4.8' CXXFLAGS='-Wno-return-type' BUILD_TYPE='Dev'
 
 
     - os: linux
@@ -108,7 +108,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='g++-4.9' BUILD_TYPE='Release'
+      env: CXX='g++-4.9' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-gcc49-dev
@@ -116,7 +116,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='g++-4.9' BUILD_TYPE='Dev'
+      env: CXX='g++-4.9' BUILD_TYPE='Dev'
 
 
     - os: linux
@@ -125,7 +125,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-5', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='g++-5' BUILD_TYPE='Release'
+      env: CXX='g++-5' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-gcc5-dev
@@ -133,7 +133,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-5', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='g++-5' BUILD_TYPE='Dev'
+      env: CXX='g++-5' BUILD_TYPE='Dev'
 
 
     - os: linux
@@ -142,7 +142,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-6', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='g++-6' BUILD_TYPE='Release'
+      env: CXX='g++-6' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-gcc6-dev
@@ -150,41 +150,41 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-6', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: COMPILER='g++-6' BUILD_TYPE='Dev'
+      env: CXX='g++-6' BUILD_TYPE='Dev'
 
 
     # 3/ OSX Clang Builds
     - os: osx
       osx_image: xcode6.4
       compiler: xcode64-clang-release
-      env: COMPILER='clang++' BUILD_TYPE='Release'
+      env: CXX='clang++' BUILD_TYPE='Release'
 
     - os: osx
       osx_image: xcode6.4
       compiler: xcode64-clang-dev
-      env: COMPILER='clang++' BUILD_TYPE='Dev'
+      env: CXX='clang++' BUILD_TYPE='Dev'
 
 
     - os: osx
       osx_image: xcode7
       compiler: xcode7-clang-release
-      env: COMPILER='clang++' BUILD_TYPE='Release'
+      env: CXX='clang++' BUILD_TYPE='Release'
 
     - os: osx
       osx_image: xcode7
       compiler: xcode7-clang-dev
-      env: COMPILER='clang++' BUILD_TYPE='Dev'
+      env: CXX='clang++' BUILD_TYPE='Dev'
 
 
     - os: osx
       osx_image: xcode8.3
       compiler: xcode8-clang-release
-      env: COMPILER='clang++' BUILD_TYPE='Release'
+      env: CXX='clang++' BUILD_TYPE='Release'
 
     - os: osx
       osx_image: xcode8.3
       compiler: xcode8-clang-dev
-      env: COMPILER='clang++' BUILD_TYPE='Dev'
+      env: CXX='clang++' BUILD_TYPE='Dev'
 
 #-----------------------------------------------------------------------------
 
@@ -200,7 +200,7 @@ install:
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
   - mkdir build && cd build
-  - CXX=${COMPILER} CXXFLAGS=${COMPILER_FLAGS} cmake -LA .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+  - cmake -LA .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 
 script:
   - make VERBOSE=1 && ctest --output-on-failure
