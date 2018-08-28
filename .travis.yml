@@ -80,8 +80,8 @@ matrix:
       addons:
         apt:
           sources: ['llvm-toolchain-trusty-5.0', 'ubuntu-toolchain-r-test']
-          packages: ['clang-5.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3']
-      env: CXX='clang++-5.0' BUILD_TYPE='Dev'
+          packages: ['clang-5.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'clang-tidy-5.0']
+      env: CXX='clang++-5.0' BUILD_TYPE='Dev' CLANG_TIDY=clang-tidy-5.0
 
 
     # 2/ Linux GCC Builds
@@ -200,9 +200,10 @@ install:
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
   - mkdir build && cd build
-  - cmake -LA .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+  - cmake -LA .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCLANG_TIDY=$(which ${CLANG_TIDY})
 
 script:
   - make VERBOSE=1 && ctest --output-on-failure
+  - if [ -n "${CLANG_TIDY}" ]; then make clang-tidy; fi
 
 #-----------------------------------------------------------------------------
