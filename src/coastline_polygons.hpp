@@ -113,8 +113,11 @@ public:
     /// Write all land polygons to the output database.
     void output_land_polygons(bool make_copy);
 
+    /// Check water polygons for validity and try to make them valid if needed
+    polygon_vector_type check_water_polygons(unsigned int& warnings);
+
     /// Write all water polygons to the output database.
-    unsigned int output_water_polygons();
+    void output_water_polygons(polygon_vector_type&& polygons);
 
     /// Write all coastlines to the output database (as lines).
     void output_lines(int max_points) const;

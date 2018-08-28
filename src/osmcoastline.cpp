@@ -334,8 +334,10 @@ int main(int argc, char *argv[]) {
         }
         if (options.output_polygons == output_polygon_type::water ||
             options.output_polygons == output_polygon_type::both) {
+            vout << "Checking and making water polygons valid...\n";
+            auto polygons = coastline_polygons.check_water_polygons(warnings);
             vout << "Writing out water polygons...\n";
-            warnings += coastline_polygons.output_water_polygons();
+            coastline_polygons.output_water_polygons(std::move(polygons));
         }
     } else {
         vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";
