@@ -1,5 +1,5 @@
 ---
-Checks: '*,-android-cloexec-*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-hicpp-vararg,-modernize-make-unique,-readability-implicit-bool-conversion'
+Checks: '*,-android-cloexec-*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-hicpp-vararg,-modernize-make-unique,-readability-implicit-bool-cast,-readability-implicit-bool-conversion'
 #
 #  For a list of check options, see:
 #  http://clang.llvm.org/extra/clang-tidy/checks/list.html
@@ -36,6 +36,9 @@ Checks: '*,-android-cloexec-*,-cppcoreguidelines-pro-bounds-array-to-pointer-dec
 #
 #  modernize-make-unique
 #    This is a C++11 program and C++ doesn't have std::make_unique.
+#
+#  readability-implicit-bool-cast
+#    Old name for readability-implicit-bool-conversion.
 #
 #  readability-implicit-bool-conversion
 #    I don't think this makes the code more readable.
