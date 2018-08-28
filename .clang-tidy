@@ -46,5 +46,5 @@ Checks: '*,-android-cloexec-*,-cert-err60-cpp,-cppcoreguidelines-pro-bounds-arra
 #  readability-implicit-bool-conversion
 #    I don't think this makes the code more readable.
 #
-#WarningsAsErrors: '*'
+WarningsAsErrors: '*'
 ...
