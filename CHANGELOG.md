@@ -30,6 +30,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Fix undefined behavior that resulted in more or less coastlines reported
   as "questionable".
 - Lower right corner of Antarctica was being cut off in EPSG:3857.
+- Very narrow water polygons were output near the anti-meridian in Antarctica.
 
 
 ## [2.1.4] - 2016-09-16

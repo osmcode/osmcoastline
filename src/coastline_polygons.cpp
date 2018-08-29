@@ -287,6 +287,18 @@ void CoastlinePolygons::output_lines(int max_points) const {
     }
 }
 
+OGREnvelope env_west;
+OGREnvelope env_east;
+
+// Without this check there will be a very narrow sliver of water at the
+// antimeridian "cutting" into Antarctica. If this returns true, the geometry
+// is the polygon with this sliver and we don't add it to the output.
+static bool antarctica_bogus(const OGRGeometry* geom) noexcept {
+    OGREnvelope envelope;
+    geom->getEnvelope(&envelope);
+    return env_east.Contains(envelope) || env_west.Contains(envelope);
+}
+
 void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
 //    std::cerr << "envelope = (" << e.MinX << ", " << e.MinY << "), (" << e.MaxX << ", " << e.MaxY << ") v.size()=" << v.size() << "\n";
     if (v.size() < 100) {
@@ -302,7 +314,9 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
             if (geom) {
                 switch (geom->getGeometryType()) {
                     case wkbPolygon:
-                        m_output.add_water_polygon(static_cast_unique_ptr<OGRPolygon>(std::move(geom)));
+                        if (!antarctica_bogus(geom.get())) {
+                            m_output.add_water_polygon(static_cast_unique_ptr<OGRPolygon>(std::move(geom)));
+                        }
                         break;
                     case wkbMultiPolygon: {
                             auto mp = static_cast_unique_ptr<OGRMultiPolygon>(std::move(geom));
@@ -310,7 +324,9 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
                                 auto p = std::unique_ptr<OGRPolygon>(static_cast<OGRPolygon*>(mp->getGeometryRef(i)));
                                 mp->removeGeometry(i, FALSE);
                                 p->assignSpatialReference(mp->getSpatialReference());
-                                m_output.add_water_polygon(std::move(p));
+                                if (!antarctica_bogus(p.get())) {
+                                    m_output.add_water_polygon(std::move(p));
+                                }
                             }
                             break;
                         }
@@ -414,6 +430,28 @@ unsigned int CoastlinePolygons::check_polygons() {
 }
 
 void CoastlinePolygons::output_water_polygons() {
+    if (srs.is_wgs84()) {
+        env_west.MinX = -180.0;
+        env_west.MinY =  -90.0;
+        env_west.MaxX = -179.9998;
+        env_west.MaxY =  -77.0;
+
+        env_east.MinX =  179.9998;
+        env_east.MinY =  -90.0;
+        env_east.MaxX =  180.0;
+        env_east.MaxY =  -77.0;
+    } else {
+        env_west.MinX = -20037508.342789244;
+        env_west.MinY = -20037508.342789244;
+        env_west.MaxX = -20037499.0;
+        env_west.MaxY =  14230070.0;
+
+        env_east.MinX =  20037499.0;
+        env_east.MinY = -20037508.342789244;
+        env_east.MaxX =  20037508.342789244;
+        env_east.MaxY =  14230080.0;
+    }
+
     split_bbox(srs.max_extent(), std::move(m_polygons));
 }
 
