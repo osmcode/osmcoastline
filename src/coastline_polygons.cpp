@@ -388,7 +388,8 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
     }
 }
 
-polygon_vector_type CoastlinePolygons::check_water_polygons(unsigned int& warnings) {
+unsigned int CoastlinePolygons::check_polygons() {
+    unsigned int warnings = 0;
     polygon_vector_type v;
 
     for (auto& polygon : m_polygons) {
@@ -406,10 +407,13 @@ polygon_vector_type CoastlinePolygons::check_water_polygons(unsigned int& warnin
         }
     }
 
-    return v;
+    using std::swap;
+    swap(m_polygons, v);
+
+    return warnings;
 }
 
-void CoastlinePolygons::output_water_polygons(polygon_vector_type&& polygons) {
-    split_bbox(srs.max_extent(), std::move(polygons));
+void CoastlinePolygons::output_water_polygons() {
+    split_bbox(srs.max_extent(), std::move(m_polygons));
 }
 

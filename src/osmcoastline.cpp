@@ -327,6 +327,10 @@ int main(int argc, char *argv[]) {
             coastline_polygons.split();
             stats.land_polygons_after_split = coastline_polygons.num_polygons();
         }
+
+        vout << "Checking and making polygons valid...\n";
+        warnings += coastline_polygons.check_polygons();
+
         if (options.output_polygons == output_polygon_type::land ||
             options.output_polygons == output_polygon_type::both) {
             vout << "Writing out land polygons...\n";
@@ -334,10 +338,8 @@ int main(int argc, char *argv[]) {
         }
         if (options.output_polygons == output_polygon_type::water ||
             options.output_polygons == output_polygon_type::both) {
-            vout << "Checking and making water polygons valid...\n";
-            auto polygons = coastline_polygons.check_water_polygons(warnings);
             vout << "Writing out water polygons...\n";
-            coastline_polygons.output_water_polygons(std::move(polygons));
+            coastline_polygons.output_water_polygons();
         }
     } else {
         vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";
