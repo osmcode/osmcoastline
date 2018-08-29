@@ -1,5 +1,5 @@
 ---
-Checks: '*,-android-cloexec-*,-cert-err60-cpp,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-hicpp-vararg,-modernize-make-unique,-readability-implicit-bool-cast,-readability-implicit-bool-conversion'
+Checks: '*,-android-cloexec-*,-cert-err58-cpp,-cert-err60-cpp,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-hicpp-vararg,-modernize-make-unique,-readability-implicit-bool-cast,-readability-implicit-bool-conversion'
 #
 #  For a list of check options, see:
 #  http://clang.llvm.org/extra/clang-tidy/checks/list.html
@@ -8,6 +8,9 @@ Checks: '*,-android-cloexec-*,-cert-err60-cpp,-cppcoreguidelines-pro-bounds-arra
 #
 #  android-cloexec-*
 #    O_CLOEXEC isn't available on Windows making this non-portable.
+#
+#  cert-err58-cpp
+#    Rather unlikely that this is a problem.
 #
 #  cert-err60-cpp
 #    Reports exceptions from standard library as broken.
