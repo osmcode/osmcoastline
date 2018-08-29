@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Various small code-cleanup changes.
 - Output extended version information on `--verbose` and `--version`.
 - Derive exception used from `std::runtime_error`.
+- Update to newest gdalcpp.
 
 ### Fixed
 
