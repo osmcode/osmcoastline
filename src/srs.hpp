@@ -69,6 +69,10 @@ public:
      */
     bool set_output(int epsg);
 
+    bool is_wgs84() const noexcept {
+        return !m_transform;
+    }
+
     OGRSpatialReference* wgs84() {
         return &m_srs_wgs84;
     }
@@ -94,15 +98,15 @@ public:
      * map and only there to close the coastline polygons.
      */
     double max_x() const noexcept {
-        return m_transform ?  20037500.0 :  179.9999;
+        return is_wgs84() ? 179.9999 : 20037500.0;
     }
 
     double min_x() const noexcept {
-        return m_transform ? -20037500.0 : -179.9999;
+        return is_wgs84() ? -179.9999 : -20037500.0;
     }
 
     double min_y() const noexcept {
-        return m_transform ? -20037400.0 :  -85.049;
+        return is_wgs84() ? -85.049 : -20037400.0;
     }
 
 }; // class SRS

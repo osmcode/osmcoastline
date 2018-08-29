@@ -54,16 +54,16 @@ void SRS::transform(OGRGeometry* geometry) {
 OGREnvelope SRS::max_extent() const {
     OGREnvelope envelope;
 
-    if (m_transform) {
+    if (is_wgs84()) {
+        envelope.MinX = -180.0;
+        envelope.MinY =  -90.0;
+        envelope.MaxX =  180.0;
+        envelope.MaxY =   90.0;
+    } else {
         envelope.MinX = -20037508.342789244;
         envelope.MinY = -20037508.342789244;
         envelope.MaxX =  20037508.342789244;
         envelope.MaxY =  20037508.342789244;
-    } else {
-        envelope.MinX = -180;
-        envelope.MinY =  -90;
-        envelope.MaxX =  180;
-        envelope.MaxY =   90;
     }
 
     return envelope;
