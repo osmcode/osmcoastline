@@ -191,7 +191,8 @@ int main(int argc, char *argv[]) {
 
     {
         // This is in an extra scope so that the considerable amounts of memory
-        // held by the handlers is recovered after we don't need them any more.
+        // held by some intermediate datastructures is recovered after we don't
+        // need them any more.
         vout << "Reading from file '" << options.inputfile << "'.\n";
         osmium::io::File infile{options.inputfile};
 
