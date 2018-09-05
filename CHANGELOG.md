@@ -13,9 +13,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Use `OGC_FID` instead of `ID` as id column in SQL scripts, that's how ogr
+- Use `OGC_FID` instead of `ID` as id column in SQL scripts, that's how OGR
   expects it.
-- Update to newest Protozero and Libosmium.
+- Update to newer Protozero and Libosmium.
 - Various small code-cleanup changes.
 - Output extended version information on `--verbose` and `--version`.
 - Derive exception used from `std::runtime_error`.
