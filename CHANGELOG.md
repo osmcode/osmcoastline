@@ -8,6 +8,15 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+
+## [2.2.0] - 2018-09-05
+
+### Added
+
 - Add spatialite scripts for creating grids for splitting.
 - CMake config adds `clang-tidy` target.
 
@@ -108,7 +117,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Added man pages
 
 
-[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.1.4...HEAD
+[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/osmcode/osmium-tool/compare/v2.1.4...v2.2.0
 [2.1.4]: https://github.com/osmcode/osmium-tool/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/osmcode/osmium-tool/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/osmcode/osmium-tool/compare/v2.1.1...v2.1.2
