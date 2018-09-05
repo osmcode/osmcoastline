@@ -1,7 +1,7 @@
 
 # NAME
 
-osmcoastline - extract coastline from OSM data
+osmcoastline - extract coastline from OpenStreetMap data
 
 
 # SYNOPSIS
@@ -11,7 +11,7 @@ osmcoastline - extract coastline from OSM data
 
 # DESCRIPTION
 
-**osmcoastline** extracts the coastline data from the *INPUT-FILE*, ususally
+**osmcoastline** extracts the coastline data from the *INPUT-FILE*, usually
 a planet file (or the output of the **osmcoastline_filter** program, see below)
 and assembles all the pieces into polygons for use in map renderers etc.
 
@@ -80,7 +80,7 @@ description of the options below and the README.md for details.
     projections are currently not supported. Default is 4326.
 
 -S, --write-segments=FILENAME
-:   Write out all coastline segments to the given file. Segments are
+:   Write out all coastline segments to the specified file. Segments are
     connections between two points. The segments are written in an internal
     format intended for use with the **osmcoastline_segments** program
     only. The file includes all segments actually in the OSM data and only
@@ -134,5 +134,6 @@ Running **osmcoastline_filter** first:
 * `README.md`
 * **osmcoastline_filter**(1), **osmcoastline_readmeta**(1),
   **osmcoastline_segments**(1), **osmcoastline_ways**(1)
+* [Project page](https://osmcode.org/osmcoastline/)
 * [OSMCoastline in OSM wiki](https://wiki.openstreetmap.org/wiki/OSMCoastline)
 

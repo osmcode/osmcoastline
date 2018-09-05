@@ -1,7 +1,7 @@
 
 # NAME
 
-osmcoastline_readmeta - display metadata from database create by osmcoastline
+osmcoastline_readmeta - display metadata from database created by osmcoastline
 
 
 # SYNOPSIS
@@ -33,5 +33,6 @@ and more.
 # SEE ALSO
 
 * **osmcoastline**(1)
+* [Project page](https://osmcode.org/osmcoastline/)
 * [OSMCoastline in OSM wiki](https://wiki.openstreetmap.org/wiki/OSMCoastline)
 

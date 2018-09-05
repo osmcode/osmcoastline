@@ -1,7 +1,7 @@
 
 # NAME
 
-osmcoastline_ways - extract coastline ways from OSM data
+osmcoastline_ways - extract coastline ways from OpenStreetMap data
 
 
 # SYNOPSIS
@@ -39,5 +39,6 @@ of their "name" and "source" tags.
 # SEE ALSO
 
 * **osmcoastline**(1), **osmcoastline_filter**(1)
+* [Project page](https://osmcode.org/osmcoastline/)
 * [OSMCoastline in OSM wiki](https://wiki.openstreetmap.org/wiki/OSMCoastline)
 

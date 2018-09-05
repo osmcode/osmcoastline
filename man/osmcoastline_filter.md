@@ -1,7 +1,7 @@
 
 # NAME
 
-osmcoastline_filter - filter coastline data from OSM file
+osmcoastline_filter - filter coastline data from OpenStreetMap file
 
 
 # SYNOPSIS
@@ -18,7 +18,8 @@ building the coastlines from an OSM planet. The data is written to the
 output file in PBF format.
 
 This output file will be a lot smaller (less than 1%) than the original planet
-file, but it contains everything needed to assemble the coastline polygons.
+file, but it contains everything needed to assemble the coastline and land
+or water polygons.
 
 If you are playing around or want to run **osmcoastline** several times with
 different parameters, run **osmcoastline_filter** once first and use its output
@@ -54,5 +55,6 @@ Run it as follows:
 # SEE ALSO
 
 * **osmcoastline**(1), **osmcoastline_ways**(1)
+* [Project page](https://osmcode.org/osmcoastline/)
 * [OSMCoastline in OSM wiki](https://wiki.openstreetmap.org/wiki/OSMCoastline)
 

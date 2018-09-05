@@ -1,7 +1,7 @@
 
 # NAME
 
-osmcoastline_segments - analyze coastline changes from segment files
+osmcoastline_segments - analyze OpenStreetMap coastline changes from segment files
 
 
 # SYNOPSIS
@@ -68,5 +68,6 @@ Create a shapefile with the differences:
 
 * `README.md`
 * **osmcoastline**(1)
+* [Project page](https://osmcode.org/osmcoastline/)
 * [OSMCoastline in OSM wiki](https://wiki.openstreetmap.org/wiki/OSMCoastline)
 
