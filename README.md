@@ -16,13 +16,13 @@ https://github.com/osmcode/osmcoastline
 
     https://github.com/osmcode/libosmium
     https://osmcode.org/libosmium
-    At least version 2.14.1 is needed.
+    At least version 2.13.1 is needed.
 
 ### Protozero
 
     https://github.com/mapbox/protozero
     Debian/Ubuntu: libprotozero-dev
-    At least version 1.6.2 is needed.
+    At least version 1.6.1 is needed.
 
 ### zlib (for PBF support)
 
