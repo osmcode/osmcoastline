@@ -46,7 +46,7 @@ https://github.com/osmcode/osmcoastline
 ### Sqlite/Spatialite
 
     https://www.gaia-gis.it/fossil/libspatialite/index
-    Debian/Ubuntu: sqlite3
+    Debian/Ubuntu: sqlite3, spatialite-bin
 
 ### Pandoc (optional, to build documentation)
 
@@ -71,6 +71,11 @@ in the `doc/html` directory.
 
 
 ## Testing
+
+A few tests are provided that can be run by calling `ctest`.
+
+
+## The `runtest` script
 
 Run the script `runtest.sh` from the directory you built the program in. It
 will read the supplied `testdata.osm` and create output in the `testdata.db`
