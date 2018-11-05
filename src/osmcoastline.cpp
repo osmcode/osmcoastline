@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
         vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
         coastline_rings.close_rings(output_database, options.debug, options.close_distance);
         stats.rings_fixed = coastline_rings.num_fixed_rings();
-        warnings += coastline_rings.num_fixed_rings();
+        errors += coastline_rings.num_fixed_rings();
         vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
              << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
         errors += coastline_rings.num_unconnected_nodes();
