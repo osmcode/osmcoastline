@@ -85,40 +85,49 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
         std::cerr << "organizePolygons() done\n";
     }
 
-    if (mega_geometry->getGeometryType() != wkbMultiPolygon) {
-        throw std::runtime_error{"mega geometry isn't a multipolygon. Something is very wrong!"};
-    }
-
-    // This isn't an owning pointer on purpose. We are going to "steal" parts
-    // of the geometry a few lines below but only mark them as unowned farther
-    // below when we are calling removeGeometry() on it. If this was an
-    // owning pointer we'd get a double free if there is an error.
-    auto* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.release());
-
     polygon_vector_type polygons;
-    polygons.reserve(mega_multipolygon->getNumGeometries());
-    for (int i = 0; i < mega_multipolygon->getNumGeometries(); ++i) {
-        OGRGeometry* geom = mega_multipolygon->getGeometryRef(i);
-        assert(geom->getGeometryType() == wkbPolygon);
-        std::unique_ptr<OGRPolygon> p{static_cast<OGRPolygon*>(geom)};
-        if (p->IsValid()) {
-            polygons.push_back(std::move(p));
+
+    if (mega_geometry->getGeometryType() == wkbPolygon) {
+        if (mega_geometry->IsValid()) {
+            polygons.push_back(static_cast_unique_ptr<OGRPolygon>(std::move(mega_geometry)));
         } else {
-            output.add_error_line(make_unique_ptr_clone<OGRLineString>(p->getExteriorRing()), "invalid");
-            std::unique_ptr<OGRGeometry> buf0{p->Buffer(0)};
-            if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
-                buf0->assignSpatialReference(srs.wgs84());
-                polygons.push_back(static_cast_unique_ptr<OGRPolygon>(std::move(buf0)));
-                (*warnings)++;
+            std::cerr << "Ignoring invalid polygon geometry.\n";
+            (*errors)++;
+        }
+    } else if (mega_geometry->getGeometryType() != wkbMultiPolygon) {
+        throw std::runtime_error{"mega geometry isn't a multipolygon. Something is very wrong!"};
+    } else {
+
+        // This isn't an owning pointer on purpose. We are going to "steal" parts
+        // of the geometry a few lines below but only mark them as unowned farther
+        // below when we are calling removeGeometry() on it. If this was an
+        // owning pointer we'd get a double free if there is an error.
+        auto* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.release());
+
+        polygons.reserve(mega_multipolygon->getNumGeometries());
+        for (int i = 0; i < mega_multipolygon->getNumGeometries(); ++i) {
+            OGRGeometry* geom = mega_multipolygon->getGeometryRef(i);
+            assert(geom->getGeometryType() == wkbPolygon);
+            std::unique_ptr<OGRPolygon> p{static_cast<OGRPolygon*>(geom)};
+            if (p->IsValid()) {
+                polygons.push_back(std::move(p));
             } else {
-                std::cerr << "Ignoring invalid polygon geometry.\n";
-                (*errors)++;
+                output.add_error_line(make_unique_ptr_clone<OGRLineString>(p->getExteriorRing()), "invalid");
+                std::unique_ptr<OGRGeometry> buf0{p->Buffer(0)};
+                if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
+                    buf0->assignSpatialReference(srs.wgs84());
+                    polygons.push_back(static_cast_unique_ptr<OGRPolygon>(std::move(buf0)));
+                    (*warnings)++;
+                } else {
+                    std::cerr << "Ignoring invalid polygon geometry.\n";
+                    (*errors)++;
+                }
             }
         }
-    }
 
-    mega_multipolygon->removeGeometry(-1, FALSE);
-    delete mega_multipolygon; // NOLINT(cppcoreguidelines-owning-memory)
+        mega_multipolygon->removeGeometry(-1, FALSE);
+        delete mega_multipolygon; // NOLINT(cppcoreguidelines-owning-memory)
+    }
 
     return polygons;
 }
