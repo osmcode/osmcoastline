@@ -5,17 +5,9 @@
 #
 #-----------------------------------------------------------------------------
 
+. $1/test/init.sh
+
 set -x
-
-SRC_DIR=$1
-BIN_DIR=$2
-TEST_ID=$3
-
-DATA=${SRC_DIR}/test/t/test-${TEST_ID}.osm
-OSMC=${BIN_DIR}/src/osmcoastline
-LOG=${BIN_DIR}/test/test-${TEST_ID}.log
-DB=${BIN_DIR}/test/test-${TEST_ID}.db
-SQL="spatialite -bail -batch $DB"
 
 #-----------------------------------------------------------------------------
 
@@ -31,6 +23,10 @@ grep '^There were 0 warnings.$' $LOG
 grep '^There were 0 errors.$' $LOG
 
 DUMP=${BIN_DIR}/test/test-${TEST_ID}.dump
+
+check_count land_polygons 2;
+check_count error_points 0;
+check_count error_lines 0;
 
 echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL >$DUMP
 grep -F 'POLYGON((1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01))' $DUMP

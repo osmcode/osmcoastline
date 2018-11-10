@@ -5,17 +5,9 @@
 #
 #-----------------------------------------------------------------------------
 
+. $1/test/init.sh
+
 set -x
-
-SRC_DIR=$1
-BIN_DIR=$2
-TEST_ID=$3
-
-DATA=${SRC_DIR}/test/t/test-${TEST_ID}.osm
-OSMC=${BIN_DIR}/src/osmcoastline
-LOG=${BIN_DIR}/test/test-${TEST_ID}.log
-DB=${BIN_DIR}/test/test-${TEST_ID}.db
-SQL="spatialite -bail -batch $DB"
 
 #-----------------------------------------------------------------------------
 
