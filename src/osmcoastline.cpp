@@ -75,6 +75,10 @@ const unsigned int max_warnings = 500;
 polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, OutputDatabase& output, unsigned int* warnings, unsigned int* errors) {
     std::vector<OGRGeometry*> all_polygons = coastline_rings.add_polygons_to_vector();
 
+    if (all_polygons.empty()) {
+        throw std::runtime_error{"No polygons created!"};
+    }
+
     int is_valid;
     const char* options[] = {"METHOD=ONLY_CCW", nullptr};
     if (debug) {
@@ -83,6 +87,10 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     std::unique_ptr<OGRGeometry> mega_geometry{OGRGeometryFactory::organizePolygons(&all_polygons[0], all_polygons.size(), &is_valid, options)};
     if (debug) {
         std::cerr << "organizePolygons() done\n";
+    }
+
+    if (!mega_geometry) {
+        throw std::runtime_error{"No polygons created!"};
     }
 
     polygon_vector_type polygons;
@@ -95,7 +103,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
             (*errors)++;
         }
     } else if (mega_geometry->getGeometryType() != wkbMultiPolygon) {
-        throw std::runtime_error{"mega geometry isn't a multipolygon. Something is very wrong!"};
+        throw std::runtime_error{"mega geometry isn't a (multi)polygon. Something is very wrong!"};
     } else {
 
         // This isn't an owning pointer on purpose. We are going to "steal" parts
@@ -301,55 +309,60 @@ int main(int argc, char *argv[]) {
     }
 
     if (options.output_polygons != output_polygon_type::none) {
-        vout << "Create polygons...\n";
-        CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database, &warnings, &errors), output_database, options.bbox_overlap, options.max_points_in_polygon);
-        stats.land_polygons_before_split = coastline_polygons.num_polygons();
+        try {
+            vout << "Create polygons...\n";
+            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database, &warnings, &errors), output_database, options.bbox_overlap, options.max_points_in_polygon);
+            stats.land_polygons_before_split = coastline_polygons.num_polygons();
 
-        vout << "Fixing coastlines going the wrong way...\n";
-        stats.rings_turned_around = coastline_polygons.fix_direction();
-        vout << "  Turned " << stats.rings_turned_around << " polygons around.\n";
-        warnings += stats.rings_turned_around;
+            vout << "Fixing coastlines going the wrong way...\n";
+            stats.rings_turned_around = coastline_polygons.fix_direction();
+            vout << "  Turned " << stats.rings_turned_around << " polygons around.\n";
+            warnings += stats.rings_turned_around;
 
-        if (options.epsg != 4326) {
-            vout << "Transforming polygons to EPSG " << options.epsg << "...\n";
-            coastline_polygons.transform();
-        }
+            if (options.epsg != 4326) {
+                vout << "Transforming polygons to EPSG " << options.epsg << "...\n";
+                coastline_polygons.transform();
+            }
 
-        if (options.output_lines) {
-            vout << "Writing coastlines as lines... (Because you used --output-lines/-l)\n";
-            coastline_polygons.output_lines(options.max_points_in_polygon);
-        } else {
-            vout << "Not writing coastlines as lines (Use --output-lines/-l if you want this).\n";
-        }
+            if (options.output_lines) {
+                vout << "Writing coastlines as lines... (Because you used --output-lines/-l)\n";
+                coastline_polygons.output_lines(options.max_points_in_polygon);
+            } else {
+                vout << "Not writing coastlines as lines (Use --output-lines/-l if you want this).\n";
+            }
 
-        if (options.epsg == 4326) {
-            vout << "Checking for questionable input data...\n";
-            const unsigned int questionable = coastline_rings.output_questionable(coastline_polygons, output_database);
-            warnings += questionable;
-            vout << "  Found " << questionable << " rings in input data.\n";
-        } else {
-            vout << "Not performing check for questionable input data, because it only works in EPSG:4326...\n";
-        }
+            if (options.epsg == 4326) {
+                vout << "Checking for questionable input data...\n";
+                const unsigned int questionable = coastline_rings.output_questionable(coastline_polygons, output_database);
+                warnings += questionable;
+                vout << "  Found " << questionable << " rings in input data.\n";
+            } else {
+                vout << "Not performing check for questionable input data, because it only works in EPSG:4326...\n";
+            }
 
-        if (options.split_large_polygons) {
-            vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
-            vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
-            coastline_polygons.split();
-            stats.land_polygons_after_split = coastline_polygons.num_polygons();
-        }
+            if (options.split_large_polygons) {
+                vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
+                vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
+                coastline_polygons.split();
+                stats.land_polygons_after_split = coastline_polygons.num_polygons();
+            }
 
-        vout << "Checking and making polygons valid...\n";
-        warnings += coastline_polygons.check_polygons();
+            vout << "Checking and making polygons valid...\n";
+            warnings += coastline_polygons.check_polygons();
 
-        if (options.output_polygons == output_polygon_type::land ||
-            options.output_polygons == output_polygon_type::both) {
-            vout << "Writing out land polygons...\n";
-            coastline_polygons.output_land_polygons(options.output_polygons == output_polygon_type::both);
-        }
-        if (options.output_polygons == output_polygon_type::water ||
-            options.output_polygons == output_polygon_type::both) {
-            vout << "Writing out water polygons...\n";
-            coastline_polygons.output_water_polygons();
+            if (options.output_polygons == output_polygon_type::land ||
+                options.output_polygons == output_polygon_type::both) {
+                vout << "Writing out land polygons...\n";
+                coastline_polygons.output_land_polygons(options.output_polygons == output_polygon_type::both);
+            }
+            if (options.output_polygons == output_polygon_type::water ||
+                options.output_polygons == output_polygon_type::both) {
+                vout << "Writing out water polygons...\n";
+                coastline_polygons.output_water_polygons();
+            }
+        } catch (const std::runtime_error& e) {
+            vout << e.what() << '\n';
+            ++errors;
         }
     } else {
         vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";
