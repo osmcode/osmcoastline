@@ -22,8 +22,6 @@ grep 'Turned 0 polygons around.$' $LOG
 grep '^There were 0 warnings.$' $LOG
 grep '^There were 0 errors.$' $LOG
 
-DUMP=${BIN_DIR}/test/test-${TEST_ID}.dump
-
 check_count land_polygons 2;
 check_count error_points 0;
 check_count error_lines 0;
