@@ -311,7 +311,11 @@ int main(int argc, char *argv[]) {
     if (options.output_polygons != output_polygon_type::none) {
         try {
             vout << "Create polygons...\n";
-            CoastlinePolygons coastline_polygons(create_polygons(coastline_rings, output_database, &warnings, &errors), output_database, options.bbox_overlap, options.max_points_in_polygon);
+            CoastlinePolygons coastline_polygons{create_polygons(coastline_rings, output_database, &warnings, &errors), \
+                                                 output_database, \
+                                                 options.bbox_overlap, \
+                                                 options.max_points_in_polygon};
+
             stats.land_polygons_before_split = coastline_polygons.num_polygons();
 
             vout << "Fixing coastlines going the wrong way...\n";

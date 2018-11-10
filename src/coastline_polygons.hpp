@@ -81,7 +81,7 @@ class CoastlinePolygons {
 
 public:
 
-    CoastlinePolygons(polygon_vector_type&& polygons, OutputDatabase& output, double expand, unsigned int max_points_in_polygon) :
+    CoastlinePolygons(polygon_vector_type&& polygons, OutputDatabase& output, double expand, int max_points_in_polygon) :
         m_output(output),
         m_expand(expand),
         m_max_points_in_polygon(max_points_in_polygon),
