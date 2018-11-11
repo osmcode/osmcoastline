@@ -6,6 +6,7 @@ readonly TEST_ID=$3
 
 readonly DATA=${SRC_DIR}/test/t/test-${TEST_ID}.osm
 readonly OSMC=${BIN_DIR}/src/osmcoastline
+readonly INPUT=${BIN_DIR}/test/test-${TEST_ID}.opl
 readonly LOG=${BIN_DIR}/test/test-${TEST_ID}.log
 readonly DB=${BIN_DIR}/test/test-${TEST_ID}.db
 readonly DUMP=${BIN_DIR}/test/test-${TEST_ID}.dump

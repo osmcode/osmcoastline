@@ -11,7 +11,17 @@ set -x
 
 #-----------------------------------------------------------------------------
 
-$OSMC --verbose --overwrite --output-database=$DB --output-rings $DATA >$LOG 2>&1
+cat <<'OSM' >$INPUT
+n100 x1.01 y1.01
+n101 x1.04 y1.01
+n102 x1.04 y1.04
+n103 x1.01 y1.04
+w200 Tnatural=coastline Nn100,n101,n102,n103
+OSM
+
+#-----------------------------------------------------------------------------
+
+$OSMC --verbose --overwrite --output-database=$DB --output-rings $INPUT >$LOG 2>&1
 RC=$?
 set -e
 
@@ -42,7 +52,7 @@ echo "SELECT AsText(geometry), osm_id, error FROM error_lines;" | $SQL \
 
 set +e
 
-$OSMC --verbose --overwrite --output-database=$DB --output-rings -c 0 $DATA >$LOG 2>&1
+$OSMC --verbose --overwrite --output-database=$DB --output-rings -c 0 $INPUT >$LOG 2>&1
 RC=$?
 set -e
 

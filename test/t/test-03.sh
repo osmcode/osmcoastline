@@ -11,9 +11,24 @@ set -x
 
 #-----------------------------------------------------------------------------
 
+cat <<'OSM' >$INPUT
+n100 x1.01 y1.01
+n101 x1.04 y1.01
+n102 x1.04 y1.04
+n103 x1.01 y1.04
+n110 x1.01 y1.11
+n111 x1.04 y1.11
+n112 x1.04 y1.14
+n113 x1.01 y1.14
+w200 Tnatural=coastline Nn100,n101,n102,n103,n100
+w201 Tnatural=coastline Nn110,n111,n112,n113,n110
+OSM
+
+#-----------------------------------------------------------------------------
+
 set -e
 
-$OSMC --verbose --overwrite --output-database=$DB $DATA >$LOG 2>&1
+$OSMC --verbose --overwrite --output-database=$DB $INPUT >$LOG 2>&1
 
 test $? -eq 0
 
