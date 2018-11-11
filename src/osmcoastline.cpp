@@ -231,10 +231,16 @@ int main(int argc, char *argv[]) {
         stats.unconnected_nodes = coastline_rings.num_unconnected_nodes();
         stats.rings = coastline_rings.size();
         stats.rings_from_single_way = coastline_rings.num_rings_from_single_way();
-        vout << "  There are " << coastline_rings.num_unconnected_nodes() << " nodes where the coastline is not closed.\n";
-        vout << "  There are " << coastline_rings.size() << " coastline rings ("
-             << coastline_rings.num_rings_from_single_way() << " from a single way and "
-             << coastline_rings.size() - coastline_rings.num_rings_from_single_way() << " from multiple ways).\n";
+        vout << "  There are "
+             << coastline_rings.num_unconnected_nodes()
+             << " nodes where the coastline is not closed.\n";
+        vout << "  There are "
+             << coastline_rings.size()
+             << " coastline rings ("
+             << coastline_rings.num_rings_from_single_way()
+             << " from a single closed way and "
+             << (coastline_rings.size() - coastline_rings.num_rings_from_single_way())
+             << " others).\n";
         vout << memory_usage();
 
         vout << "Reading nodes (2nd pass through input file)...\n";
