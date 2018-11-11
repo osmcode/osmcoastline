@@ -1,7 +1,7 @@
 #!/bin/sh
 #-----------------------------------------------------------------------------
 #
-#  Invalid way with only two points and invalid way with single point
+#  Valid small "island" made up from two ways with coastline all around.
 #
 #-----------------------------------------------------------------------------
 
@@ -11,27 +11,22 @@ set -x
 
 #-----------------------------------------------------------------------------
 
-$OSMC --verbose --overwrite --output-database=$DB --output-rings -c 0 $DATA >$LOG 2>&1
-RC=$?
 set -e
 
-test $RC -eq 2
+$OSMC --verbose --overwrite --output-database=$DB $DATA >$LOG 2>&1
 
-grep 'There are 2 nodes where the coastline is not closed.' $LOG
-grep '^There were 2 warnings.$' $LOG
-grep '^There were 1 errors.$' $LOG
+test $? -eq 0
 
-check_count land_polygons 0;
-check_count rings 0;
-check_count error_points 3;
-check_count error_lines 1;
+grep 'There are 1 coastline rings (0 from a single closed way and 1 others).$' $LOG
 
-echo "SELECT AsText(geometry), osm_id, error FROM error_points;" | $SQL >$DUMP
-grep -F 'POINT(1.01 1.01)|100|end_point' $DUMP
-grep -F 'POINT(1.04 1.01)|101|end_point' $DUMP
-grep -F 'POINT(1.11 1.11)|110|single_point_in_ring' $DUMP
+grep '^There were 0 warnings.$' $LOG
+grep '^There were 0 errors.$' $LOG
 
-echo "SELECT AsText(geometry), osm_id, error FROM error_lines;" | $SQL \
-    | grep -F 'LINESTRING(1.04 1.01, 1.01 1.01)|200|not_closed'
+check_count land_polygons 1;
+check_count error_points 0;
+check_count error_lines 0;
+
+echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL \
+    | grep -F 'POLYGON((1.01 1.01, 1.01 1.03, 1.05 1.03, 1.04 1.02, 1.03 1.02, 1.02 1.01, 1.01 1.01))'
 
 #-----------------------------------------------------------------------------
