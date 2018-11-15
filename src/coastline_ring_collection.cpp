@@ -273,14 +273,19 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
         }
     }
 
+    // There can be no intersections if there are less than two segments
+    if (segments.size() < 2) {
+        return 0;
+    }
+
     if (debug) {
         std::cerr << "Finding intersections...\n";
     }
 
     std::vector<osmium::Location> intersections;
-    for (auto it1 = segments.cbegin(); it1 != segments.cend()-1; ++it1) {
+    for (auto it1 = segments.cbegin(); it1 != segments.cend() - 1; ++it1) {
         const osmium::UndirectedSegment& s1 = *it1;
-        for (auto it2 = it1+1; it2 != segments.cend(); ++it2) {
+        for (auto it2 = it1 + 1; it2 != segments.cend(); ++it2) {
             const osmium::UndirectedSegment& s2 = *it2;
             if (s1 == s2) {
                 std::unique_ptr<OGRLineString> line = create_ogr_linestring(s1);

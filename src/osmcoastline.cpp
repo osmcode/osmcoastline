@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
     // operating on.
     CoastlineRingCollection coastline_rings;
 
-    {
+    try {
         // This is in an extra scope so that the considerable amounts of memory
         // held by some intermediate datastructures is recovered after we don't
         // need them any more.
@@ -265,6 +265,9 @@ int main(int argc, char *argv[]) {
             }
         }
         reader2.close();
+    } catch (const std::exception& e) {
+        vout << e.what() << '\n';
+        std::exit(return_code_fatal);
     }
 
     vout << "Checking for missing positions...\n";
