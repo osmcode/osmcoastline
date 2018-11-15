@@ -32,7 +32,6 @@
 #ifdef _MSC_VER
 #include <io.h>
 #include <BaseTsd.h>
-typedef SSIZE_T ssize_t;
 #endif
 
 extern SRS srs;
@@ -268,11 +267,11 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
             std::cerr << "Writing segments to file...\n";
         }
 
-        const ssize_t length = segments.size() * sizeof(osmium::UndirectedSegment);
+        const auto length = segments.size() * sizeof(osmium::UndirectedSegment);
 #ifndef _MSC_VER
-        if (::write(segments_fd, segments.data(), length) != length) {
+        if (::write(segments_fd, segments.data(), length) != static_cast<ssize_t>(length)) {
 #else
-        if (_write(segments_fd, segments.data(), length) != length) {
+        if (_write(segments_fd, segments.data(), length) != static_cast<int>(length)) {
 #endif
             throw std::runtime_error{"Write error"};
         }
