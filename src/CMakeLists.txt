@@ -34,3 +34,6 @@ target_link_libraries(osmcoastline_ways ${OSMIUM_IO_LIBRARIES} ${GDAL_LIBRARIES}
 set_pthread_on_target(osmcoastline_ways)
 install(TARGETS osmcoastline_ways DESTINATION bin)
 
+# only used for testing - should not be installed
+add_executable(nodegrid2opl nodegrid2opl.cpp)
+
