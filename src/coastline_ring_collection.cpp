@@ -117,14 +117,14 @@ void CoastlineRingCollection::setup_positions(posmap_type& posmap) {
     }
 }
 
-unsigned int CoastlineRingCollection::check_positions(bool output_missing) {
-    unsigned int missing_positions = 0;
+unsigned int CoastlineRingCollection::check_locations(bool output_missing) {
+    unsigned int missing_locations = 0;
 
     for (const auto& ring : m_list) {
-        missing_positions += ring->check_positions(output_missing);
+        missing_locations += ring->check_locations(output_missing);
     }
 
-    return missing_positions;
+    return missing_locations;
 }
 
 bool is_valid_polygon(const OGRGeometry* geometry) {

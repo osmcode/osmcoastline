@@ -272,9 +272,9 @@ int main(int argc, char *argv[]) {
     }
 
     vout << "Checking for missing positions...\n";
-    unsigned int missing_positions = coastline_rings.check_positions(options.debug);
-    if (missing_positions) {
-        vout << "  There are " << missing_positions << " positions missing. Check that input file contains all nodes needed.\n";
+    unsigned int missing_locations = coastline_rings.check_locations(options.debug);
+    if (missing_locations) {
+        vout << "  There are " << missing_locations << " locations missing. Check that input file contains all nodes needed.\n";
         std::exit(return_code_error);
     } else {
         vout << "  All positions are there.\n";

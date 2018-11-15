@@ -105,7 +105,7 @@ public:
 
     void setup_positions(posmap_type& posmap);
 
-    unsigned int check_positions(bool output_missing);
+    unsigned int check_locations(bool output_missing);
 
     std::vector<OGRGeometry*> add_polygons_to_vector();
 

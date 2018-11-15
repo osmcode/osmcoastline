@@ -36,7 +36,7 @@ void CoastlineRing::setup_positions(posmap_type& posmap) {
     }
 }
 
-unsigned int CoastlineRing::check_positions(bool output_missing) {
+unsigned int CoastlineRing::check_locations(bool output_missing) {
     unsigned int missing_positions = 0;
 
     for (const auto& wn : m_way_node_list) {
