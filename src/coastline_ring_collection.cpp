@@ -67,8 +67,9 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
 
         if ((*prev)->is_closed()) {
             const auto found = m_start_nodes.find((*prev)->first_node_id());
-            assert(found != m_start_nodes.end());
-            m_start_nodes.erase(found);
+            if (found != m_start_nodes.end()) {
+                m_start_nodes.erase(found);
+            }
             return;
         }
 
@@ -103,8 +104,9 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
         m_start_nodes.erase(mnext);
         if ((*next)->is_closed()) {
             const auto found = m_end_nodes.find((*next)->last_node_id());
-            assert(found != m_end_nodes.end());
-            m_end_nodes.erase(found);
+            if (found != m_end_nodes.end()) {
+                m_end_nodes.erase(found);
+            }
             return;
         }
         m_start_nodes[(*next)->first_node_id()] = next;
