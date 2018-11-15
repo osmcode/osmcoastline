@@ -91,6 +91,7 @@ public:
      */
     explicit CoastlineRing(const osmium::Way& way) :
         m_ring_id(way.id()) {
+        assert(!way.nodes().empty());
         m_way_node_list.reserve(way.is_closed() ? way.nodes().size() : 1000);
         m_way_node_list.insert(m_way_node_list.begin(), way.nodes().begin(), way.nodes().end());
     }

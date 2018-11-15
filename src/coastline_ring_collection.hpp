@@ -77,6 +77,7 @@ public:
      * or it will be joined to an existing CoastlineRing.
      */
     void add_way(const osmium::Way& way) {
+        assert(!way.nodes().empty());
         m_ways++;
         if (way.is_closed()) {
             m_rings_from_single_way++;

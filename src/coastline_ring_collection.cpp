@@ -46,6 +46,7 @@ extern bool debug;
  * CoastlineRing for it and add that to the collection.
  */
 void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
+    assert(!way.nodes().empty());
     const auto mprev = m_end_nodes.find(way.nodes().front().ref());
     const auto mnext = m_start_nodes.find(way.nodes().back().ref());
 
@@ -66,7 +67,9 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
         m_end_nodes.erase(mprev);
 
         if ((*prev)->is_closed()) {
-            m_start_nodes.erase(m_start_nodes.find((*prev)->first_node_id()));
+            const auto found = m_start_nodes.find((*prev)->first_node_id());
+            assert(found != m_start_nodes.end());
+            m_start_nodes.erase(found);
             return;
         }
 
@@ -100,7 +103,9 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
         (*next)->add_at_front(way);
         m_start_nodes.erase(mnext);
         if ((*next)->is_closed()) {
-            m_end_nodes.erase(m_end_nodes.find((*next)->last_node_id()));
+            const auto found = m_end_nodes.find((*next)->last_node_id());
+            assert(found != m_end_nodes.end());
+            m_end_nodes.erase(found);
             return;
         }
         m_start_nodes[(*next)->first_node_id()] = next;
@@ -440,6 +445,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     // go through all the polygons that have been created before and mark the outer rings
     for (const auto& polygon : polygons) {
         const OGRLinearRing* exterior_ring = polygon->getExteriorRing();
+        assert(exterior_ring);
         osmium::Location pos{exterior_ring->getX(0), exterior_ring->getY(0)};
         const auto rings_it = lower_bound(rings.begin(), rings.end(), lcrp_type{pos, nullptr}, comp);
         if (rings_it != rings.end()) {

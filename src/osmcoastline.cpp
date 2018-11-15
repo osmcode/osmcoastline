@@ -79,7 +79,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
         throw std::runtime_error{"No polygons created!"};
     }
 
-    int is_valid;
+    int is_valid = false;
     const char* options[] = {"METHOD=ONLY_CCW", nullptr};
     if (debug) {
         std::cerr << "Calling organizePolygons()\n";
@@ -115,6 +115,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
         polygons.reserve(mega_multipolygon->getNumGeometries());
         for (int i = 0; i < mega_multipolygon->getNumGeometries(); ++i) {
             OGRGeometry* geom = mega_multipolygon->getGeometryRef(i);
+            assert(geom);
             assert(geom->getGeometryType() == wkbPolygon);
             std::unique_ptr<OGRPolygon> p{static_cast<OGRPolygon*>(geom)};
             if (p->IsValid()) {

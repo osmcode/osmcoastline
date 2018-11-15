@@ -65,14 +65,17 @@ unsigned int CoastlinePolygons::fix_direction() {
 
     for (const auto& polygon : m_polygons) {
         OGRLinearRing* er = polygon->getExteriorRing();
+        assert(er);
         if (!er->isClockwise()) {
             er->reverseWindingOrder();
             // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
             er->setCoordinateDimension(2);
             for (int i = 0; i < polygon->getNumInteriorRings(); ++i) {
-                polygon->getInteriorRing(i)->reverseWindingOrder();
+                OGRLinearRing* ir = polygon->getInteriorRing(i);
+                assert(ir);
+                ir->reverseWindingOrder();
                 // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
-                polygon->getInteriorRing(i)->setCoordinateDimension(2);
+                ir->setCoordinateDimension(2);
             }
             m_output.add_error_line(make_unique_ptr_clone<OGRLineString>(er), "direction");
             warnings++;
@@ -92,7 +95,7 @@ void CoastlinePolygons::split_geometry(std::unique_ptr<OGRGeometry>&& geom, int 
     if (geom->getGeometryType() == wkbPolygon) {
         geom->assignSpatialReference(srs.out());
         split_polygon(static_cast_unique_ptr<OGRPolygon>(std::move(geom)), level);
-    } else { // wkbMultiPolygon
+    } else if (geom->getGeometryType() == wkbMultiPolygon) {
         const auto mp = static_cast_unique_ptr<OGRMultiPolygon>(std::move(geom));
         while (mp->getNumGeometries() > 0) {
             std::unique_ptr<OGRPolygon> polygon{static_cast<OGRPolygon*>(mp->getGeometryRef(0))};
@@ -100,6 +103,8 @@ void CoastlinePolygons::split_geometry(std::unique_ptr<OGRGeometry>&& geom, int 
             polygon->assignSpatialReference(srs.out());
             split_polygon(std::move(polygon), level);
         }
+    } else {
+        assert(false);
     }
 }
 
@@ -247,6 +252,7 @@ void CoastlinePolygons::add_line_to_output(std::unique_ptr<OGRLineString> line, 
 // Add a coastline ring as LineString to output. Segments in this line that are
 // near the southern edge of the map or near the antimeridian are suppressed.
 void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLinearRing* ring) const {
+    assert(ring);
     const int num = ring->getNumPoints();
     assert(num > 2);
 
@@ -307,6 +313,7 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
             assert(geom->getSpatialReference() != nullptr);
             for (const auto& polygon : v) {
                 std::unique_ptr<OGRGeometry> diff{geom->Difference(polygon.get())};
+                assert(diff);
                 // for some reason there is sometimes no srs on the geometries, so we add them on
                 diff->assignSpatialReference(srs.out());
                 geom = std::move(diff);
@@ -322,6 +329,7 @@ void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
                             auto mp = static_cast_unique_ptr<OGRMultiPolygon>(std::move(geom));
                             for (int i = mp->getNumGeometries() - 1; i >= 0; --i) {
                                 auto p = std::unique_ptr<OGRPolygon>(static_cast<OGRPolygon*>(mp->getGeometryRef(i)));
+                                assert(p);
                                 mp->removeGeometry(i, FALSE);
                                 p->assignSpatialReference(mp->getSpatialReference());
                                 if (!antarctica_bogus(p.get())) {
