@@ -74,6 +74,10 @@ in the `doc/html` directory.
 
 A few tests are provided that can be run by calling `ctest`.
 
+The tests themselves are written as shell scripts and can be found in the
+`test/t` directory. Some test use the `nodegrid2opl` helper program found in
+the `src` directory, it has some documentation in the source code.
+
 
 ## The `runtest` script
 

@@ -25,7 +25,8 @@ If you are playing around or want to run **osmcoastline** several times with
 different parameters, run **osmcoastline_filter** once first and use its output
 as the input for **osmcoastline**.
 
-**osmcoastline_filter** can read PBF and XML files, but write only PBF files.
+**osmcoastline_filter** can read any file format supported by libosmium (in
+particular this is PBF, XML, and OPL files), but write only PBF files.
 PBF files are much smaller and faster to read and write than XML files. The
 output file will first contain all ways tagged "natural=coastline", then all
 nodes used for those ways (and all nodes tagged "natural=coastline"). Having

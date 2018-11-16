@@ -41,10 +41,13 @@ coastline changes between different runs of the **osmcoastline** program.
 
 0
   ~ if the segment files are the same
+
 1
   ~ if the segment files are different
+
 3
   ~ if there was a fatal error when running the program
+
 4
   ~ if there was a problem with the command line arguments.
 
