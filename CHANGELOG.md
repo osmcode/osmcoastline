@@ -8,9 +8,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- We have now proper test cases. Just a few, but at least there is a framework
+  for automated testing now.
+
 ### Changed
 
+- Various small changes in the code and manuals to make it clearer.
+
 ### Fixed
+
+- Various small bugs were fixed that lead to crashes in unusual circumstances.
 
 
 ## [2.2.0] - 2018-09-05
