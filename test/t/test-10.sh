@@ -1,7 +1,8 @@
 #!/bin/sh
 #-----------------------------------------------------------------------------
 #
-#  Invalid coastline
+#  This is an especially complex case of the coastline looping back on
+#  itself.
 #
 #-----------------------------------------------------------------------------
 
@@ -34,11 +35,11 @@ set -e
 
 test $RC -eq 2
 
-#grep '^There were 3 warnings.$' $LOG
-#grep '^There were 1 errors.$' $LOG
-#
-#check_count land_polygons 0;
-#check_count error_points 0;
-#check_count error_lines 3;
+grep '^There were 3 warnings.$' $LOG
+grep '^There were 2 errors.$' $LOG
+
+check_count land_polygons 0;
+check_count error_points 2;
+check_count error_lines 4;
 
 #-----------------------------------------------------------------------------
