@@ -36,7 +36,7 @@ class OGRPoint;
 class OGRLineString;
 class OGRPolygon;
 
-using posmap_type = std::multimap<osmium::object_id_type, osmium::Location*>;
+using locmap_type = std::multimap<osmium::object_id_type, osmium::Location*>;
 
 /**
  * The CoastlineRing class models a (possibly unfinished) ring of
@@ -116,14 +116,14 @@ public:
         return m_way_node_list.back().ref();
     }
 
-    /// Position of the first node in the ring.
-    osmium::Location first_position() const noexcept {
+    /// Location of the first node in the ring.
+    osmium::Location first_location() const noexcept {
         assert(!m_way_node_list.empty());
         return m_way_node_list.front().location();
     }
 
-    /// Position of the last node in the ring.
-    osmium::Location last_position() const noexcept {
+    /// Location of the last node in the ring.
+    osmium::Location last_location() const noexcept {
         assert(!m_way_node_list.empty());
         return m_way_node_list.back().location();
     }
@@ -164,10 +164,10 @@ public:
     }
 
     /**
-     * When there are two different nodes with the same position
+     * When there are two different nodes with the same location
      * a situation can arise where a CoastlineRing looks not closed
      * when looking at the node IDs but looks closed then looking
-     * at the positions. To "fix" this we change the node ID of the
+     * at the location. To "fix" this we change the node ID of the
      * last node in the ring to be the same as the first. This
      * method does this.
      */
@@ -177,16 +177,16 @@ public:
     }
 
     /**
-     * Add pointers to the node positions to the given posmap. The
-     * posmap can than later be used to directly put the positions
+     * Add pointers to the node locations to the given locmap. The
+     * locmap can than later be used to directly put the locations
      * into the right place.
      */
-    void setup_positions(posmap_type& posmap);
+    void setup_locations(locmap_type& locmap);
 
     /**
      * Check whether all node locations for the ways are there. This
      * can happen if the input data is missing a node needed for a
-     * way. The function returns the number of missing positions.
+     * way. The function returns the number of missing locations.
      */
     unsigned int check_locations(bool output_missing);
 
@@ -255,7 +255,7 @@ public:
      */
     std::unique_ptr<OGRPoint> ogr_last_point() const;
 
-    double distance_to_start_position(osmium::Location pos) const;
+    double distance_to_start_location(osmium::Location pos) const;
 
     void add_segments_to_vector(std::vector<osmium::UndirectedSegment>& segments) const;
 
@@ -264,7 +264,7 @@ public:
 }; // class CoastlineRing
 
 inline bool operator<(const CoastlineRing& lhs, const CoastlineRing& rhs) noexcept {
-    return lhs.first_position() < rhs.first_position();
+    return lhs.first_location() < rhs.first_location();
 }
 
 #endif // COASTLINE_RING_HPP

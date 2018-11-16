@@ -113,9 +113,9 @@ void CoastlineRingCollection::add_partial_ring(const osmium::Way& way) {
     }
 }
 
-void CoastlineRingCollection::setup_positions(posmap_type& posmap) {
+void CoastlineRingCollection::setup_locations(locmap_type& locmap) {
     for (const auto& ring : m_list) {
-        ring->setup_positions(posmap);
+        ring->setup_locations(locmap);
     }
 }
 
@@ -321,8 +321,8 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
 
 bool CoastlineRingCollection::close_antarctica_ring(int epsg) {
     for (const auto& ring : m_list) {
-        const osmium::Location fpos = ring->first_position();
-        const osmium::Location lpos = ring->last_position();
+        const osmium::Location fpos = ring->first_location();
+        const osmium::Location lpos = ring->last_location();
         if (fpos.lon() > 179.99 && lpos.lon() < -179.99 &&
             fpos.lat() <  -77.0 && fpos.lat() >  -78.0 &&
             lpos.lat() <  -77.0 && lpos.lat() >  -78.0) {
@@ -342,7 +342,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
     // Create vector with all possible combinations of connections between rings.
     for (const auto& end_node : m_end_nodes) {
         for (const auto& start_node : m_start_nodes) {
-            const double distance = (*start_node.second)->distance_to_start_position((*end_node.second)->last_position());
+            const double distance = (*start_node.second)->distance_to_start_location((*end_node.second)->last_location());
             if (distance < max_distance) {
                 connections.emplace_back(distance, end_node.first, start_node.first);
             }
@@ -377,10 +377,10 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
             output.add_error_point(e->ogr_last_point(), "fixed_end_point", e->last_node_id());
             output.add_error_point(s->ogr_first_point(), "fixed_end_point", s->first_node_id());
 
-            if (e->last_position() != s->first_position()) {
+            if (e->last_location() != s->first_location()) {
                 std::unique_ptr<OGRLineString> linestring{new OGRLineString};
-                linestring->addPoint(e->last_position().lon(), e->last_position().lat());
-                linestring->addPoint(s->first_position().lon(), s->first_position().lat());
+                linestring->addPoint(e->last_location().lon(), e->last_location().lat());
+                linestring->addPoint(s->first_location().lon(), s->first_location().lat());
                 output.add_error_line(std::move(linestring), "added_line");
             }
 
@@ -395,7 +395,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
                 e->join_over_gap(*s);
 
                 m_list.erase(sit->second);
-                if (e->first_position() == e->last_position()) {
+                if (e->first_location() == e->last_location()) {
                     output.add_error_point(e->ogr_first_point(), "double_node", e->first_node_id());
                     m_start_nodes.erase(e->first_node_id());
                     m_end_nodes.erase(eit);
@@ -432,7 +432,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
 
     // put all rings in a vector...
     for (const auto& ring : m_list) {
-        rings.emplace_back(ring->first_position(), ring.get());
+        rings.emplace_back(ring->first_location(), ring.get());
     }
 
     // comparison function that ignores the second part of the pair
@@ -440,7 +440,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
         return a.first < b.first;
     };
 
-    // ... and sort it by position of the first node in the ring (this allows binary search in it)
+    // ... and sort it by location of the first node in the ring (this allows binary search in it)
     std::sort(rings.begin(), rings.end(), comp);
 
     // go through all the polygons that have been created before and mark the outer rings

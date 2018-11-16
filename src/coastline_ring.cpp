@@ -30,25 +30,25 @@
 #include <iostream>
 #include <utility>
 
-void CoastlineRing::setup_positions(posmap_type& posmap) {
+void CoastlineRing::setup_locations(locmap_type& locmap) {
     for (auto& wn : m_way_node_list) {
-        posmap.insert(std::make_pair(wn.ref(), &(wn.location())));
+        locmap.insert(std::make_pair(wn.ref(), &(wn.location())));
     }
 }
 
 unsigned int CoastlineRing::check_locations(bool output_missing) {
-    unsigned int missing_positions = 0;
+    unsigned int missing_locations = 0;
 
     for (const auto& wn : m_way_node_list) {
         if (!wn.location()) {
-            ++missing_positions;
+            ++missing_locations;
             if (output_missing) {
-                std::cerr << "Missing position of node " << wn.ref() << "\n";
+                std::cerr << "Missing location of node " << wn.ref() << "\n";
             }
         }
     }
 
-    return missing_positions;
+    return missing_locations;
 }
 
 void CoastlineRing::add_at_front(const osmium::Way& way) {
@@ -76,7 +76,7 @@ void CoastlineRing::join(const CoastlineRing& other) {
 }
 
 void CoastlineRing::join_over_gap(const CoastlineRing& other) {
-    if (last_position() != other.first_position()) {
+    if (last_location() != other.first_location()) {
         m_way_node_list.push_back(other.m_way_node_list.front());
     }
 
@@ -88,7 +88,7 @@ void CoastlineRing::join_over_gap(const CoastlineRing& other) {
 }
 
 void CoastlineRing::close_ring() {
-    if (first_position() != last_position()) {
+    if (first_location() != last_location()) {
         m_way_node_list.push_back(m_way_node_list.front());
     }
     m_fixed = true;
@@ -153,7 +153,7 @@ std::unique_ptr<OGRPoint> CoastlineRing::ogr_last_point() const {
 
 // Pythagoras doesn't work on a round earth but that is ok here, we only need a
 // rough measure anyway
-double CoastlineRing::distance_to_start_position(osmium::Location pos) const {
+double CoastlineRing::distance_to_start_location(osmium::Location pos) const {
     assert(!m_way_node_list.empty());
     const osmium::Location p = m_way_node_list.front().location();
     return (pos.lon() - p.lon()) * (pos.lon() - p.lon()) +

@@ -103,7 +103,7 @@ public:
         return m_fixed_rings;
     }
 
-    void setup_positions(posmap_type& posmap);
+    void setup_locations(locmap_type& locmap);
 
     unsigned int check_locations(bool output_missing);
 

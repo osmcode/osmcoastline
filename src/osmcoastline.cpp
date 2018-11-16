@@ -245,8 +245,8 @@ int main(int argc, char *argv[]) {
         vout << memory_usage();
 
         vout << "Reading nodes (2nd pass through input file)...\n";
-        posmap_type posmap{};
-        coastline_rings.setup_positions(posmap);
+        locmap_type locmap{};
+        coastline_rings.setup_locations(locmap);
         osmium::geom::OGRFactory<> factory;
         osmium::io::Reader reader2{infile, osmium::osm_entity_bits::node};
         while (const auto buffer = reader2.read()) {
@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                const auto ret = posmap.equal_range(node.id());
+                const auto ret = locmap.equal_range(node.id());
                 for (auto it = ret.first; it != ret.second; ++it) {
                     *(it->second) = node.location();
                 }
@@ -271,13 +271,13 @@ int main(int argc, char *argv[]) {
         std::exit(return_code_fatal);
     }
 
-    vout << "Checking for missing positions...\n";
+    vout << "Checking for missing locations...\n";
     unsigned int missing_locations = coastline_rings.check_locations(options.debug);
     if (missing_locations) {
         vout << "  There are " << missing_locations << " locations missing. Check that input file contains all nodes needed.\n";
         std::exit(return_code_error);
     } else {
-        vout << "  All positions are there.\n";
+        vout << "  All locations are there.\n";
     }
 
     vout << memory_usage();
