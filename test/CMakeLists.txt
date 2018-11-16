@@ -8,6 +8,8 @@
 
 file(GLOB TEST_SCRIPTS t/*.sh)
 
+list(SORT TEST_SCRIPTS)
+
 foreach(file ${TEST_SCRIPTS})
     string(REGEX REPLACE "^.*/(.+).sh$" "\\1" tid ${file})
 
