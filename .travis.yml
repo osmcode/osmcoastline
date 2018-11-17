@@ -6,161 +6,119 @@
 
 language: generic
 
-dist: trusty
+dist: xenial
 
 #-----------------------------------------------------------------------------
 
 matrix:
   include:
 
-    # 1/ Linux Clang Builds
-    - os: linux
-      compiler: linux-clang38-release
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['clang-3.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
-      env: CXX='clang++-3.8' BUILD_TYPE='Release'
-
+    # Linux Clang Builds
     - os: linux
       compiler: linux-clang38-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
           packages: ['clang-3.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
       env: CXX='clang++-3.8' BUILD_TYPE='Dev'
-
 
     - os: linux
       compiler: linux-clang39-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
           packages: ['clang-3.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
       env: CXX='clang++-3.9' BUILD_TYPE='Dev'
-
 
     - os: linux
       compiler: linux-clang40-dev
       addons:
         apt:
-          sources: ['llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test']
           packages: ['clang-4.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
       env: CXX='clang++-4.0' BUILD_TYPE='Dev'
-
 
     - os: linux
       compiler: linux-clang50-dev
       addons:
         apt:
-          sources: ['llvm-toolchain-trusty-5.0', 'ubuntu-toolchain-r-test']
           packages: ['clang-5.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
       env: CXX='clang++-5.0' BUILD_TYPE='Dev'
-
-
-    - os: linux
-      compiler: linux-clang60-release
-      addons:
-        apt:
-          sources: ['llvm-toolchain-trusty-6.0', 'ubuntu-toolchain-r-test']
-          packages: ['clang-6.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
-      env: CXX='clang++-6.0' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-clang60-dev
       addons:
         apt:
-          sources: ['llvm-toolchain-trusty-6.0', 'ubuntu-toolchain-r-test']
           packages: ['clang-6.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin', 'clang-tidy-6.0']
       env: CXX='clang++-6.0' BUILD_TYPE='Dev' CLANG_TIDY=clang-tidy-6.0
 
-
-    # 2/ Linux GCC Builds
     - os: linux
-      compiler: linux-gcc48-release
+      compiler: linux-clang60-release
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
-      env: CXX='g++-4.8' CXXFLAGS='-Wno-return-type' BUILD_TYPE='Release'
+          packages: ['clang-6.0', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
+      env: CXX='clang++-6.0' BUILD_TYPE='Release'
 
+
+    # Linux GCC Builds
     - os: linux
       compiler: linux-gcc48-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.8', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
-      env: CXX='g++-4.8' CXXFLAGS='-Wno-return-type' BUILD_TYPE='Dev'
-
+      env: CXX='g++-4.8' BUILD_TYPE='Dev' CXXFLAGS='-Wno-return-type'
 
     - os: linux
       compiler: linux-gcc49-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
       env: CXX='g++-4.9' BUILD_TYPE='Dev'
-
 
     - os: linux
       compiler: linux-gcc5-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-5', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
       env: CXX='g++-5' BUILD_TYPE='Dev'
-
-
-    - os: linux
-      compiler: linux-gcc6-release
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-6', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
-      env: CXX='g++-6' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-gcc6-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
+          sources: [ 'ubuntu-toolchain-r-test' ]
           packages: ['g++-6', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
       env: CXX='g++-6' BUILD_TYPE='Dev'
-
-
-    - os: linux
-      compiler: linux-gcc7-release
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-7', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
-      env: CXX='g++-7' BUILD_TYPE='Release'
 
     - os: linux
       compiler: linux-gcc7-dev
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
+          sources: [ 'ubuntu-toolchain-r-test' ]
           packages: ['g++-7', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
       env: CXX='g++-7' BUILD_TYPE='Dev'
 
+    - os: linux
+      compiler: linux-gcc7-release
+      addons:
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test' ]
+          packages: ['g++-7', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
+      env: CXX='g++-7' BUILD_TYPE='Release'
 
-    # 3/ OSX Clang Builds
+
+    # OSX Clang Builds
     - os: osx
       osx_image: xcode9.4
       compiler: xcode9-clang-dev
       env: CXX='clang++' BUILD_TYPE='Dev'
 
+    - os: osx
+      osx_image: xcode10.1
+      compiler: xcode10-clang-dev
+      env: CXX='clang++' BUILD_TYPE='Dev'
 
     - os: osx
       osx_image: xcode10.1
       compiler: xcode10-clang-release
       env: CXX='clang++' BUILD_TYPE='Release'
-
-    - os: osx
-      osx_image: xcode10.1
-      compiler: xcode10-clang-dev
-      env: CXX='clang++' BUILD_TYPE='Dev'
 
 #-----------------------------------------------------------------------------
 
