@@ -45,4 +45,7 @@ check_count error_lines 1;
 echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL \
     | grep -F 'POLYGON((1.05 1.99, 1.14 1.99, 1.23 1.98, 1.25 1.97, 1.21 1.94, 1.08 1.94, 1.04 1.97, 1.05 1.99), (1.1 1.97, 1.12 1.96, 1.15 1.96, 1.17 1.97, 1.1 1.97))'
 
+echo "SELECT AsText(geometry), osm_id, error FROM error_lines;" | $SQL \
+    | grep -F 'LINESTRING(1.1 1.97, 1.17 1.97, 1.15 1.96, 1.12 1.96, 1.1 1.97)|201|questionable'
+
 #-----------------------------------------------------------------------------
