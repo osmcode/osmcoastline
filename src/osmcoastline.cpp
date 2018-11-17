@@ -86,7 +86,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     }
     std::unique_ptr<OGRGeometry> mega_geometry{OGRGeometryFactory::organizePolygons(&all_polygons[0], all_polygons.size(), &is_valid, options)};
     if (debug) {
-        std::cerr << "organizePolygons() done\n";
+        std::cerr << "organizePolygons() done (" << (is_valid ? "valid" : "invalid") << ")\n";
     }
 
     if (!mega_geometry) {
