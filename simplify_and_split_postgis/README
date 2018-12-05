@@ -46,9 +46,9 @@ tolerances, etc.:
 
 5. For every zoom level you want, you have to prepare tile tables:
 
-   # psql -d coastlines -v zoom=3 setup_bbox_tiles.sql
-   # psql -d coastlines -v zoom=5 setup_bbox_tiles.sql
-   # psql -d coastlines -v zoom=6 setup_bbox_tiles.sql
+   # psql -d coastlines -v zoom=3 -f setup_bbox_tiles.sql
+   # psql -d coastlines -v zoom=5 -f setup_bbox_tiles.sql
+   # psql -d coastlines -v zoom=6 -f setup_bbox_tiles.sql
 
 6. For every simplification step you need, do the simplification:
 
