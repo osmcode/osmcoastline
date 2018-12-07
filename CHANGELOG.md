@@ -8,6 +8,15 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+
+## [2.2.1] - 2018-12-07
+
+### Added
+
 - We have now proper test cases. Just a few, but at least there is a framework
   for automated testing now.
 
