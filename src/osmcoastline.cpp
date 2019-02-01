@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
         vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
     }
 
-    if (options.output_polygons != output_polygon_type::none) {
+    if (options.output_polygons != output_polygon_type::none || options.output_lines) {
         try {
             vout << "Create polygons...\n";
             CoastlinePolygons coastline_polygons{create_polygons(coastline_rings, output_database, &warnings, &errors), \
@@ -345,34 +345,36 @@ int main(int argc, char *argv[]) {
                 vout << "Not writing coastlines as lines (Use --output-lines/-l if you want this).\n";
             }
 
-            if (options.epsg == 4326) {
-                vout << "Checking for questionable input data...\n";
-                const unsigned int questionable = coastline_rings.output_questionable(coastline_polygons, output_database);
-                warnings += questionable;
-                vout << "  Found " << questionable << " rings in input data.\n";
-            } else {
-                vout << "Not performing check for questionable input data, because it only works in EPSG:4326...\n";
-            }
+            if (options.output_polygons != output_polygon_type::none) {
+                if (options.epsg == 4326) {
+                    vout << "Checking for questionable input data...\n";
+                    const unsigned int questionable = coastline_rings.output_questionable(coastline_polygons, output_database);
+                    warnings += questionable;
+                    vout << "  Found " << questionable << " rings in input data.\n";
+                } else {
+                    vout << "Not performing check for questionable input data, because it only works in EPSG:4326...\n";
+                }
 
-            if (options.split_large_polygons) {
-                vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
-                vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
-                coastline_polygons.split();
-                stats.land_polygons_after_split = coastline_polygons.num_polygons();
-            }
+                if (options.split_large_polygons) {
+                    vout << "Split polygons with more than " << options.max_points_in_polygon << " points... (Use --max-points/-m to change this. Set to 0 not to split at all.)\n";
+                    vout << "  Using overlap of " << options.bbox_overlap << " (Set this with --bbox-overlap/-b).\n";
+                    coastline_polygons.split();
+                    stats.land_polygons_after_split = coastline_polygons.num_polygons();
+                }
 
-            vout << "Checking and making polygons valid...\n";
-            warnings += coastline_polygons.check_polygons();
+                vout << "Checking and making polygons valid...\n";
+                warnings += coastline_polygons.check_polygons();
 
-            if (options.output_polygons == output_polygon_type::land ||
-                options.output_polygons == output_polygon_type::both) {
-                vout << "Writing out land polygons...\n";
-                coastline_polygons.output_land_polygons(options.output_polygons == output_polygon_type::both);
-            }
-            if (options.output_polygons == output_polygon_type::water ||
-                options.output_polygons == output_polygon_type::both) {
-                vout << "Writing out water polygons...\n";
-                coastline_polygons.output_water_polygons();
+                if (options.output_polygons == output_polygon_type::land ||
+                    options.output_polygons == output_polygon_type::both) {
+                    vout << "Writing out land polygons...\n";
+                    coastline_polygons.output_land_polygons(options.output_polygons == output_polygon_type::both);
+                }
+                if (options.output_polygons == output_polygon_type::water ||
+                    options.output_polygons == output_polygon_type::both) {
+                    vout << "Writing out water polygons...\n";
+                    coastline_polygons.output_water_polygons();
+                }
             }
         } catch (const std::runtime_error& e) {
             vout << e.what() << '\n';
