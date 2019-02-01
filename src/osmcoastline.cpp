@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
             ++errors;
         }
     } else {
-        vout << "Not creating polygons (Because you set the --no-polygons/-p option).\n";
+        vout << "Not creating polygons (Because you used the --output-polygons=none option).\n";
     }
 
     vout << memory_usage();
