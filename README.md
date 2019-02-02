@@ -263,16 +263,16 @@ coastline that can remain open. The coastline starts somewhere around 180°
 East, 77° South and ends around 180° West and 77° South. OSMCoastline will find
 those open ends and connect them by adding several "nodes" forming a proper
 polygon. Depending on the output projection (EPSG:4326 or EPSG:3857) this
-polygon will either go to the South Pole or to the 85.0511° line.
+polygon will either extend to the South Pole or to the 85.0511° line.
 
 
 ## Filtering
 
 The program `osmcoastline_filter` can be used to filter from an OSM planet file
-all nodes and ways needed for building the coastlines and writing them out in
-OSM format. This file will be a lot smaller (less than 1%) than the original
-planet file, but it contains everything needed to assemble the coastline
-polygons.
+all nodes and ways needed for building the coastlines and write them out in
+OSM format. The resulting file will be a lot smaller (less than 1%) than the
+original planet file, but it contains everything needed to assemble the
+coastline polygons.
 
 If you are playing around or want to run `osmcoastline` several times with
 different parameters, run `osmcoastline_filter` once first and use its output
