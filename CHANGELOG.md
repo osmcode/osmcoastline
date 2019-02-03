@@ -13,6 +13,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 
+## [2.2.2] - 2018-02-03
+
+### Fixed
+
+- Make `--output-lines` work even if `--output-polygons` is set to `none`.
+
+
 ## [2.2.1] - 2018-12-07
 
 ### Added
