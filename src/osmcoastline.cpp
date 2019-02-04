@@ -153,6 +153,15 @@ std::string memory_usage() {
 
 /* ================================================== */
 
+std::unique_ptr<OutputDatabase> open_output_database(const std::string& name, const bool create_index) try {
+    return std::unique_ptr<OutputDatabase>{new OutputDatabase{name, srs, create_index}};
+} catch (const std::exception& e) {
+    std::cerr << e.what() << '\n';
+    std::exit(return_code_fatal);
+}
+
+/* ================================================== */
+
 int main(int argc, char *argv[]) {
     Stats stats{};
     unsigned int warnings = 0;
@@ -201,7 +210,8 @@ int main(int argc, char *argv[]) {
     } else {
         vout << "Will NOT create geometry index (because you told me to using --no-index/-i).\n";
     }
-    OutputDatabase output_database{options.output_database, srs, options.create_index};
+
+    auto output_database = open_output_database(options.output_database, options.create_index);
 
     // The collection of all coastline rings we will be filling and then
     // operating on.
@@ -253,7 +263,7 @@ int main(int argc, char *argv[]) {
             for (const auto& node : buffer.select<osmium::Node>()) {
                 if (node.tags().has_tag("natural", "coastline")) {
                     try {
-                        output_database.add_error_point(factory.create_point(node), "tagged_node", node.id());
+                        output_database->add_error_point(factory.create_point(node), "tagged_node", node.id());
                     } catch (const osmium::geometry_error&) {
                         std::cerr << "Ignoring illegal geometry for node " << node.id() << ".\n";
                     }
@@ -267,7 +277,7 @@ int main(int argc, char *argv[]) {
         }
         reader2.close();
     } catch (const std::exception& e) {
-        vout << e.what() << '\n';
+        std::cerr << e.what() << '\n';
         std::exit(return_code_fatal);
     }
 
@@ -282,10 +292,10 @@ int main(int argc, char *argv[]) {
 
     vout << memory_usage();
 
-    output_database.set_options(options);
+    output_database->set_options(options);
 
     vout << "Check line segments for intersections and overlaps...\n";
-    warnings += coastline_rings.check_for_intersections(output_database, segments_fd);
+    warnings += coastline_rings.check_for_intersections(*output_database, segments_fd);
 
     if (segments_fd != -1) {
         ::close(segments_fd);
@@ -301,7 +311,7 @@ int main(int argc, char *argv[]) {
     if (options.close_rings) {
         vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
         vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
-        coastline_rings.close_rings(output_database, options.debug, options.close_distance);
+        coastline_rings.close_rings(*output_database, options.debug, options.close_distance);
         stats.rings_fixed = coastline_rings.num_fixed_rings();
         errors += coastline_rings.num_fixed_rings();
         vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
@@ -313,7 +323,7 @@ int main(int argc, char *argv[]) {
 
     if (options.output_rings) {
         vout << "Writing out rings... (Because you gave the --output-rings/-r option.)\n";
-        warnings += coastline_rings.output_rings(output_database);
+        warnings += coastline_rings.output_rings(*output_database);
     } else {
         vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
     }
@@ -321,8 +331,8 @@ int main(int argc, char *argv[]) {
     if (options.output_polygons != output_polygon_type::none || options.output_lines) {
         try {
             vout << "Create polygons...\n";
-            CoastlinePolygons coastline_polygons{create_polygons(coastline_rings, output_database, &warnings, &errors), \
-                                                 output_database, \
+            CoastlinePolygons coastline_polygons{create_polygons(coastline_rings, *output_database, &warnings, &errors), \
+                                                 *output_database, \
                                                  options.bbox_overlap, \
                                                  options.max_points_in_polygon};
 
@@ -348,7 +358,7 @@ int main(int argc, char *argv[]) {
             if (options.output_polygons != output_polygon_type::none) {
                 if (options.epsg == 4326) {
                     vout << "Checking for questionable input data...\n";
-                    const unsigned int questionable = coastline_rings.output_questionable(coastline_polygons, output_database);
+                    const unsigned int questionable = coastline_rings.output_questionable(coastline_polygons, *output_database);
                     warnings += questionable;
                     vout << "  Found " << questionable << " rings in input data.\n";
                 } else {
@@ -387,8 +397,8 @@ int main(int argc, char *argv[]) {
     vout << memory_usage();
 
     vout << "Committing database transactions...\n";
-    output_database.set_meta(vout.runtime(), osmium::MemoryUsage{}.peak(), stats);
-    output_database.commit();
+    output_database->set_meta(vout.runtime(), osmium::MemoryUsage{}.peak(), stats);
+    output_database->commit();
     vout << "All done.\n";
     vout << memory_usage();
 
