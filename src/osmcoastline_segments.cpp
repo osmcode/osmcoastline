@@ -162,10 +162,10 @@ int main(int argc, char *argv[]) {
         std::exit(return_code_cmdline);
     }
 
-    segvec removed_segments;
-    segvec added_segments;
-
     try {
+        segvec removed_segments;
+        segvec added_segments;
+
         InputFile file1{argv[optind]};
         InputFile file2{argv[optind + 1]};
 
@@ -174,25 +174,25 @@ int main(int argc, char *argv[]) {
 
         std::set_difference(m1.cbegin(), m1.cend(), m2.cbegin(), m2.cend(), std::back_inserter(removed_segments));
         std::set_difference(m2.cbegin(), m2.cend(), m1.cbegin(), m1.cend(), std::back_inserter(added_segments));
-    } catch (const std::runtime_error& e) {
-        std::cerr << e.what() << "\n";
+
+        if (dump) {
+            std::cout << "Removed:\n";
+            for (const auto& segment : removed_segments) {
+                std::cout << "  " << segment << "\n";
+            }
+
+            std::cout << "Added:\n";
+            for (const auto& segment : added_segments) {
+                std::cout << "  " << segment << "\n";
+            }
+        } else if (!geom.empty()) {
+            output_ogr(geom, format, removed_segments, added_segments);
+        }
+
+        return (removed_segments.empty() && added_segments.empty()) ? 0 : 1;
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
         std::exit(return_code_fatal);
     }
-
-    if (dump) {
-        std::cout << "Removed:\n";
-        for (const auto& segment : removed_segments) {
-            std::cout << "  " << segment << "\n";
-        }
-
-        std::cout << "Added:\n";
-        for (const auto& segment : added_segments) {
-            std::cout << "  " << segment << "\n";
-        }
-    } else if (!geom.empty()) {
-        output_ogr(geom, format, removed_segments, added_segments);
-    }
-
-    return (removed_segments.empty() && added_segments.empty()) ? 0 : 1;
 }
 

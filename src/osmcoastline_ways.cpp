@@ -129,27 +129,32 @@ int main(int argc, char* argv[]) {
 
     CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");
 
-    const std::string input_osm_filename{argv[1]};
+    try {
+        const std::string input_osm_filename{argv[1]};
 
-    std::string output_db_filename{"coastline-ways.db"};
-    if (argc >= 3) {
-        output_db_filename = argv[2];
+        std::string output_db_filename{"coastline-ways.db"};
+        if (argc >= 3) {
+            output_db_filename = argv[2];
+        }
+
+        index_type index_pos;
+        index_type index_neg;
+        location_handler_type location_handler{index_pos, index_neg};
+
+        osmium::io::File infile{input_osm_filename};
+        osmium::io::Reader reader1{infile, osmium::osm_entity_bits::node};
+        osmium::apply(reader1, location_handler);
+        reader1.close();
+
+        CoastlineWaysHandler coastline_ways_handler{output_db_filename};
+        osmium::io::Reader reader2{infile, osmium::osm_entity_bits::way};
+        osmium::apply(reader2, location_handler, coastline_ways_handler);
+        reader2.close();
+
+        std::cerr << "Sum of way lengths: " << std::fixed << (coastline_ways_handler.sum_length() / 1000) << "km\n";
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        std::exit(return_code_fatal);
     }
-
-    index_type index_pos;
-    index_type index_neg;
-    location_handler_type location_handler{index_pos, index_neg};
-
-    osmium::io::File infile{input_osm_filename};
-    osmium::io::Reader reader1{infile, osmium::osm_entity_bits::node};
-    osmium::apply(reader1, location_handler);
-    reader1.close();
-
-    CoastlineWaysHandler coastline_ways_handler{output_db_filename};
-    osmium::io::Reader reader2{infile, osmium::osm_entity_bits::way};
-    osmium::apply(reader2, location_handler, coastline_ways_handler);
-    reader2.close();
-
-    std::cerr << "Sum of way lengths: " << std::fixed << (coastline_ways_handler.sum_length() / 1000) << "km\n";
 }
 

@@ -96,11 +96,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // The vout object is an output stream we can write to instead of
-    // std::cerr. Nothing is written if we are not in verbose mode.
-    // The running time will be prepended to output lines.
-    osmium::util::VerboseOutput vout{verbose};
-
     if (output_filename.empty()) {
         std::cerr << "Missing -o/--output=OSMFILE option\n";
         std::exit(return_code_cmdline);
@@ -111,15 +106,20 @@ int main(int argc, char* argv[]) {
         std::exit(return_code_cmdline);
     }
 
-    osmium::io::Header header;
-    header.set("generator", std::string{"osmcoastline_filter/"} + get_osmcoastline_version());
-    header.add_box(osmium::Box{-180.0, -90.0, 180.0, 90.0});
-
-    osmium::io::File infile{argv[optind]};
-
-    vout << "Started osmcoastline_filter " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n';
-
     try {
+        // The vout object is an output stream we can write to instead of
+        // std::cerr. Nothing is written if we are not in verbose mode.
+        // The running time will be prepended to output lines.
+        osmium::util::VerboseOutput vout{verbose};
+
+        osmium::io::Header header;
+        header.set("generator", std::string{"osmcoastline_filter/"} + get_osmcoastline_version());
+        header.add_box(osmium::Box{-180.0, -90.0, 180.0, 90.0});
+
+        osmium::io::File infile{argv[optind]};
+
+        vout << "Started osmcoastline_filter " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n';
+
         osmium::io::Writer writer{output_filename, header};
         auto output_it = osmium::io::make_output_iterator(writer);
 
@@ -169,16 +169,16 @@ int main(int argc, char* argv[]) {
         }
 
         writer.close();
-    } catch (const osmium::io_error& e) {
-        std::cerr << "io error: " << e.what() << "'\n";
-        std::exit(return_code_fatal);
-    }
 
-    vout << "All done.\n";
-    osmium::MemoryUsage mem;
-    if (mem.current() > 0) {
-        vout << "Memory used: current: " << mem.current() << " MBytes\n"
-             << "             peak:    " << mem.peak() << " MBytes\n";
+        vout << "All done.\n";
+        osmium::MemoryUsage mem;
+        if (mem.current() > 0) {
+            vout << "Memory used: current: " << mem.current() << " MBytes\n"
+                << "             peak:    " << mem.peak() << " MBytes\n";
+        }
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        std::exit(return_code_fatal);
     }
 }
 
