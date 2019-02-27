@@ -13,7 +13,19 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 
-## [2.2.3] - 2018-02-06
+## [2.2.4] - 2019-02-27
+
+### Changed
+
+- Also look for newer clang-tidy versions in CMake config.
+
+### Fixed
+
+- Put Antarctic closure to exactly +/- 180 degree longitude.
+- Add try/catch around most of main so we don't end with exception.
+
+
+## [2.2.3] - 2019-02-06
 
 ### Fixed
 
@@ -21,7 +33,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Better error reporting on some exceptions.
 
 
-## [2.2.2] - 2018-02-03
+## [2.2.2] - 2019-02-03
 
 ### Fixed
 
@@ -148,7 +160,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Added man pages
 
 
-[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.2.3...HEAD
+[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.2.4...HEAD
+[2.2.4]: https://github.com/osmcode/osmium-tool/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/osmcode/osmium-tool/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/osmcode/osmium-tool/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/osmcode/osmium-tool/compare/v2.2.0...v2.2.1
