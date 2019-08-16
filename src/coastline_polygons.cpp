@@ -35,7 +35,7 @@ class OGRSpatialReference;
 extern SRS srs;
 extern bool debug;
 
-std::unique_ptr<OGRPolygon> CoastlinePolygons::create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand) const {
+static std::unique_ptr<OGRPolygon> create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand) {
     OGREnvelope e;
 
     e.MinX = x1 - expand;
@@ -58,6 +58,31 @@ std::unique_ptr<OGRPolygon> CoastlinePolygons::create_rectangular_polygon(double
     polygon->assignSpatialReference(srs.out());
 
     return polygon;
+}
+
+static bool add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2) {
+    // segments along southern edge of the map are not added to line output
+    if (point1->getY() < srs.min_y() && point2->getY() < srs.min_y()) {
+        if (debug) {
+            std::cerr << "Suppressing segment (" << point1->getX() << " " << point1->getY() << ", " << point2->getX() << " " << point2->getY() << ") near southern edge of map.\n";
+        }
+        return false;
+    }
+
+    // segments along antimeridian are not added to line output
+    if ((point1->getX() > srs.max_x() && point2->getX() > srs.max_x()) ||
+        (point1->getX() < srs.min_x() && point2->getX() < srs.min_x())) {
+        if (debug) {
+            std::cerr << "Suppressing segment (" << point1->getX() << " " << point1->getY() << ", " << point2->getX() << " " << point2->getY() << ") near antimeridian.\n";
+        }
+        return false;
+    }
+
+    if (line->getNumPoints() == 0) {
+        line->addPoint(point1);
+    }
+    line->addPoint(point2);
+    return true;
 }
 
 unsigned int CoastlinePolygons::fix_direction() {
@@ -216,31 +241,6 @@ void CoastlinePolygons::output_land_polygons(bool make_copy) {
         }
         m_polygons.clear();
     }
-}
-
-bool CoastlinePolygons::add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2) const {
-    // segments along southern edge of the map are not added to line output
-    if (point1->getY() < srs.min_y() && point2->getY() < srs.min_y()) {
-        if (debug) {
-            std::cerr << "Suppressing segment (" << point1->getX() << " " << point1->getY() << ", " << point2->getX() << " " << point2->getY() << ") near southern edge of map.\n";
-        }
-        return false;
-    }
-
-    // segments along antimeridian are not added to line output
-    if ((point1->getX() > srs.max_x() && point2->getX() > srs.max_x()) ||
-        (point1->getX() < srs.min_x() && point2->getX() < srs.min_x())) {
-        if (debug) {
-            std::cerr << "Suppressing segment (" << point1->getX() << " " << point1->getY() << ", " << point2->getX() << " " << point2->getY() << ") near antimeridian.\n";
-        }
-        return false;
-    }
-
-    if (line->getNumPoints() == 0) {
-        line->addPoint(point1);
-    }
-    line->addPoint(point2);
-    return true;
 }
 
 void CoastlinePolygons::add_line_to_output(std::unique_ptr<OGRLineString> line, OGRSpatialReference* srs) const {

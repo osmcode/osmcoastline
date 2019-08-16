@@ -34,9 +34,7 @@ enum class output_polygon_type {
 /**
  * This class encapsulates the command line parsing.
  */
-class Options {
-
-public:
+struct Options {
 
     /// Input OSM file name.
     std::string inputfile;
@@ -97,17 +95,6 @@ public:
 
     Options(int argc, char* argv[]);
 
-private:
-
-    /**
-     * Get EPSG code from text. This method knows about a few common cases
-     * of specifying WGS84 or the "Web Mercator" SRS. More are currently
-     * not supported.
-     */
-    int get_epsg(const char* text);
-
-    void print_help() const;
-
-}; // class Options
+}; // struct Options
 
 #endif // OPTIONS_HPP

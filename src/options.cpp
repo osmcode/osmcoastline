@@ -33,6 +33,50 @@
 #define strcasecmp _stricmp
 #endif
 
+static void print_help() {
+    std::cout << "Usage: osmcoastline [OPTIONS] OSMFILE\n"
+              << "\nOptions:\n"
+              << "  -h, --help                 - This help message\n"
+              << "  -c, --close-distance=DIST  - Distance between nodes under which open rings\n"
+              << "                               are closed (0 - disable closing of rings)\n"
+              << "  -b, --bbox-overlap=OVERLAP - Set overlap when splitting polygons\n"
+              << "  -i, --no-index             - Do not create spatial indexes in output db\n"
+              << "  -d, --debug                - Enable debugging output\n"
+              << "  -f, --overwrite            - Overwrite output file if it already exists\n"
+              << "  -l, --output-lines         - Output coastlines as lines to database file\n"
+              << "  -m, --max-points=NUM       - Split lines/polygons with more than this many\n"
+              << "                               points (0 - disable splitting)\n"
+              << "  -o, --output-database=FILE - Spatialite database file for output\n"
+              << "  -p, --output-polygons=land|water|both|none\n"
+              << "                             - Which polygons to write out (default: land)\n"
+              << "  -r, --output-rings         - Output rings to database file\n"
+              << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
+              << "  -S, --write-segments=FILE  - Write segments to given file\n"
+              << "  -v, --verbose              - Verbose output\n"
+              << "  -V, --version              - Show version and exit\n"
+              << "\n";
+}
+
+/**
+ * Get EPSG code from text. This method knows about a few common cases
+ * of specifying WGS84 or the "Web Mercator" SRS. More are currently
+ * not supported.
+ */
+static int get_epsg(const char* text) {
+    if (!strcasecmp(text, "WGS84") || !std::strcmp(text, "4326")) {
+        return 4326;
+    }
+    if (!std::strcmp(text, "3857")) {
+        return 3857;
+    }
+    if (!std::strcmp(text, "3785") || !std::strcmp(text, "900913")) {
+        std::cerr << "Please use code 3857 for the 'Web Mercator' projection!\n";
+        std::exit(return_code_cmdline);
+    }
+    std::cerr << "Unknown SRS '" << text << "'. Currently only 4326 (WGS84) and 3857 ('Web Mercator') are supported.\n";
+    std::exit(return_code_cmdline);
+}
+
 Options::Options(int argc, char* argv[]) {
     static struct option long_options[] = {
         {"bbox-overlap",    required_argument, nullptr, 'b'},
@@ -156,44 +200,5 @@ Options::Options(int argc, char* argv[]) {
     }
 
     inputfile = argv[optind];
-}
-
-int Options::get_epsg(const char* text) {
-    if (!strcasecmp(text, "WGS84") || !std::strcmp(text, "4326")) {
-        return 4326;
-    }
-    if (!std::strcmp(text, "3857")) {
-        return 3857;
-    }
-    if (!std::strcmp(text, "3785") || !std::strcmp(text, "900913")) {
-        std::cerr << "Please use code 3857 for the 'Web Mercator' projection!\n";
-        std::exit(return_code_cmdline);
-    }
-    std::cerr << "Unknown SRS '" << text << "'. Currently only 4326 (WGS84) and 3857 ('Web Mercator') are supported.\n";
-    std::exit(return_code_cmdline);
-}
-
-void Options::print_help() const {
-    std::cout << "Usage: osmcoastline [OPTIONS] OSMFILE\n"
-              << "\nOptions:\n"
-              << "  -h, --help                 - This help message\n"
-              << "  -c, --close-distance=DIST  - Distance between nodes under which open rings\n"
-              << "                               are closed (0 - disable closing of rings)\n"
-              << "  -b, --bbox-overlap=OVERLAP - Set overlap when splitting polygons\n"
-              << "  -i, --no-index             - Do not create spatial indexes in output db\n"
-              << "  -d, --debug                - Enable debugging output\n"
-              << "  -f, --overwrite            - Overwrite output file if it already exists\n"
-              << "  -l, --output-lines         - Output coastlines as lines to database file\n"
-              << "  -m, --max-points=NUM       - Split lines/polygons with more than this many\n"
-              << "                               points (0 - disable splitting)\n"
-              << "  -o, --output-database=FILE - Spatialite database file for output\n"
-              << "  -p, --output-polygons=land|water|both|none\n"
-              << "                             - Which polygons to write out (default: land)\n"
-              << "  -r, --output-rings         - Output rings to database file\n"
-              << "  -s, --srs=EPSGCODE         - Set SRS (4326 for WGS84 (default) or 3857)\n"
-              << "  -S, --write-segments=FILE  - Write segments to given file\n"
-              << "  -v, --verbose              - Verbose output\n"
-              << "  -V, --version              - Show version and exit\n"
-              << "\n";
 }
 
