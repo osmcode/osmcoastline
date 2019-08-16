@@ -305,7 +305,7 @@ static bool antarctica_bogus(const OGRGeometry* geom) noexcept {
     return env_east.Contains(envelope) || env_west.Contains(envelope);
 }
 
-void CoastlinePolygons::split_bbox(OGREnvelope e, polygon_vector_type&& v) {
+void CoastlinePolygons::split_bbox(const OGREnvelope& e, polygon_vector_type&& v) {
 //    std::cerr << "envelope = (" << e.MinX << ", " << e.MinY << "), (" << e.MaxX << ", " << e.MaxY << ") v.size()=" << v.size() << "\n";
     if (v.size() < 100) {
         try {
