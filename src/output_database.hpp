@@ -33,8 +33,9 @@
 class OGRLineString;
 class OGRPoint;
 class OGRPolygon;
-class Options;
 class SRS;
+
+struct Options;
 struct Stats;
 
 /**
