@@ -305,11 +305,13 @@ static bool antarctica_bogus(const OGRGeometry* geom) noexcept {
     return env_east.Contains(envelope) || env_west.Contains(envelope);
 }
 
-void CoastlinePolygons::split_bbox(const OGREnvelope& e, polygon_vector_type&& v) {
-//    std::cerr << "envelope = (" << e.MinX << ", " << e.MinY << "), (" << e.MaxX << ", " << e.MaxY << ") v.size()=" << v.size() << "\n";
+void CoastlinePolygons::split_bbox(const OGREnvelope& envelope, polygon_vector_type&& v) {
+//    std::cerr << "envelope = (" << envelope.MinX << ", " << envelope.MinY
+//              << "), (" << envelope.MaxX << ", " << envelope.MaxY
+//              << ") v.size()=" << v.size() << "\n";
     if (v.size() < 100) {
         try {
-            std::unique_ptr<OGRGeometry> geom{create_rectangular_polygon(e.MinX, e.MinY, e.MaxX, e.MaxY, m_expand)};
+            std::unique_ptr<OGRGeometry> geom{create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY, m_expand)};
             assert(geom->getSpatialReference() != nullptr);
             for (const auto& polygon : v) {
                 std::unique_ptr<OGRGeometry> diff{geom->Difference(polygon.get())};
@@ -342,7 +344,17 @@ void CoastlinePolygons::split_bbox(const OGREnvelope& e, polygon_vector_type&& v
                         // XXX
                         break;
                     default:
-                        std::cerr << "IGNORING envelope = (" << e.MinX << ", " << e.MinY << "), (" << e.MaxX << ", " << e.MaxY << ") type=" << geom->getGeometryName() << "\n";
+                        std::cerr << "IGNORING envelope = ("
+                                  << envelope.MinX
+                                  << ", "
+                                  << envelope.MinY
+                                  << "), ("
+                                  << envelope.MaxX
+                                  << ", "
+                                  << envelope.MaxY
+                                  << ") type="
+                                  << geom->getGeometryName()
+                                  << "\n";
                         // ignore XXX
                         break;
                 }
@@ -355,33 +367,33 @@ void CoastlinePolygons::split_bbox(const OGREnvelope& e, polygon_vector_type&& v
         OGREnvelope e1;
         OGREnvelope e2;
 
-        if (e.MaxX - e.MinX < e.MaxY - e.MinY) {
+        if (envelope.MaxX - envelope.MinX < envelope.MaxY - envelope.MinY) {
             // split vertically
-            const double MidY = (e.MaxY + e.MinY) / 2;
+            const double MidY = (envelope.MaxY + envelope.MinY) / 2;
 
-            e1.MinX = e.MinX;
-            e1.MinY = e.MinY;
-            e1.MaxX = e.MaxX;
+            e1.MinX = envelope.MinX;
+            e1.MinY = envelope.MinY;
+            e1.MaxX = envelope.MaxX;
             e1.MaxY = MidY;
 
-            e2.MinX = e.MinX;
+            e2.MinX = envelope.MinX;
             e2.MinY = MidY;
-            e2.MaxX = e.MaxX;
-            e2.MaxY = e.MaxY;
+            e2.MaxX = envelope.MaxX;
+            e2.MaxY = envelope.MaxY;
 
         } else {
             // split horizontally
-            const double MidX = (e.MaxX + e.MinX) / 2;
+            const double MidX = (envelope.MaxX + envelope.MinX) / 2;
 
-            e1.MinX = e.MinX;
-            e1.MinY = e.MinY;
+            e1.MinX = envelope.MinX;
+            e1.MinY = envelope.MinY;
             e1.MaxX = MidX;
-            e1.MaxY = e.MaxY;
+            e1.MaxY = envelope.MaxY;
 
             e2.MinX = MidX;
-            e2.MinY = e.MinY;
-            e2.MaxX = e.MaxX;
-            e2.MaxY = e.MaxY;
+            e2.MinY = envelope.MinY;
+            e2.MaxX = envelope.MaxX;
+            e2.MaxY = envelope.MaxY;
 
         }
 
@@ -392,11 +404,11 @@ void CoastlinePolygons::split_bbox(const OGREnvelope& e, polygon_vector_type&& v
             /* You might think re-computing the envelope of all those polygons
             again and again might take a lot of time, but I benchmarked it and
             it has no measurable impact. */
-            OGREnvelope e;
-            polygon->getEnvelope(&e);
+            OGREnvelope polygon_envelope;
+            polygon->getEnvelope(&polygon_envelope);
 
-            const bool e1_intersects_e = e1.Intersects(e);
-            const bool e2_intersects_e = e2.Intersects(e);
+            const bool e1_intersects_e = e1.Intersects(polygon_envelope);
+            const bool e2_intersects_e = e2.Intersects(polygon_envelope);
 
             if (e1_intersects_e && e2_intersects_e) {
                 v1.emplace_back(static_cast<OGRPolygon*>(polygon->clone()));
