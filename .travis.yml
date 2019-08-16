@@ -63,7 +63,7 @@ matrix:
       compiler: linux-clang7-dev
       addons:
         apt:
-          packages: ['clang-7', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
+          packages: ['pandoc', 'libgdal-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin', 'clang-7']
       env: CXX='clang++-7' BUILD_TYPE='Dev'
 
     - os: linux
@@ -71,7 +71,7 @@ matrix:
       compiler: linux-clang7-release
       addons:
         apt:
-          packages: ['pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin', 'clang-7', 'clang-tidy-7']
+          packages: ['pandoc', 'libgdal-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin', 'clang-7', 'clang-tidy-7']
       env: CXX='clang++-7' BUILD_TYPE='Release' CLANG_TIDY=clang-tidy-7
 
     # Linux GCC Builds
@@ -97,27 +97,29 @@ matrix:
       env: CXX='g++-5' BUILD_TYPE='Dev'
 
     - os: linux
+      dist: bionic
       compiler: linux-gcc6-dev
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: ['g++-6', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
+          packages: ['pandoc', 'libgdal-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin', 'g++-6']
       env: CXX='g++-6' BUILD_TYPE='Dev'
 
     - os: linux
+      dist: bionic
       compiler: linux-gcc7-dev
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: ['g++-7', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
+          packages: ['pandoc', 'libgdal-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin', 'g++-7']
       env: CXX='g++-7' BUILD_TYPE='Dev'
 
     - os: linux
+      dist: bionic
       compiler: linux-gcc7-release
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: ['g++-7', 'pandoc', 'libgdal1-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin']
+          packages: ['pandoc', 'libgdal-dev', 'libgeos-dev', 'sqlite3', 'spatialite-bin', 'g++-7']
       env: CXX='g++-7' BUILD_TYPE='Release'
 
 
