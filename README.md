@@ -284,6 +284,14 @@ Run it as follows: `osmcoastline_filter -o OUTFILE.osm.pbf INFILE.osm.pbf`
 files are much smaller and faster to read and write.
 
 
+## Extracts
+
+Generally you can not run OSMCoastline on extracts. OSMCoastline assembles ways
+into continuous coastline linestrings and then into land and water polygons.
+But if the coastline is not closed, it can't do that. This might work if your
+extract only contains an island, but in most cases this will not work.
+
+
 ## License
 
 OSMCoastline is available under the GNU GPL version 3 or later.
