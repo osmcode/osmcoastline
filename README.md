@@ -117,9 +117,9 @@ options.
 
 ## Output
 
-The output is a spatialite database with the following tables. All tables are
-always created but depending on the command line options only some of them
-might contain anything.
+By default, the output is a spatialite database with the following tables. All
+tables are always created but depending on the command line options only some of
+them might contain anything.
 
 * `error_lines` Lines that have errors (for instance not closed rings or
   self-intersections).
@@ -145,10 +145,7 @@ By default all output is in WGS84. You can use the option `--srs=3857` to
 create output in "Web Mercator". (Other projections are currently not
 supported.)
 
-OSMCoastline always creates only this one database. If you need shapefiles
-use ogr2ogr to convert the data:
 
-    ogr2ogr -f "ESRI Shapefile" land_polygons.shp coastline.db land_polygons
 
 By default geometry indexes are created for all tables. This makes the database
 larger, but faster to use. You can use the option `--no-index` to suppress
@@ -163,6 +160,16 @@ using Spatialite or PostGIS, respectively.
 The database tables `options` and `meta` contain the command line options
 used to create the database and some metadata. You can use the script
 `osmcoastline_readmeta` to look at them.
+
+By default, OSMCoastline creates a spatialite database. If you need shapefiles use
+ogr2ogr to convert the data:
+
+    ogr2ogr -f "ESRI Shapefile" land_polygons.shp coastline.db land_polygons
+
+Alternatively, OSMCoastline aims to support all geospatial data formats as the output
+(e.g. shapefile, by setting GDAL driver as "ESRI Shapefile"). If a data format other
+than spatialite database is selected as the output format, the two database tables
+`options` and `meta` will be omitted and geometry indexes will not be created. 
 
 
 ## Steps
