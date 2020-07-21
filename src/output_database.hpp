@@ -39,11 +39,13 @@ struct Options;
 struct Stats;
 
 /**
- * Handle output to an sqlite database (via OGR).
+ * Handle output to a database (via OGR).
  * Several tables/layers are created using the right SRS for the different
  * kinds of data.
  */
 class OutputDatabase {
+
+    std::string m_driver;
 
     bool m_with_index;
 
@@ -77,9 +79,11 @@ class OutputDatabase {
 
     std::vector<std::string> layer_options() const;
 
+    std::vector<std::string> driver_options() const;
+
 public:
 
-    OutputDatabase(const std::string& outdb, SRS& srs, bool with_index=false);
+    OutputDatabase(const std::string& driver, const std::string& outdb, SRS& srs, bool with_index=false);
 
     ~OutputDatabase() noexcept = default;
 

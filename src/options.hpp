@@ -57,6 +57,9 @@ struct Options {
     /// Show debug output?
     bool debug = false;
 
+    /// GDAL driver.
+    std::string driver = "SQLite";
+
     /// Maximum number of points in polygons.
     int max_points_in_polygon = 1000;
 
@@ -66,7 +69,7 @@ struct Options {
     /// What polygons should be written out?
     output_polygon_type output_polygons = output_polygon_type::land;
 
-    /// Output Spatialite database file name.
+    /// Output database file name.
     std::string output_database;
 
     /// Should output database be overwritten

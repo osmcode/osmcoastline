@@ -153,8 +153,8 @@ std::string memory_usage() {
 
 /* ================================================== */
 
-std::unique_ptr<OutputDatabase> open_output_database(const std::string& name, const bool create_index) try {
-    return std::unique_ptr<OutputDatabase>{new OutputDatabase{name, srs, create_index}};
+std::unique_ptr<OutputDatabase> open_output_database(const std::string& driver, const std::string& name, const bool create_index) try {
+    return std::unique_ptr<OutputDatabase>{new OutputDatabase{driver, name, srs, create_index}};
 } catch (const std::exception& e) {
     std::cerr << e.what() << '\n';
     std::exit(return_code_fatal);
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
         vout << "Will NOT create geometry index (because you told me to using --no-index/-i).\n";
     }
 
-    auto output_database = open_output_database(options.output_database, options.create_index);
+    auto output_database = open_output_database(options.driver, options.output_database, options.create_index);
 
     // The collection of all coastline rings we will be filling and then
     // operating on.
@@ -292,7 +292,9 @@ int main(int argc, char *argv[]) {
 
     vout << memory_usage();
 
-    output_database->set_options(options);
+    if (options.driver == "SQLite") {
+        output_database->set_options(options);
+    } 
 
     vout << "Check line segments for intersections and overlaps...\n";
     warnings += coastline_rings.check_for_intersections(*output_database, segments_fd);
@@ -397,7 +399,9 @@ int main(int argc, char *argv[]) {
     vout << memory_usage();
 
     vout << "Committing database transactions...\n";
-    output_database->set_meta(vout.runtime(), osmium::MemoryUsage{}.peak(), stats);
+    if (options.driver == "SQLite") {
+        output_database->set_meta(vout.runtime(), osmium::MemoryUsage{}.peak(), stats);
+    }
     output_database->commit();
     vout << "All done.\n";
     vout << memory_usage();
