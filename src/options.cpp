@@ -43,10 +43,11 @@ static void print_help() {
               << "  -i, --no-index             - Do not create spatial indexes in output db\n"
               << "  -d, --debug                - Enable debugging output\n"
               << "  -f, --overwrite            - Overwrite output file if it already exists\n"
+              << "  -g, --gdal-driver=DRIVER   - GDAL driver (SQLite or ESRI Shapefile)\n"
               << "  -l, --output-lines         - Output coastlines as lines to database file\n"
               << "  -m, --max-points=NUM       - Split lines/polygons with more than this many\n"
               << "                               points (0 - disable splitting)\n"
-              << "  -o, --output-database=FILE - Spatialite database file for output\n"
+              << "  -o, --output-database=FILE - Database file for output\n"
               << "  -p, --output-polygons=land|water|both|none\n"
               << "                             - Which polygons to write out (default: land)\n"
               << "  -r, --output-rings         - Output rings to database file\n"
@@ -83,6 +84,7 @@ Options::Options(int argc, char* argv[]) {
         {"close-distance",  required_argument, nullptr, 'c'},
         {"no-index",              no_argument, nullptr, 'i'},
         {"debug",                 no_argument, nullptr, 'd'},
+        {"gdal-driver",     required_argument, nullptr, 'g'},
         {"help",                  no_argument, nullptr, 'h'},
         {"output-lines",          no_argument, nullptr, 'l'},
         {"max-points",      required_argument, nullptr, 'm'},
@@ -98,7 +100,7 @@ Options::Options(int argc, char* argv[]) {
     };
 
     while (true) {
-        const int c = getopt_long(argc, argv, "b:c:idhlm:o:p:rfs:S:vV", long_options, nullptr);
+        const int c = getopt_long(argc, argv, "b:c:idg:hlm:o:p:rfs:S:vV", long_options, nullptr);
         if (c == -1) {
             break;
         }
@@ -123,6 +125,9 @@ Options::Options(int argc, char* argv[]) {
             case 'h':
                 print_help();
                 std::exit(return_code_ok);
+            case 'g':
+                driver = optarg;
+                break;
             case 'l':
                 output_lines = true;
                 break;

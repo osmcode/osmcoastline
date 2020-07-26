@@ -34,10 +34,11 @@
 #include <sstream>
 #include <utility>
 
-OutputDatabase::OutputDatabase(const std::string& outdb, SRS& srs, bool with_index) :
+OutputDatabase::OutputDatabase(const std::string& driver, const std::string& outdb, SRS& srs, bool with_index) :
+    m_driver(driver),
     m_with_index(with_index),
     m_srs(srs),
-    m_dataset("SQLite", outdb, gdalcpp::SRS(*srs.out()), { "SPATIALITE=TRUE", "INIT_WITH_EPSG=no" }),
+    m_dataset(driver, outdb, gdalcpp::SRS(*srs.out()), driver_options()),
     m_layer_error_points(m_dataset, "error_points", wkbPoint, layer_options()),
     m_layer_error_lines(m_dataset, "error_lines", wkbLineString, layer_options()),
     m_layer_rings(m_dataset, "rings", wkbPolygon, layer_options()),
@@ -58,19 +59,21 @@ OutputDatabase::OutputDatabase(const std::string& outdb, SRS& srs, bool with_ind
     m_layer_rings.add_field("land",    OFTInteger, 1);
     m_layer_rings.add_field("valid",   OFTInteger, 1);
 
-    m_dataset.exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER)");
-    m_dataset.exec("CREATE TABLE meta ("
-         "timestamp                      TEXT, "
-         "runtime                        INTEGER, "
-         "memory_usage                   INTEGER, "
-         "num_ways                       INTEGER, "
-         "num_unconnected_nodes          INTEGER, "
-         "num_rings                      INTEGER, "
-         "num_rings_from_single_way      INTEGER, "
-         "num_rings_fixed                INTEGER, "
-         "num_rings_turned_around        INTEGER, "
-         "num_land_polygons_before_split INTEGER, "
-         "num_land_polygons_after_split  INTEGER)");
+    if (m_driver == "SQLite") {
+        m_dataset.exec("CREATE TABLE options (overlap REAL, close_distance REAL, max_points_in_polygons INTEGER, split_large_polygons INTEGER)");
+        m_dataset.exec("CREATE TABLE meta ("
+            "timestamp                      TEXT, "
+            "runtime                        INTEGER, "
+            "memory_usage                   INTEGER, "
+            "num_ways                       INTEGER, "
+            "num_unconnected_nodes          INTEGER, "
+            "num_rings                      INTEGER, "
+            "num_rings_from_single_way      INTEGER, "
+            "num_rings_fixed                INTEGER, "
+            "num_rings_turned_around        INTEGER, "
+            "num_land_polygons_before_split INTEGER, "
+            "num_land_polygons_after_split  INTEGER)");
+    }
 
     m_dataset.start_transaction();
     m_layer_rings.start_transaction();
@@ -234,9 +237,17 @@ void OutputDatabase::add_line(std::unique_ptr<OGRLineString>&& linestring) {
 
 std::vector<std::string> OutputDatabase::layer_options() const {
     std::vector<std::string> options;
-    if (!m_with_index) {
+    if (!m_with_index && m_driver == "SQLite") {
         options.emplace_back("SPATIAL_INDEX=no");
     }
     return options;
 }
 
+std::vector<std::string> OutputDatabase::driver_options() const {
+    std::vector<std::string> options;
+    if (m_driver == "SQLite") {
+        options.emplace_back("SPATIALITE=TRUE");
+        options.emplace_back("INIT_WITH_EPSG=no");
+    }
+    return options;
+}
