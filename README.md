@@ -4,11 +4,9 @@
 OSMCoastline extracts the coastline data from an OSM planet file and assembles
 all the pieces into polygons for use in map renderers etc.
 
-https://wiki.openstreetmap.org/wiki/OSMCoastline
+https://osmcode.org/osmcoastline
 
-https://github.com/osmcode/osmcoastline
-
-[![Build Status](https://secure.travis-ci.org/osmcode/osmcoastline.svg)](https://travis-ci.org/osmcode/osmcoastline)
+[![Build Status](https://github.com/osmcode/osmcoastline/workflows/CI/badge.svg?branch=master)](https://github.com/osmcode/osmcoastline/actions)
 
 ## Prerequisites
 
