@@ -150,7 +150,7 @@ void OutputDatabase::add_error_line(std::unique_ptr<OGRLineString>&& linestring,
     feature.add_to_layer();
 }
 
-void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id, int nways, int npoints, bool fixed) {
+void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id, unsigned int nways, unsigned int npoints, bool fixed) {
     m_srs.transform(polygon.get());
 
     const bool land = polygon->getExteriorRing()->isClockwise();
@@ -209,8 +209,8 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
 
     gdalcpp::Feature feature{m_layer_rings, std::move(polygon)};
     feature.set_field("osm_id", osm_id);
-    feature.set_field("nways", nways);
-    feature.set_field("npoints", npoints);
+    feature.set_field("nways", static_cast<int>(nways));
+    feature.set_field("npoints", static_cast<int>(npoints));
     feature.set_field("fixed", fixed);
     feature.set_field("land", land);
     feature.set_field("valid", valid);

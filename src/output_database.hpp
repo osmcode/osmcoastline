@@ -89,7 +89,7 @@ public:
 
     void add_error_point(std::unique_ptr<OGRPoint>&& point, const char* error, osmium::object_id_type id = 0);
     void add_error_line(std::unique_ptr<OGRLineString>&& linestring, const char* error, osmium::object_id_type id = 0);
-    void add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id, int nways, int npoints, bool fixed);
+    void add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id, unsigned int nways, unsigned int npoints, bool fixed);
     void add_land_polygon(std::unique_ptr<OGRPolygon>&& polygon);
     void add_water_polygon(std::unique_ptr<OGRPolygon>&& polygon);
     void add_line(std::unique_ptr<OGRLineString>&& linestring);
