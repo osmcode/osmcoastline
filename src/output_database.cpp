@@ -177,7 +177,7 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
         GEOSGeom_destroy(p);
 #else
         GEOSContextHandle_t contextHandle = OGRGeometry::createGEOSContext();
-        auto r = GEOSisValidReason(polygon->exportToGEOS(contextHandle));
+        char* r = GEOSisValidReason(polygon->exportToGEOS(contextHandle));
         std::string reason = r ? r : "";
         OGRGeometry::freeGEOSContext(contextHandle);
 #endif
@@ -187,8 +187,8 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
             const std::size_t right_bracket = reason.find(']');
 
             std::istringstream iss{reason.substr(left_bracket+1, right_bracket-left_bracket-1), std::istringstream::in};
-            double x;
-            double y;
+            double x = NAN;
+            double y = NAN;
             iss >> x;
             iss >> y;
             reason = reason.substr(0, left_bracket);

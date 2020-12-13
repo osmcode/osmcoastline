@@ -131,7 +131,7 @@ unsigned int CoastlineRingCollection::check_locations(bool output_missing) {
 
 bool is_valid_polygon(const OGRGeometry* geometry) {
     if (geometry && geometry->getGeometryType() == wkbPolygon) {
-        const auto polygon = static_cast<const OGRPolygon*>(geometry);
+        const auto *const polygon = static_cast<const OGRPolygon*>(geometry);
         return (polygon->getExteriorRing()->getNumPoints() > 3) && (polygon->getNumInteriorRings() == 0) && geometry->IsValid();
     }
     return false;
