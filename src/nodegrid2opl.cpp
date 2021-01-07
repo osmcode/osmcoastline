@@ -54,11 +54,9 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> nodes;
-
 const int id_offset = 100;
 
-static void add_node(char c, double x, double y) {
+static void add_node(std::vector<std::string>& nodes, char c, double x, double y) {
     static std::set<int> ids;
     int id = id_offset;
 
@@ -81,13 +79,15 @@ int main() {
     const double scale = 0.01;
     const double offset = 1;
 
+    std::vector<std::string> nodes;
+
     int x = 1;
     int y = 100;
 
     for (std::string line; std::getline(std::cin, line);) {
         for (const auto c : line) {
             if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')) {
-                add_node(c, offset + x * scale, offset + y * scale);
+                add_node(nodes, c, offset + x * scale, offset + y * scale);
             }
             ++x;
         }
