@@ -159,15 +159,16 @@ The database tables `options` and `meta` contain the command line options
 used to create the database and some metadata. You can use the script
 `osmcoastline_readmeta` to look at them.
 
-By default, OSMCoastline creates a spatialite database. If you need shapefiles use
-ogr2ogr to convert the data:
+By default, OSMCoastline creates a spatialite database. If you need shapefiles
+use ogr2ogr to convert the data:
 
     ogr2ogr -f "ESRI Shapefile" land_polygons.shp coastline.db land_polygons
 
-Alternatively, OSMCoastline aims to support all geospatial data formats as the output
-(e.g. shapefile, by setting GDAL driver as "ESRI Shapefile"). If a data format other
-than spatialite database is selected as the output format, the two database tables
-`options` and `meta` will be omitted and geometry indexes will not be created. 
+Alternatively, OSMCoastline aims to support all geospatial data formats as the
+output (e.g. Shapefile, by setting GDAL driver as "ESRI Shapefile"). If a data
+format other than Spatialite database is selected as the output format, the two
+database tables `options` and `meta` will be omitted and geometry indexes will
+not be created.
 
 
 ## Steps

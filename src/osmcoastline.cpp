@@ -294,7 +294,7 @@ int main(int argc, char *argv[]) {
 
     if (options.driver == "SQLite") {
         output_database->set_options(options);
-    } 
+    }
 
     vout << "Check line segments for intersections and overlaps...\n";
     warnings += coastline_rings.check_for_intersections(*output_database, segments_fd);
