@@ -8,9 +8,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Add `-g`, `--gdal-driver=DRIVER` option to `osmcoastline`. This allows
+  writing results to a shapefile or other format, not only to sqlite files.
+
 ### Changed
 
+- Various small fixes and cleanups.
+
 ### Fixed
+
+- Segfault in osmcoastline with newer GDAL versions (#39)
 
 
 ## [2.2.4] - 2019-02-27
