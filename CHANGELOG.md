@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Various small fixes and cleanups.
 - Now depends on libosmium 2.16.0 or greater. This allows compiling with
   support for PBF lz4 compression which is enabled by default if the
-  library is found. Disable by setting CMake option WITH_LZ4 to OFF.
+  library is found. Disable by setting CMake option `WITH_LZ4` to `OFF`.
 
 ### Fixed
 

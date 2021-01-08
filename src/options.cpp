@@ -172,8 +172,9 @@ Options::Options(int argc, char* argv[]) {
                 verbose = true;
                 break;
             case 'V':
-                std::cout << "osmcoastline " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n'
-                          << "PBF compression types:";
+                std::cout << "osmcoastline " << get_osmcoastline_long_version() << "\n"
+                          << get_libosmium_version() << '\n'
+                          << "Supported PBF compression types:";
                 for (const auto& type : osmium::io::supported_pbf_compression_types()) {
                     std::cout << " " << type;
                 }
