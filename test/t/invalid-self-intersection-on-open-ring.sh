@@ -34,12 +34,13 @@ test $RC -eq 2
 
 grep 'Self-intersection at or near point' $LOG
 
-grep '^There were 2 warnings.$' $LOG
+grep '^There were [12] warnings.$' $LOG
 grep '^There were 1 errors.$' $LOG
 
 check_count land_polygons 1;
 check_count error_points 3;
-check_count error_lines 2;
+check_count_with_op error_lines -ge 1;
+check_count_with_op error_lines -le 2;
 
 echo "SELECT AsText(geometry), osm_id, error FROM error_points;" | $SQL >$DUMP
 

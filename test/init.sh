@@ -15,3 +15,7 @@ check_count() {
     test `echo "SELECT count(*) FROM $1;" | $SQL` -eq $2
 }
 
+check_count_with_op() {
+    test `echo "SELECT count(*) FROM $1;" | $SQL` $2 $3
+}
+
