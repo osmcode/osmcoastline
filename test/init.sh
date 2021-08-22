@@ -11,11 +11,11 @@ readonly DB=${BIN_DIR}/test/${TEST_ID}.db
 readonly DUMP=${BIN_DIR}/test/${TEST_ID}.dump
 readonly SQL="spatialite -bail -batch $DB"
 
-check_count() {
-    test `echo "SELECT count(*) FROM $1;" | $SQL` -eq $2
+check_count_with_op() {
+    test "$(echo "SELECT count(*) FROM $1;" | $SQL)" "$2" "$3"
 }
 
-check_count_with_op() {
-    test `echo "SELECT count(*) FROM $1;" | $SQL` $2 $3
+check_count() {
+    check_count_with_op "$1" "-eq" "$2"
 }
 

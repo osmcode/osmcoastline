@@ -11,7 +11,7 @@ set -x
 
 #-----------------------------------------------------------------------------
 
-${BIN_DIR}/src/nodegrid2opl << 'NODES' >$INPUT
+"$BIN_DIR/src/nodegrid2opl" << 'NODES' >"$INPUT"
     0         8
          4
        5  3
@@ -19,23 +19,23 @@ ${BIN_DIR}/src/nodegrid2opl << 'NODES' >$INPUT
     1
 NODES
 
-cat <<'OSM' >>$INPUT
+cat <<'OSM' >>"$INPUT"
 w200 v1 Tnatural=coastline Nn103,n104,n105,n106,n107,n108
 w200 v1 Tnatural=coastline Nn108,n100,n101,n102,n103
 OSM
 
 #-----------------------------------------------------------------------------
 
-$OSMC --verbose --overwrite --output-database=$DB $INPUT >$LOG 2>&1
+"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 RC=$?
 set -e
 
 test $RC -eq 1
 
-grep 'Self-intersection at or near point' $LOG
+grep 'Self-intersection at or near point' "$LOG"
 
-grep '^There were 1 warnings.$' $LOG
-grep '^There were 0 errors.$' $LOG
+grep '^There were 1 warnings.$' "$LOG"
+grep '^There were 0 errors.$' "$LOG"
 
 check_count land_polygons 1;
 check_count error_points 1;

@@ -11,7 +11,7 @@ set -x
 
 #-----------------------------------------------------------------------------
 
-cat <<'OSM' >$INPUT
+cat <<'OSM' >"$INPUT"
 n100 v1 x1.01 y1.01
 n101 v1 x1.01 y1.04
 n102 v1 x1.04 y1.04
@@ -21,16 +21,16 @@ OSM
 
 #-----------------------------------------------------------------------------
 
-$OSMC --verbose --overwrite --output-database=$DB $INPUT >$LOG 2>&1
+"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 RC=$?
 set -e
 
 test $RC -eq 1
 
-grep 'Turned 1 polygons around.$' $LOG
+grep 'Turned 1 polygons around.$' "$LOG"
 
-grep '^There were 1 warnings.$' $LOG
-grep '^There were 0 errors.$' $LOG
+grep '^There were 1 warnings.$' "$LOG"
+grep '^There were 0 errors.$' "$LOG"
 
 check_count land_polygons 1;
 check_count error_points 0;

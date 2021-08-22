@@ -11,7 +11,7 @@ set -x
 
 #-----------------------------------------------------------------------------
 
-cat <<'OSM' >$INPUT
+cat <<'OSM' >"$INPUT"
 n100 v1 x1.10 y1.06
 n101 v1 x1.30 y1.06
 n102 v1 x1.35 y1.05
@@ -27,16 +27,16 @@ OSM
 
 #-----------------------------------------------------------------------------
 
-$OSMC --verbose --overwrite --output-database=$DB $INPUT >$LOG 2>&1
+"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 RC=$?
 set -e
 
 test $RC -eq 2
 
-grep 'There are 2 nodes where the coastline is not closed.$' $LOG
+grep 'There are 2 nodes where the coastline is not closed.$' "$LOG"
 
-grep '^There were 1 warnings.$' $LOG
-grep '^There were 1 errors.$' $LOG
+grep '^There were 1 warnings.$' "$LOG"
+grep '^There were 1 errors.$' "$LOG"
 
 check_count land_polygons 1;
 check_count error_points 2;

@@ -11,7 +11,7 @@ set -x
 
 #-----------------------------------------------------------------------------
 
-cat <<'OSM' >$INPUT
+cat <<'OSM' >"$INPUT"
 n100 v1 x-180.0 y1.1
 n101 v1 x-179.0 y1.1
 n102 v1 x-179.0 y1.4
@@ -28,27 +28,27 @@ OSM
 
 set -e
 
-$OSMC --verbose --overwrite --output-lines --output-database=$DB $INPUT >$LOG 2>&1
+"$OSMC" --verbose --overwrite --output-lines --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 
 test $? -eq 0
 
-grep 'Turned 0 polygons around.$' $LOG
+grep 'Turned 0 polygons around.$' "$LOG"
 
-grep '^There were 0 warnings.$' $LOG
-grep '^There were 0 errors.$' $LOG
+grep '^There were 0 warnings.$' "$LOG"
+grep '^There were 0 errors.$' "$LOG"
 
 check_count land_polygons 2;
 check_count error_points 0;
 check_count error_lines 0;
 
-echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL >$DUMP
+echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL >"$DUMP"
 
-grep -F 'POLYGON((-180 1.1, -180 1.4, -179 1.4, -179 1.1, -180 1.1))' $DUMP
-grep -F 'POLYGON((180 1.4, 180 1.1, 179 1.1, 179 1.4, 180 1.4))' $DUMP
+grep -F 'POLYGON((-180 1.1, -180 1.4, -179 1.4, -179 1.1, -180 1.1))' "$DUMP"
+grep -F 'POLYGON((180 1.4, 180 1.1, 179 1.1, 179 1.4, 180 1.4))' "$DUMP"
 
-echo "SELECT AsText(geometry) FROM lines;" | $SQL >$DUMP
+echo "SELECT AsText(geometry) FROM lines;" | $SQL >"$DUMP"
 
-grep -F 'LINESTRING(-180 1.4, -179 1.4, -179 1.1, -180 1.1)' $DUMP
-grep -F 'LINESTRING(180 1.1, 179 1.1, 179 1.4, 180 1.4)' $DUMP
+grep -F 'LINESTRING(-180 1.4, -179 1.4, -179 1.1, -180 1.1)' "$DUMP"
+grep -F 'LINESTRING(180 1.1, 179 1.1, 179 1.4, 180 1.4)' "$DUMP"
 
 #-----------------------------------------------------------------------------

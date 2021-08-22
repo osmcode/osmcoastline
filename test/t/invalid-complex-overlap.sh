@@ -12,7 +12,7 @@ set -x
 
 #-----------------------------------------------------------------------------
 
-cat <<'OSM' >$INPUT
+cat <<'OSM' >"$INPUT"
 n100 v1 dV c0 t i0 u T x1.00 y1.07
 n101 v1 dV c0 t i0 u T x1.00 y1.06
 n102 v1 dV c0 t i0 u T x1.00 y1.03
@@ -29,14 +29,14 @@ OSM
 
 #-----------------------------------------------------------------------------
 
-$OSMC --verbose --overwrite --output-database=$DB $INPUT >$LOG 2>&1
+"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 RC=$?
 set -e
 
 test $RC -eq 2
 
-grep '^There were 3 warnings.$' $LOG
-grep '^There were 2 errors.$' $LOG
+grep '^There were 3 warnings.$' "$LOG"
+grep '^There were 2 errors.$' "$LOG"
 
 check_count land_polygons 0;
 check_count error_points 2;
