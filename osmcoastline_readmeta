@@ -1,18 +1,20 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  osmcoastline_readmeta [COASTLINEDB]
 #
+
+set -euo pipefail
 
 OSMCOASTLINE_VERSION=@OSMCOASTLINE_VERSION@
 
 SQLEXEC="sqlite3"
 
-if [ "x$1" = "x--help" -o "x$1" = "x-h" ]; then
+if [[ $# -ge 1 && ( $1 == "--help" || $1 == "-h" ) ]]; then
     echo "Usage: osmcoastline_readmeta [COASTLINEDB]"
     exit 0
 fi
 
-if [ "x$1" = "x--version" -o "x$1" = "x-V" ]; then
+if [[ $# -ge 1 && ( $1 == "--version" || $1 == "-v" ) ]]; then
     echo "osmcoastline_readmeta version $OSMCOASTLINE_VERSION"
     echo "Copyright (C) 2012-2021  Jochen Topf <jochen@topf.org>"
     echo "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>."
@@ -21,83 +23,69 @@ if [ "x$1" = "x--version" -o "x$1" = "x-V" ]; then
     exit 0
 fi
 
-if [ "x$1" = "x" ]; then
+if [[ $# -eq 0 ]]; then
     DBFILE=testdata.db
 else
     DBFILE=$1
 fi
 
-if [ ! -e $DBFILE ]; then
+if [[ ! -e "$DBFILE" ]]; then
     echo "Can't open '$DBFILE'"
     exit 1
 fi
 
-echo "Options used to create this data:\n"
+function sql {
+    $SQLEXEC -column "$DBFILE" | sed -e 's/^/  /'
+}
 
-echo -n "  Overlap (--bbox-overlap/-b): "
-$SQLEXEC $DBFILE "SELECT overlap FROM options;"
+function sql_select {
+    echo -n "  $1: "
+    $SQLEXEC "$DBFILE" "$2"
+}
 
-echo -n "  Close gaps in coastline smaller than (--close-distance/-c): "
-$SQLEXEC $DBFILE "SELECT close_distance FROM options;"
+function sql_meta {
+    sql_select "$1" "SELECT $2 FROM meta;"
+}
 
-echo -n "  Max points in polygons (--max-points/-m): "
-$SQLEXEC $DBFILE "SELECT max_points_in_polygons FROM options;"
+function sql_options {
+    sql_select "$1" "SELECT $2 FROM options;"
+}
 
-echo -n "  Split large polygons: "
-$SQLEXEC $DBFILE "SELECT CASE split_large_polygons WHEN 0 THEN 'no' ELSE 'yes' END FROM options;"
+printf "Options used to create this data:\n\n"
 
-echo -n "  Spatial reference system (--srid/-s): "
-$SQLEXEC $DBFILE "SELECT CASE srid WHEN 4326 THEN '4326 (WGS84)' WHEN 3857 THEN '3857 (Mercator)' ELSE srid END FROM geometry_columns WHERE f_table_name='land_polygons';"
+sql_options "Overlap (--bbox-overlap/-b)" overlap
+sql_options "Close gaps in coastline smaller than (--close-distance/-c)" close_distance
+sql_options "Max points in polygons (--max-points/-m)" max_points_in_polygons
+sql_options "Split large polygons" "CASE split_large_polygons WHEN 0 THEN 'no' ELSE 'yes' END"
 
-echo "\nMetadata:\n"
+sql_select "Spatial reference system (--srid/-s)" "SELECT CASE srid WHEN 4326 THEN '4326 (WGS84)' WHEN 3857 THEN '3857 (Mercator)' ELSE srid END FROM geometry_columns WHERE f_table_name='land_polygons';"
 
-echo -n "  Database created at: "
-$SQLEXEC $DBFILE "SELECT timestamp FROM meta;"
+printf "\nMetadata:\n\n"
 
-echo -n "  Runtime (minutes): "
-$SQLEXEC $DBFILE "SELECT CAST(round(CAST(runtime AS REAL)/60) AS INT) FROM meta;"
+sql_meta "Database created at" timestamp
+sql_meta "Runtime (minutes)" "CAST(round(CAST(runtime AS REAL)/60) AS INT)"
+sql_meta "Memory usage (MB)" memory_usage
+sql_meta "Ways tagged natural=coastline" num_ways
+sql_meta "Number of nodes where coastline is not closed (before fixing)" num_unconnected_nodes
+sql_meta "Coastline rings" num_rings
+sql_meta "Coastline rings created from a single way" num_rings_from_single_way
+sql_meta "Coastline rings created from more then one way" "num_rings - num_rings_from_single_way"
+sql_meta "Number of rings fixed (closed)" num_rings_fixed
+sql_meta "Number of rings turned around" num_rings_turned_around
+sql_meta "Number of land polygons before split" num_land_polygons_before_split
+sql_meta "Number of land polygons after split" "CASE num_land_polygons_after_split WHEN 0 THEN 'NOT SPLIT' ELSE num_land_polygons_after_split END"
 
-echo -n "  Memory usage (MB): "
-$SQLEXEC $DBFILE "SELECT memory_usage FROM meta;"
+printf "\nErrors/warnings (Points):\n\n"
+printf ".width 3 20\nSELECT count(*), error FROM error_points GROUP BY error;" | sql
 
-echo -n "  Ways tagged natural=coastline: "
-$SQLEXEC $DBFILE "SELECT num_ways FROM meta;"
+printf "\nErrors/warnings (LineStrings):\n\n"
+printf ".width 3 20\nSELECT count(*), error FROM error_lines GROUP BY error;" | sql
 
-echo -n "  Number of nodes where coastline is not closed (before fixing): "
-$SQLEXEC $DBFILE "SELECT num_unconnected_nodes FROM meta;"
-
-echo -n "  Coastline rings: "
-$SQLEXEC $DBFILE "SELECT num_rings FROM meta;"
-
-echo -n "  Coastline rings created from a single way: "
-$SQLEXEC $DBFILE "SELECT num_rings_from_single_way FROM meta;"
-
-echo -n "  Coastline rings created from more then one way: "
-$SQLEXEC $DBFILE "SELECT num_rings - num_rings_from_single_way FROM meta;"
-
-echo -n "  Number of rings fixed (closed): "
-$SQLEXEC $DBFILE "SELECT num_rings_fixed FROM meta;"
-
-echo -n "  Number of rings turned around: "
-$SQLEXEC $DBFILE "SELECT num_rings_turned_around FROM meta;"
-
-echo -n "  Number of land polygons before split: "
-$SQLEXEC $DBFILE "SELECT num_land_polygons_before_split FROM meta;"
-
-echo -n "  Number of land polygons after split: "
-$SQLEXEC $DBFILE "SELECT CASE num_land_polygons_after_split WHEN 0 THEN 'NOT SPLIT' ELSE num_land_polygons_after_split END FROM meta;"
-
-echo "\nErrors/warnings (Points):\n"
-echo ".width 3 20\nSELECT count(*), error FROM error_points GROUP BY error;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
-
-echo "\nErrors/warnings (LineStrings):\n"
-echo ".width 3 20\nSELECT count(*), error FROM error_lines GROUP BY error;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
-
-echo "\nOutput:\n"
-echo "SELECT count(*), 'land_polygons' FROM land_polygons;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
-echo "SELECT count(*), 'water_polygons' FROM water_polygons;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
-echo "SELECT count(*), 'lines' FROM lines;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
-echo "SELECT count(*), 'rings' FROM rings;" | $SQLEXEC -column $DBFILE | sed -e 's/^/  /'
+printf "\nOutput:\n\n"
+echo "SELECT count(*), 'land_polygons' FROM land_polygons;" | sql
+echo "SELECT count(*), 'water_polygons' FROM water_polygons;" | sql
+echo "SELECT count(*), 'lines' FROM lines;" | sql
+echo "SELECT count(*), 'rings' FROM rings;" | sql
 
 echo
 
