@@ -85,6 +85,10 @@ OutputDatabase::OutputDatabase(const std::string& driver, const std::string& out
 }
 
 void OutputDatabase::set_options(const Options& options) {
+    if (m_driver != "SQLite") {
+        return;
+    }
+
     std::ostringstream sql;
 
     sql << "INSERT INTO options (overlap, close_distance, max_points_in_polygons, split_large_polygons) VALUES ("
@@ -104,6 +108,10 @@ void OutputDatabase::set_options(const Options& options) {
 }
 
 void OutputDatabase::set_meta(int runtime, int memory_usage, const Stats& stats) {
+    if (m_driver != "SQLite") {
+        return;
+    }
+
     std::ostringstream sql;
 
     sql << "INSERT INTO meta (timestamp, runtime, memory_usage, "
@@ -237,7 +245,7 @@ void OutputDatabase::add_line(std::unique_ptr<OGRLineString>&& linestring) {
 
 std::vector<std::string> OutputDatabase::layer_options() const {
     std::vector<std::string> options;
-    if (!m_with_index && m_driver == "SQLite") {
+    if (!m_with_index && (m_driver == "SQLite" || m_driver == "GPKG")) {
         options.emplace_back("SPATIAL_INDEX=no");
     }
     return options;

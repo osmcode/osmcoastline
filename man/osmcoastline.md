@@ -50,8 +50,8 @@ description of the options below and the README.md for details.
 :   Overwrite output file if it already exists.
 
 -g, --gdal-driver=DRIVER
-:   Allows user to select any GDAL driver. Only "SQLite" and "ESRI Shapefile"
-    GDAL drivers have been tested. The default is "SQLite".
+:   Allows user to select any GDAL driver. Only "SQLite", "GPKG" and
+    "ESRI Shapefile" GDAL drivers have been tested. The default is "SQLite".
 
 -i, --no-index
 :   Do not create spatial indexes in output db. The default is to create those

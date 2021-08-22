@@ -29,6 +29,9 @@ Displayed are the command line options used to create the database, some
 statistics about the coastline, the number of warnings and errors detected
 and more.
 
+This will only work if the (default) "SQLite" output format has been used
+on the **osmcoastline** program.
+
 
 # SEE ALSO
 

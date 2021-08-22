@@ -293,9 +293,7 @@ int main(int argc, char *argv[]) {
 
         vout << memory_usage();
 
-        if (options.driver == "SQLite") {
-            output_database->set_options(options);
-        }
+        output_database->set_options(options);
 
         vout << "Check line segments for intersections and overlaps...\n";
         warnings += coastline_rings.check_for_intersections(*output_database, segments_fd);
@@ -404,9 +402,7 @@ int main(int argc, char *argv[]) {
     vout << memory_usage();
 
     vout << "Committing database transactions...\n";
-    if (options.driver == "SQLite") {
-        output_database->set_meta(vout.runtime(), osmium::MemoryUsage{}.peak(), stats);
-    }
+    output_database->set_meta(vout.runtime(), osmium::MemoryUsage{}.peak(), stats);
     output_database->commit();
     vout << "All done.\n";
     vout << memory_usage();
