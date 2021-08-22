@@ -6,7 +6,8 @@
 #
 #-----------------------------------------------------------------------------
 
-. $1/test/init.sh
+# shellcheck source=test/init.sh
+. "$1/test/init.sh"
 
 set -x
 
