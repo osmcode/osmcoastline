@@ -25,7 +25,10 @@
 #include <ogr_geometry.h>
 
 bool SRS::set_output(int epsg) {
-    m_srs_out.importFromEPSG(epsg);
+    auto const result = m_srs_out.importFromEPSG(epsg);
+    if (result != OGRERR_NONE) {
+        return false;
+    }
 
     if (epsg != 4326) {
         m_transform = std::unique_ptr<OGRCoordinateTransformation>(OGRCreateCoordinateTransformation(&m_srs_wgs84, &m_srs_out));
@@ -45,8 +48,9 @@ void SRS::transform(OGRGeometry* geometry) {
     // Transform if no SRS is set on input geometry or it is set to WGS84.
     const OGRSpatialReference* srs = geometry->getSpatialReference();
     if (srs == nullptr || srs->IsSame(&m_srs_wgs84)) {
-        if (geometry->transform(m_transform.get()) != OGRERR_NONE) {
-            throw TransformationException{};
+        auto const result = geometry->transform(m_transform.get());
+        if (result != OGRERR_NONE) {
+            throw TransformationException{result};
         }
     }
 }

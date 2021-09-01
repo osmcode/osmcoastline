@@ -53,14 +53,17 @@ public:
 
     public:
 
-        TransformationException() :
-            runtime_error("SRS transformation failed") {
+        TransformationException(OGRErr error_code) :
+            runtime_error("SRS transformation failed - OGRErr=" + std::to_string(error_code)) {
         }
 
     }; // class TransformationException
 
-    SRS() noexcept {
-        m_srs_wgs84.SetWellKnownGeogCS("WGS84");
+    SRS() {
+        auto const result = m_srs_wgs84.SetWellKnownGeogCS("WGS84");
+        if (result != OGRERR_NONE) {
+            throw TransformationException{result};
+        }
     }
 
     /**
