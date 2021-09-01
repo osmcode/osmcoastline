@@ -43,12 +43,12 @@ check_count error_points 3;
 check_count_with_op error_lines -ge 1;
 check_count_with_op error_lines -le 2;
 
-if [ "$SRID" = "4326" ]; then
-    echo "SELECT AsText(geometry), osm_id, error FROM error_points;" | $SQL >"$DUMP"
+echo "SELECT InsertEpsgSrid(4326);" | $SQL
 
-    grep -F 'POINT(1.09 1.975)|0|intersection' "$DUMP"
-    grep -F 'POINT(1.05 1.96)|101|fixed_end_point' "$DUMP"
-    grep -F 'POINT(1.15 1.97)|107|fixed_end_point' "$DUMP"
-fi
+echo "SELECT AsText(Transform(geometry, 4326)), osm_id, error FROM error_points;" | $SQL >"$DUMP"
+
+grep -F 'POINT(1.09 1.975)|0|intersection' "$DUMP"
+grep -F 'POINT(1.05 1.96)|101|fixed_end_point' "$DUMP"
+grep -F 'POINT(1.15 1.97)|107|fixed_end_point' "$DUMP"
 
 #-----------------------------------------------------------------------------

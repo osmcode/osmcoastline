@@ -42,10 +42,10 @@ check_count land_polygons 2;
 check_count error_points 0;
 check_count error_lines 0;
 
-if [ "$SRID" = "4326" ]; then
-    echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL >"$DUMP"
-    grep -F 'POLYGON((1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01))' "$DUMP"
-    grep -F 'POLYGON((1.01 1.11, 1.01 1.14, 1.04 1.14, 1.04 1.11, 1.01 1.11))' "$DUMP"
-fi
+echo "SELECT InsertEpsgSrid(4326);" | $SQL
+
+echo "SELECT AsText(Transform(geometry, 4326)) FROM land_polygons;" | $SQL >"$DUMP"
+grep -F 'POLYGON((1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01))' "$DUMP"
+grep -F 'POLYGON((1.01 1.11, 1.01 1.14, 1.04 1.14, 1.04 1.11, 1.01 1.11))' "$DUMP"
 
 #-----------------------------------------------------------------------------

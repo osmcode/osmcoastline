@@ -42,16 +42,16 @@ check_count land_polygons 2;
 check_count error_points 0;
 check_count error_lines 0;
 
-if [ "$SRID" = "4326" ]; then
-    echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL >"$DUMP"
+echo "SELECT InsertEpsgSrid(4326);" | $SQL
 
-    grep -F 'POLYGON((-180 1.1, -180 1.4, -179 1.4, -179 1.1, -180 1.1))' "$DUMP"
-    grep -F 'POLYGON((180 1.4, 180 1.1, 179 1.1, 179 1.4, 180 1.4))' "$DUMP"
+echo "SELECT AsText(Transform(geometry, 4326)) FROM land_polygons;" | $SQL >"$DUMP"
 
-    echo "SELECT AsText(geometry) FROM lines;" | $SQL >"$DUMP"
+grep -F 'POLYGON((-180 1.1, -180 1.4, -179 1.4, -179 1.1, -180 1.1))' "$DUMP"
+grep -F 'POLYGON((180 1.4, 180 1.1, 179 1.1, 179 1.4, 180 1.4))' "$DUMP"
 
-    grep -F 'LINESTRING(-180 1.4, -179 1.4, -179 1.1, -180 1.1)' "$DUMP"
-    grep -F 'LINESTRING(180 1.1, 179 1.1, 179 1.4, 180 1.4)' "$DUMP"
-fi
+echo "SELECT AsText(Transform(geometry, 4326)) FROM lines;" | $SQL >"$DUMP"
+
+grep -F 'LINESTRING(-180 1.4, -179 1.4, -179 1.1, -180 1.1)' "$DUMP"
+grep -F 'LINESTRING(180 1.1, 179 1.1, 179 1.4, 180 1.4)' "$DUMP"
 
 #-----------------------------------------------------------------------------

@@ -33,9 +33,9 @@ check_count land_polygons 0;
 check_count error_points 1;
 check_count error_lines 0;
 
-if [ "$SRID" = "4326" ]; then
-    echo "SELECT AsText(geometry), osm_id, error FROM error_points;" | $SQL \
-        | grep -F 'POINT(1.01 1.01)|100|tagged_node'
-fi
+echo "SELECT InsertEpsgSrid(4326);" | $SQL
+
+echo "SELECT AsText(Transform(geometry, 4326)), osm_id, error FROM error_points;" | $SQL \
+    | grep -F 'POINT(1.01 1.01)|100|tagged_node'
 
 #-----------------------------------------------------------------------------

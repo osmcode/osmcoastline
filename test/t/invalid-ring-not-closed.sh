@@ -38,18 +38,18 @@ check_count rings 1;
 check_count error_points 2;
 check_count error_lines 1;
 
-if [ "$SRID" = "4326" ]; then
-    echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL \
-        | grep -F 'POLYGON((1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01))'
+echo "SELECT InsertEpsgSrid(4326);" | $SQL
 
-    echo "SELECT AsText(geometry), osm_id, error FROM error_points;" | $SQL >"$DUMP"
+echo "SELECT AsText(Transform(geometry, 4326)) FROM land_polygons;" | $SQL \
+    | grep -F 'POLYGON((1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01))'
 
-    grep -F 'POINT(1.01 1.01)|100|fixed_end_point' "$DUMP"
-    grep -F 'POINT(1.01 1.04)|103|fixed_end_point' "$DUMP"
+echo "SELECT AsText(Transform(geometry, 4326)), osm_id, error FROM error_points;" | $SQL >"$DUMP"
 
-    echo "SELECT AsText(geometry), osm_id, error FROM error_lines;" | $SQL \
-        | grep -F 'LINESTRING(1.01 1.04, 1.01 1.01)|0|added_line'
-fi
+grep -F 'POINT(1.01 1.01)|100|fixed_end_point' "$DUMP"
+grep -F 'POINT(1.01 1.04)|103|fixed_end_point' "$DUMP"
+
+echo "SELECT AsText(Transform(geometry, 4326)), osm_id, error FROM error_lines;" | $SQL \
+    | grep -F 'LINESTRING(1.01 1.04, 1.01 1.01)|0|added_line'
 
 #-----------------------------------------------------------------------------
 
@@ -71,9 +71,9 @@ check_count rings 0;
 check_count error_points 2;
 check_count error_lines 1;
 
-if [ "$SRID" = "4326" ]; then
-    echo "SELECT AsText(geometry), osm_id, error FROM error_lines;" | $SQL \
-        | grep -F 'LINESTRING(1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01)|200|not_closed'
-fi
+echo "SELECT InsertEpsgSrid(4326);" | $SQL
+
+echo "SELECT AsText(Transform(geometry, 4326)), osm_id, error FROM error_lines;" | $SQL \
+    | grep -F 'LINESTRING(1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01)|200|not_closed'
 
 #-----------------------------------------------------------------------------
