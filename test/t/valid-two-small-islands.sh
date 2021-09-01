@@ -29,7 +29,7 @@ OSM
 
 set -e
 
-"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
+"$OSMC" --verbose --overwrite --srs="$SRID" --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 
 test $? -eq 0
 
@@ -42,8 +42,10 @@ check_count land_polygons 2;
 check_count error_points 0;
 check_count error_lines 0;
 
-echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL >"$DUMP"
-grep -F 'POLYGON((1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01))' "$DUMP"
-grep -F 'POLYGON((1.01 1.11, 1.01 1.14, 1.04 1.14, 1.04 1.11, 1.01 1.11))' "$DUMP"
+if [ "$SRID" = "4326" ]; then
+    echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL >"$DUMP"
+    grep -F 'POLYGON((1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01))' "$DUMP"
+    grep -F 'POLYGON((1.01 1.11, 1.01 1.14, 1.04 1.14, 1.04 1.11, 1.01 1.11))' "$DUMP"
+fi
 
 #-----------------------------------------------------------------------------

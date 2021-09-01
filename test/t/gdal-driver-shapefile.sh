@@ -26,7 +26,7 @@ set -e
 
 rm -rf "$DB"
 
-"$OSMC" --verbose --overwrite --gdal-driver "ESRI Shapefile" --output-database="$DB" "$INPUT" >"$LOG" 2>&1
+"$OSMC" --verbose --overwrite --gdal-driver "ESRI Shapefile" --srs="$SRID" --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 
 test $? -eq 0
 

@@ -27,7 +27,7 @@ OSM
 
 #-----------------------------------------------------------------------------
 
-"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
+"$OSMC" --verbose --overwrite --srs="$SRID" --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 RC=$?
 set -e
 
@@ -42,7 +42,9 @@ check_count land_polygons 1;
 check_count error_points 1;
 check_count error_lines 0;
 
-echo "SELECT AsText(geometry), osm_id, error FROM error_points;" | $SQL \
-    | grep -F 'POINT(1.09 1.975)|0|intersection'
+if [ "$SRID" = "4326" ]; then
+    echo "SELECT AsText(geometry), osm_id, error FROM error_points;" | $SQL \
+        | grep -F 'POINT(1.09 1.975)|0|intersection'
+fi
 
 #-----------------------------------------------------------------------------

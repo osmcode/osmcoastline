@@ -22,7 +22,7 @@ OSM
 
 #-----------------------------------------------------------------------------
 
-"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
+"$OSMC" --verbose --overwrite --srs="$SRID" --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 RC=$?
 set -e
 
@@ -37,10 +37,12 @@ check_count land_polygons 1;
 check_count error_points 0;
 check_count error_lines 1;
 
-echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL \
-    | grep -F 'POLYGON((1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01))'
+if [ "$SRID" = "4326" ]; then
+    echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL \
+        | grep -F 'POLYGON((1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01))'
 
-echo "SELECT AsText(geometry), osm_id, error FROM error_lines;" | $SQL \
-    | grep -F 'LINESTRING(1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01)|0|direction'
+    echo "SELECT AsText(geometry), osm_id, error FROM error_lines;" | $SQL \
+        | grep -F 'LINESTRING(1.01 1.01, 1.01 1.04, 1.04 1.04, 1.04 1.01, 1.01 1.01)|0|direction'
+fi
 
 #-----------------------------------------------------------------------------

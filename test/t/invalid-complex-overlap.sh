@@ -30,7 +30,7 @@ OSM
 
 #-----------------------------------------------------------------------------
 
-"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
+"$OSMC" --verbose --overwrite --srs="$SRID" --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 RC=$?
 set -e
 

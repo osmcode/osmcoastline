@@ -33,19 +33,25 @@ OSM
 
 #-----------------------------------------------------------------------------
 
-"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
+"$OSMC" --verbose --overwrite --srs="$SRID" --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 RC=$?
 set -e
 
 test $RC -eq 2
 
-grep 'Found 3 rings in input data.$' "$LOG"
+if [ "$SRID" = "4326" ]; then
+    grep 'Found 3 rings in input data.$' "$LOG"
+    grep '^There were 3 warnings.$' "$LOG"
+    check_count error_lines 3;
+else
+    # "questionables" are not checked in 3857
+    grep '^There were 0 warnings.$' "$LOG"
+    check_count error_lines 0;
+fi
 
-grep '^There were 3 warnings.$' "$LOG"
 grep '^There were 1 errors.$' "$LOG"
 
 check_count land_polygons 0;
 check_count error_points 0;
-check_count error_lines 3;
 
 #-----------------------------------------------------------------------------

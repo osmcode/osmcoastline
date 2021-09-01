@@ -28,7 +28,7 @@ OSM
 
 #-----------------------------------------------------------------------------
 
-"$OSMC" --verbose --overwrite --output-database="$DB" "$INPUT" >"$LOG" 2>&1
+"$OSMC" --verbose --overwrite --srs="$SRID" --output-database="$DB" "$INPUT" >"$LOG" 2>&1
 RC=$?
 set -e
 
@@ -36,14 +36,23 @@ test $RC -eq 2
 
 grep 'There are 2 nodes where the coastline is not closed.$' "$LOG"
 
-grep '^There were 1 warnings.$' "$LOG"
+if [ "$SRID" = "4326" ]; then
+    grep '^There were 1 warnings.$' "$LOG"
+    check_count error_lines 2;
+else
+    # "questionables" are not checked in 3857
+    grep '^There were 0 warnings.$' "$LOG"
+    check_count error_lines 1;
+fi
+
 grep '^There were 1 errors.$' "$LOG"
 
 check_count land_polygons 1;
 check_count error_points 2;
-check_count error_lines 2;
 
-echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL \
-    | grep -F 'POLYGON((1.25 1.04, 1.15 1.04, 1.1 1.04, 1.05 1.05, 1.1 1.06, 1.3 1.06, 1.35 1.05, 1.3 1.04, 1.25 1.04))'
+if [ "$SRID" = "4326" ]; then
+    echo "SELECT AsText(geometry) FROM land_polygons;" | $SQL \
+        | grep -F 'POLYGON((1.25 1.04, 1.15 1.04, 1.1 1.04, 1.05 1.05, 1.1 1.06, 1.3 1.06, 1.35 1.05, 1.3 1.04, 1.25 1.04))'
+fi
 
 #-----------------------------------------------------------------------------
