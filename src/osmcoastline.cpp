@@ -281,53 +281,58 @@ int main(int argc, char *argv[]) {
         std::exit(return_code_fatal);
     }
 
-    vout << "Checking for missing locations...\n";
-    unsigned int missing_locations = coastline_rings.check_locations(options.debug);
-    if (missing_locations) {
-        vout << "  There are " << missing_locations << " locations missing. Check that input file contains all nodes needed.\n";
-        std::exit(return_code_error);
-    } else {
-        vout << "  All locations are there.\n";
-    }
+    try {
+        vout << "Checking for missing locations...\n";
+        unsigned int missing_locations = coastline_rings.check_locations(options.debug);
+        if (missing_locations) {
+            vout << "  There are " << missing_locations << " locations missing. Check that input file contains all nodes needed.\n";
+            std::exit(return_code_error);
+        } else {
+            vout << "  All locations are there.\n";
+        }
 
-    vout << memory_usage();
+        vout << memory_usage();
 
-    if (options.driver == "SQLite") {
-        output_database->set_options(options);
-    }
+        if (options.driver == "SQLite") {
+            output_database->set_options(options);
+        }
 
-    vout << "Check line segments for intersections and overlaps...\n";
-    warnings += coastline_rings.check_for_intersections(*output_database, segments_fd);
+        vout << "Check line segments for intersections and overlaps...\n";
+        warnings += coastline_rings.check_for_intersections(*output_database, segments_fd);
 
-    if (segments_fd != -1) {
-        ::close(segments_fd);
-    }
+        if (segments_fd != -1) {
+            ::close(segments_fd);
+        }
 
-    vout << "Trying to close Antarctica ring...\n";
-    if (coastline_rings.close_antarctica_ring(options.epsg)) {
-        vout << "  Closed Antarctica ring.\n";
-    } else {
-        vout << "  Did not find open Antarctica ring.\n";
-    }
+        vout << "Trying to close Antarctica ring...\n";
+        if (coastline_rings.close_antarctica_ring(options.epsg)) {
+            vout << "  Closed Antarctica ring.\n";
+        } else {
+            vout << "  Did not find open Antarctica ring.\n";
+        }
 
-    if (options.close_rings) {
-        vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
-        vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
-        coastline_rings.close_rings(*output_database, options.debug, options.close_distance);
-        stats.rings_fixed = coastline_rings.num_fixed_rings();
-        errors += coastline_rings.num_fixed_rings();
-        vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
-             << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
-        errors += coastline_rings.num_unconnected_nodes();
-    } else {
-        vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";
-    }
+        if (options.close_rings) {
+            vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
+            vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
+            coastline_rings.close_rings(*output_database, options.debug, options.close_distance);
+            stats.rings_fixed = coastline_rings.num_fixed_rings();
+            errors += coastline_rings.num_fixed_rings();
+            vout << "  Closed " << coastline_rings.num_fixed_rings() << " rings. This left "
+                << coastline_rings.num_unconnected_nodes() << " nodes where the coastline could not be closed.\n";
+            errors += coastline_rings.num_unconnected_nodes();
+        } else {
+            vout << "Not closing broken rings (because you used the option --close-distance/-c 0).\n";
+        }
 
-    if (options.output_rings) {
-        vout << "Writing out rings... (Because you gave the --output-rings/-r option.)\n";
-        warnings += coastline_rings.output_rings(*output_database);
-    } else {
-        vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
+        if (options.output_rings) {
+            vout << "Writing out rings... (Because you gave the --output-rings/-r option.)\n";
+            warnings += coastline_rings.output_rings(*output_database);
+        } else {
+            vout << "Not writing out rings. (Use option --output-rings/-r if you want the rings.)\n";
+        }
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        std::exit(return_code_fatal);
     }
 
     if (options.output_polygons != output_polygon_type::none || options.output_lines) {
@@ -389,7 +394,7 @@ int main(int argc, char *argv[]) {
                 }
             }
         } catch (const std::runtime_error& e) {
-            vout << e.what() << '\n';
+            vout << "Error: " << e.what() << '\n';
             ++errors;
         }
     } else {
