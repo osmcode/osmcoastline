@@ -60,7 +60,11 @@ public:
     }; // class TransformationException
 
     SRS() {
-        auto const result = m_srs_wgs84.SetWellKnownGeogCS("WGS84");
+        /* This has to be "CRS84" not "WGS84", because WGS84 has the axis
+         * order reversed in GDAL 3 compared to GDAL 2. For CRS84 the axis
+         * order is correct in both GDAL versions.
+         * See https://gdal.org/tutorials/osr_api_tut.html */
+        auto const result = m_srs_wgs84.SetWellKnownGeogCS("CRS84");
         if (result != OGRERR_NONE) {
             throw TransformationException{result};
         }
