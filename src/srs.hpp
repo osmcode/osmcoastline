@@ -60,7 +60,7 @@ public:
     }; // class TransformationException
 
     SRS() noexcept {
-        m_srs_wgs84.SetWellKnownGeogCS("WGS84");
+        m_srs_wgs84.SetWellKnownGeogCS("CRS84");
     }
 
     /**
