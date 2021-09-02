@@ -13,6 +13,26 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 
+## [2.3.1] - 2021-09-02
+
+### Added
+
+- GPKG output support
+
+### Changed
+
+- More tests, specifically for EPSG:3857.
+- More error checks.
+- Some shell script cleanups.
+
+### Fixed
+
+- Fix axis order problem with GDAL 3: In GDAL 3 the axis order for WGS84
+  changed from (lon, lat) to (lat, lon)! So we need to use the magic "CRS84"
+  instead which does the same thing in GDAL 2 and GDAL 3. This is an important
+  fix, without it osmcoastline doesn't work with GDAL 3 when using any output
+  SRS other than WGS84.
+
 ## [2.3.0] - 2021-01-08
 
 ### Added
@@ -179,7 +199,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Added man pages
 
 
-[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.3.0...HEAD
+[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.3.1...HEAD
+[2.3.1]: https://github.com/osmcode/osmium-tool/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/osmcode/osmium-tool/compare/v2.2.4...v2.3.0
 [2.2.4]: https://github.com/osmcode/osmium-tool/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/osmcode/osmium-tool/compare/v2.2.2...v2.2.3
