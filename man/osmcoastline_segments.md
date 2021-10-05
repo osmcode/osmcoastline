@@ -12,26 +12,27 @@ osmcoastline_segments - analyze OpenStreetMap coastline changes from segment fil
 # DESCRIPTION
 
 The **osmcoastline** program can write out all segments of the coastline into a
-file (when started with the **-S, --write-segments=FILE** option). This program
-can be used to compare two of those segment files in various ways to detect
-coastline changes between different runs of the **osmcoastline** program.
+file (when started with the **-S, \--write-segments=FILE** option). This
+program can be used to compare two of those segment files in various ways to
+detect coastline changes between different runs of the **osmcoastline**
+program.
 
 
 # OPTIONS
 
--h, --help
+-h, \--help
 :   Display usage information.
 
--d, --dump
+-d, \--dump
 :   Dump segment list to stdout in plain text format.
 
--g, --geom=FILENAME
+-g, \--geom=FILENAME
 :   Write segments to geometry file or database using OGR.
 
--f, --format=FORMAT
+-f, \--format=FORMAT
 :   OGR format for writing out geometries.
 
--V, --version
+-V, \--version
 :   Display program version and license information.
 
 

@@ -6,9 +6,9 @@ osmcoastline_filter - filter coastline data from OpenStreetMap file
 
 # SYNOPSIS
 
-**osmcoastline_filter** --output=*OUTPUT_FILE* *INPUT-FILE*
+**osmcoastline_filter** \--output=*OUTPUT_FILE* *INPUT-FILE*
 
-**osmcoastline_filter** --help
+**osmcoastline_filter** \--help
 
 
 # DESCRIPTION
@@ -36,13 +36,16 @@ the **osmcoastline** and **osmcoastline_ways** programs work fine with it.
 
 # OPTIONS
 
--h, --help
-:   Display usage information
+-h, \--help
+:   Display usage information and exit.
 
--o, --output=OSMFILE
-:   Where to write output (default: none)
+-o, \--output=OSMFILE
+:   Where to write output (default: none).
 
--V, --version
+-v, \--verbose
+:   Enable verbose output.
+
+-V, \--version
 :   Display program version and license information.
 
 

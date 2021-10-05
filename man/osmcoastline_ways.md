@@ -11,10 +11,10 @@ osmcoastline_ways - extract coastline ways from OpenStreetMap data
 
 # OPTIONS
 
--h, --help
+-h, \--help
 :   Display usage information.
 
--V, --version
+-V, \--version
 :   Display program version and license information.
 
 

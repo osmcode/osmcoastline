@@ -11,10 +11,10 @@ osmcoastline_readmeta - display metadata from database created by osmcoastline
 
 # OPTIONS
 
--h, --help
+-h, \--help
 :   Display usage information.
 
--V, --version
+-V, \--version
 :   Display program version and license information.
 
 
