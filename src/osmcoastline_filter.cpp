@@ -49,6 +49,7 @@
 void print_help() {
     std::cout << "Usage: osmcoastline_filter [OPTIONS] OSMFILE\n"
               << "\nOptions:\n"
+              << "  -f, --format         - Set output format (default: pbf)\n"
               << "  -h, --help           - This help message\n"
               << "  -o, --output=OSMFILE - Where to write output (default: none)\n"
               << "  -v, --verbose        - Verbose output\n"
@@ -58,9 +59,11 @@ void print_help() {
 
 int main(int argc, char* argv[]) {
     std::string output_filename;
+    std::string output_file_format{"pbf"};
     bool verbose = false;
 
     static struct option long_options[] = {
+        {"format", required_argument, nullptr, 'f'},
         {"help",         no_argument, nullptr, 'h'},
         {"output", required_argument, nullptr, 'o'},
         {"verbose",      no_argument, nullptr, 'v'},
@@ -69,12 +72,15 @@ int main(int argc, char* argv[]) {
     };
 
     while (true) {
-        const int c = getopt_long(argc, argv, "ho:vV", long_options, nullptr);
+        const int c = getopt_long(argc, argv, "f:ho:vV", long_options, nullptr);
         if (c == -1) {
             break;
         }
 
         switch (c) {
+            case 'f':
+                output_file_format = optarg;
+                break;
             case 'h':
                 print_help();
                 std::exit(return_code_ok);
@@ -120,7 +126,8 @@ int main(int argc, char* argv[]) {
 
         vout << "Started osmcoastline_filter " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n';
 
-        osmium::io::Writer writer{output_filename, header};
+        osmium::io::File output_file{output_filename, output_file_format};
+        osmium::io::Writer writer{output_file, header};
         auto output_it = osmium::io::make_output_iterator(writer);
 
         osmium::index::IdSetSmall<osmium::object_id_type> ids;

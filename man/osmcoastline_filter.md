@@ -36,6 +36,9 @@ the **osmcoastline** and **osmcoastline_ways** programs work fine with it.
 
 # OPTIONS
 
+-f, \--format
+:   Set output format options (default: pbf).
+
 -h, \--help
 :   Display usage information and exit.
 
