@@ -16,7 +16,7 @@ fi
 
 if [[ $# -ge 1 && ( $1 == "--version" || $1 == "-v" ) ]]; then
     echo "osmcoastline_readmeta version $OSMCOASTLINE_VERSION"
-    echo "Copyright (C) 2012-2021  Jochen Topf <jochen@topf.org>"
+    echo "Copyright (C) 2012-2022  Jochen Topf <jochen@topf.org>"
     echo "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>."
     echo "This is free software: you are free to change and redistribute it."
     echo "There is NO WARRANTY, to the extent permitted by law.";
