@@ -168,7 +168,7 @@ jobs:
               zlib-devel
         shell: bash
         if: matrix.installer == 'dnf'
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
@@ -188,7 +188,7 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -yq clang-13
         shell: bash
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/install-ubuntu
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
@@ -201,7 +201,7 @@ jobs:
       CXX: clang++
       BUILD_TYPE: Dev
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/install-macos
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
@@ -214,7 +214,7 @@ jobs:
       CXX: clang++
       BUILD_TYPE: Dev
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/install-macos
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
@@ -227,7 +227,7 @@ jobs:
       CXX: clang++
       BUILD_TYPE: Release
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/install-macos
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
