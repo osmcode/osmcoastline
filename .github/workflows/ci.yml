@@ -194,19 +194,6 @@ jobs:
       - uses: ./.github/actions/build
       - uses: ./.github/actions/ctest
 
-  macos10-dev:
-    runs-on: macos-10.15
-    env:
-      CC: clang
-      CXX: clang++
-      BUILD_TYPE: Dev
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/install-macos
-      - uses: ./.github/actions/cmake
-      - uses: ./.github/actions/build
-      - uses: ./.github/actions/ctest
-
   macos11-dev:
     runs-on: macos-11.0
     env:
@@ -222,6 +209,32 @@ jobs:
 
   macos11-release:
     runs-on: macos-11.0
+    env:
+      CC: clang
+      CXX: clang++
+      BUILD_TYPE: Release
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-macos
+      - uses: ./.github/actions/cmake
+      - uses: ./.github/actions/build
+      - uses: ./.github/actions/ctest
+
+  macos12-dev:
+    runs-on: macos-12.0
+    env:
+      CC: clang
+      CXX: clang++
+      BUILD_TYPE: Dev
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-macos
+      - uses: ./.github/actions/cmake
+      - uses: ./.github/actions/build
+      - uses: ./.github/actions/ctest
+
+  macos12-release:
+    runs-on: macos-12.0
     env:
       CC: clang
       CXX: clang++
