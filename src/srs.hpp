@@ -53,7 +53,7 @@ public:
 
     public:
 
-        TransformationException(OGRErr error_code) :
+        explicit TransformationException(OGRErr error_code) :
             runtime_error("SRS transformation failed - OGRErr=" + std::to_string(error_code)) {
         }
 

@@ -74,7 +74,7 @@ public:
         if (::fstat(m_fd, &s) != 0) {
             throw std::system_error{errno, std::system_category(), std::string{"Can't get file size for '"} + m_filename + "'"};
         }
-        return std::size_t(s.st_size);
+        return static_cast<std::size_t>(s.st_size);
     }
 
 }; // class InputFile

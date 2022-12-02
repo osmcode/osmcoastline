@@ -97,12 +97,12 @@ void CoastlineRing::close_ring() {
 void CoastlineRing::close_antarctica_ring(int epsg) {
     const double min = epsg == 4326 ? -90.0 : -85.0511288;
 
-    for (int lat = -78; lat > int(min); --lat) {
-        m_way_node_list.emplace_back(0, osmium::Location{-180.0, double(lat)});
+    for (int lat = -78; lat > static_cast<int>(min); --lat) {
+        m_way_node_list.emplace_back(0, osmium::Location{-180.0, static_cast<double>(lat)});
     }
 
     for (int lon = -180; lon < 180; ++lon) {
-        m_way_node_list.emplace_back(0, osmium::Location{double(lon), min});
+        m_way_node_list.emplace_back(0, osmium::Location{static_cast<double>(lon), min});
     }
 
     if (epsg == 3857) {
@@ -110,7 +110,7 @@ void CoastlineRing::close_antarctica_ring(int epsg) {
     }
 
     for (auto lat = static_cast<int>(min); lat < -78; ++lat) {
-        m_way_node_list.emplace_back(0, osmium::Location{180.0, double(lat)});
+        m_way_node_list.emplace_back(0, osmium::Location{180.0, static_cast<double>(lat)});
     }
 
     m_way_node_list.push_back(m_way_node_list.front());
@@ -168,7 +168,7 @@ void CoastlineRing::add_segments_to_vector(std::vector<osmium::UndirectedSegment
     }
 }
 
-std::ostream& operator<<(std::ostream& out, CoastlineRing& cp) {
+std::ostream& operator<<(std::ostream& out, const CoastlineRing& cp) {
     out << "CoastlineRing(ring_id=" << cp.ring_id()
         << ", nways=" << cp.nways()
         << ", npoints=" << cp.npoints()
