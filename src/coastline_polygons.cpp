@@ -324,7 +324,10 @@ void CoastlinePolygons::split_bbox(const OGREnvelope& envelope, polygon_vector_t
                 switch (geom->getGeometryType()) {
                     case wkbPolygon:
                         if (!antarctica_bogus(geom.get())) {
-                            m_output.add_water_polygon(static_cast_unique_ptr<OGRPolygon>(std::move(geom)));
+                            auto polygon = static_cast_unique_ptr<OGRPolygon>(std::move(geom));
+                            if (polygon->getExteriorRing()) {
+                                m_output.add_water_polygon(std::move(polygon));
+                            }
                         }
                         break;
                     case wkbMultiPolygon: {
