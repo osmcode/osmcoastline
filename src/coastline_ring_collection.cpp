@@ -302,7 +302,7 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
                     break;
                 }
                 if (y_range_overlap(s1, s2)) {
-                    osmium::Location i = intersection(s1, s2);
+                    const auto i = intersection(s1, s2);
                     if (i) {
                         intersections.push_back(i);
                     }
@@ -355,7 +355,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
     // Go through vector starting with the shortest connections and close rings
     // using the connections in turn.
     while (!connections.empty()) {
-        Connection conn = connections.back();
+        const Connection conn = connections.back();
         connections.pop_back();
 
         // Invalidate all other connections using one of the same end points.
@@ -447,7 +447,7 @@ unsigned int CoastlineRingCollection::output_questionable(const CoastlinePolygon
     for (const auto& polygon : polygons) {
         const OGRLinearRing* exterior_ring = polygon->getExteriorRing();
         assert(exterior_ring);
-        osmium::Location pos{exterior_ring->getX(0), exterior_ring->getY(0)};
+        const osmium::Location pos{exterior_ring->getX(0), exterior_ring->getY(0)};
         const auto rings_it = lower_bound(rings.begin(), rings.end(), lcrp_type{pos, nullptr}, comp);
         if (rings_it != rings.end()) {
             rings_it->second->set_outer();

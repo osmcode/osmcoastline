@@ -166,11 +166,11 @@ int main(int argc, char *argv[]) {
         segvec removed_segments;
         segvec added_segments;
 
-        InputFile file1{argv[optind]};
-        InputFile file2{argv[optind + 1]};
+        const InputFile file1{argv[optind]};
+        const InputFile file2{argv[optind + 1]};
 
-        osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m1{file1.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file1.fd()};
-        osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m2{file2.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file2.fd()};
+        const osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m1{file1.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file1.fd()};
+        const osmium::util::TypedMemoryMapping<osmium::UndirectedSegment> m2{file2.size() / sizeof(osmium::UndirectedSegment), osmium::util::MemoryMapping::mapping_mode::readonly, file2.fd()};
 
         std::set_difference(m1.cbegin(), m1.cend(), m2.cbegin(), m2.cend(), std::back_inserter(removed_segments));
         std::set_difference(m2.cbegin(), m2.cend(), m1.cbegin(), m1.cend(), std::back_inserter(added_segments));

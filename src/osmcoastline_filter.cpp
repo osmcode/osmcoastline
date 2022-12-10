@@ -122,11 +122,11 @@ int main(int argc, char* argv[]) {
         header.set("generator", std::string{"osmcoastline_filter/"} + get_osmcoastline_version());
         header.add_box(osmium::Box{-180.0, -90.0, 180.0, 90.0});
 
-        osmium::io::File infile{argv[optind]};
+        const osmium::io::File infile{argv[optind]};
 
         vout << "Started osmcoastline_filter " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n';
 
-        osmium::io::File output_file{output_filename, output_file_format};
+        const osmium::io::File output_file{output_filename, output_file_format};
         osmium::io::Writer writer{output_file, header};
         auto output_it = osmium::io::make_output_iterator(writer);
 
@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) {
         writer.close();
 
         vout << "All done.\n";
-        osmium::MemoryUsage mem;
+        const osmium::MemoryUsage mem;
         if (mem.current() > 0) {
             vout << "Memory used: current: " << mem.current() << " MBytes\n"
                 << "             peak:    " << mem.peak() << " MBytes\n";

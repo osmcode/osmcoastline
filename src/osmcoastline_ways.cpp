@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
         index_type index_neg;
         location_handler_type location_handler{index_pos, index_neg};
 
-        osmium::io::File infile{input_osm_filename};
+        const osmium::io::File infile{input_osm_filename};
         osmium::io::Reader reader1{infile, osmium::osm_entity_bits::node};
         osmium::apply(reader1, location_handler);
         reader1.close();

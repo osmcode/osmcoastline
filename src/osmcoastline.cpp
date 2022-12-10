@@ -145,7 +145,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
 /* ================================================== */
 
 std::string memory_usage() {
-    osmium::MemoryUsage mem;
+    const osmium::MemoryUsage mem;
     std::ostringstream s;
     s << "Memory used: current: " << mem.current() << " MBytes, peak: " << mem.peak() << " MBytes\n";
     return s.str();
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
     unsigned int errors = 0;
 
     // Parse command line and setup 'options' object with them.
-    Options options{argc, argv};
+    const Options options{argc, argv};
 
     // The vout object is an output stream we can write to instead of
     // std::cerr. Nothing is written if we are not in verbose mode.
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
         // held by some intermediate datastructures is recovered after we don't
         // need them any more.
         vout << "Reading from file '" << options.inputfile << "'.\n";
-        osmium::io::File infile{options.inputfile};
+        const osmium::io::File infile{options.inputfile};
 
         vout << "Reading ways (1st pass through input file)...\n";
         osmium::io::Reader reader1{infile, osmium::osm_entity_bits::way};
@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
 
     try {
         vout << "Checking for missing locations...\n";
-        unsigned int missing_locations = coastline_rings.check_locations(options.debug);
+        const unsigned int missing_locations = coastline_rings.check_locations(options.debug);
         if (missing_locations) {
             vout << "  There are " << missing_locations << " locations missing. Check that input file contains all nodes needed.\n";
             std::exit(return_code_error);
