@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
             case 'h': {
                 std::cout << "Usage: osmcoastline_segments [OPTIONS] SEGFILE1 SEGFILE2\n";
                 print_help();
-                std::exit(return_code_ok);
+                return return_code_ok;
             }
             case 'V':
                 std::cout << "osmcoastline_segments " << get_osmcoastline_long_version() << " / " << get_libosmium_version() << '\n'
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
                           << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
                           << "This is free software: you are free to change and redistribute it.\n"
                           << "There is NO WARRANTY, to the extent permitted by law.\n";
-                std::exit(return_code_ok);
+                return return_code_ok;
             default:
                 break;
         }
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 
     if (optind != argc - 2) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] SEGFILE1 SEGFILE2\n";
-        std::exit(return_code_cmdline);
+        return return_code_cmdline;
     }
 
     try {
@@ -192,7 +192,9 @@ int main(int argc, char *argv[]) {
         return (removed_segments.empty() && added_segments.empty()) ? 0 : 1;
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
-        std::exit(return_code_fatal);
+        return return_code_fatal;
     }
+
+    return return_code_ok;
 }
 

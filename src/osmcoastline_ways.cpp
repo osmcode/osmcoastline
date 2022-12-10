@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
     if (argc >= 2) {
         if (!std::strcmp(argv[1], "--help") || !std::strcmp(argv[1], "-h")) {
             std::cout << "Usage: osmcoastline_ways OSMFILE [WAYSDB]\n";
-            std::exit(return_code_ok);
+            return return_code_ok;
         }
 
         if (!std::strcmp(argv[1], "--version") || !std::strcmp(argv[1], "-V")) {
@@ -118,13 +118,13 @@ int main(int argc, char* argv[]) {
                       << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
                       << "This is free software: you are free to change and redistribute it.\n"
                       << "There is NO WARRANTY, to the extent permitted by law.\n";
-            std::exit(return_code_ok);
+            return return_code_ok;
         }
     }
 
     if (argc != 2 && argc != 3) {
         std::cerr << "Usage: osmcoastline_ways OSMFILE [WAYSDB]\n";
-        std::exit(return_code_cmdline);
+        return return_code_cmdline;
     }
 
     CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");
@@ -154,7 +154,9 @@ int main(int argc, char* argv[]) {
         std::cerr << "Sum of way lengths: " << std::fixed << (coastline_ways_handler.sum_length() / 1000) << "km\n";
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
-        std::exit(return_code_fatal);
+        return return_code_fatal;
     }
+
+    return return_code_ok;
 }
 

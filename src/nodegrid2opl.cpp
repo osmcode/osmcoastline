@@ -56,7 +56,7 @@
 
 const int id_offset = 100;
 
-static void add_node(std::vector<std::string>& nodes, char c, double x, double y) {
+static bool add_node(std::vector<std::string>& nodes, char c, double x, double y) {
     static std::set<int> ids;
     int id = id_offset;
 
@@ -68,11 +68,12 @@ static void add_node(std::vector<std::string>& nodes, char c, double x, double y
 
     if (ids.count(id)) {
         std::cerr << "ID seen twice: " << c << " (" << id << ")\n";
-        std::exit(1);
+        return false;
     }
 
     ids.insert(id);
     nodes.push_back("n" + std::to_string(id) + " v1 x" + std::to_string(x) + " y" + std::to_string(y) + "\n");
+    return true;
 }
 
 int main() {
@@ -87,7 +88,9 @@ int main() {
     for (std::string line; std::getline(std::cin, line);) {
         for (const auto c : line) {
             if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')) {
-                add_node(nodes, c, offset + x * scale, offset + y * scale);
+                if (!add_node(nodes, c, offset + x * scale, offset + y * scale)) {
+                    return 1;
+                }
             }
             ++x;
         }

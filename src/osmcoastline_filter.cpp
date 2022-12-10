@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
                 break;
             case 'h':
                 print_help();
-                std::exit(return_code_ok);
+                return return_code_ok;
             case 'o':
                 output_filename = optarg;
                 break;
@@ -96,20 +96,20 @@ int main(int argc, char* argv[]) {
                           << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
                           << "This is free software: you are free to change and redistribute it.\n"
                           << "There is NO WARRANTY, to the extent permitted by law.\n";
-                std::exit(return_code_ok);
+                return return_code_ok;
             default:
-                std::exit(return_code_fatal);
+                return return_code_fatal;
         }
     }
 
     if (output_filename.empty()) {
         std::cerr << "Missing -o/--output=OSMFILE option\n";
-        std::exit(return_code_cmdline);
+        return return_code_cmdline;
     }
 
     if (optind != argc - 1) {
         std::cerr << "Usage: osmcoastline_filter [OPTIONS] OSMFILE\n";
-        std::exit(return_code_cmdline);
+        return return_code_cmdline;
     }
 
     try {
@@ -185,7 +185,9 @@ int main(int argc, char* argv[]) {
         }
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
-        std::exit(return_code_fatal);
+        return return_code_fatal;
     }
+
+    return return_code_ok;
 }
 

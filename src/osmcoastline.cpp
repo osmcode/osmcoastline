@@ -157,7 +157,7 @@ std::unique_ptr<OutputDatabase> open_output_database(const std::string& driver, 
     return std::unique_ptr<OutputDatabase>{new OutputDatabase{driver, name, srs, create_index}};
 } catch (const std::exception& e) {
     std::cerr << e.what() << '\n';
-    std::exit(return_code_fatal);
+    return nullptr;
 }
 
 /* ================================================== */
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
     vout << "Using SRS " << options.epsg << " for output. (Change with the --srs/s option.)\n";
     if (!srs.set_output(options.epsg)) {
         std::cerr << "Setting up output transformation failed\n";
-        std::exit(return_code_fatal);
+        return return_code_fatal;
     }
 
     // Optionally set up segments file
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
         segments_fd = ::open(options.segmentfile.c_str(), O_WRONLY | O_CREAT, 0666); // NOLINT(hicpp-signed-bitwise)
         if (segments_fd == -1) {
             std::cerr << "Couldn't open file '" << options.segmentfile << "' (" << std::strerror(errno) << ")\n";
-            std::exit(return_code_fatal);
+            return return_code_fatal;
         }
     }
 
@@ -212,6 +212,9 @@ int main(int argc, char *argv[]) {
     }
 
     auto output_database = open_output_database(options.driver, options.output_database, options.create_index);
+    if (!output_database) {
+        return return_code_fatal;
+    }
 
     // The collection of all coastline rings we will be filling and then
     // operating on.
@@ -278,7 +281,7 @@ int main(int argc, char *argv[]) {
         reader2.close();
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
-        std::exit(return_code_fatal);
+        return return_code_fatal;
     }
 
     try {
@@ -286,7 +289,7 @@ int main(int argc, char *argv[]) {
         const unsigned int missing_locations = coastline_rings.check_locations(options.debug);
         if (missing_locations) {
             vout << "  There are " << missing_locations << " locations missing. Check that input file contains all nodes needed.\n";
-            std::exit(return_code_error);
+            return return_code_error;
         } else {
             vout << "  All locations are there.\n";
         }
@@ -330,7 +333,7 @@ int main(int argc, char *argv[]) {
         }
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
-        std::exit(return_code_fatal);
+        return return_code_fatal;
     }
 
     if (options.output_polygons != output_polygon_type::none || options.output_lines) {
