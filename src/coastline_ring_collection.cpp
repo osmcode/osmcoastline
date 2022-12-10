@@ -229,7 +229,7 @@ bool y_range_overlap(const osmium::UndirectedSegment& s1, const osmium::Undirect
     const int omin = s2.first().y() < s2.second().y() ? s2.first().y()  : s2.second().y();
     const int omax = s2.first().y() < s2.second().y() ? s2.second().y() : s2.first().y();
 
-    return !(tmin > omax || omin > tmax);
+    return tmin <= omax && omin <= tmax;
 }
 
 std::unique_ptr<OGRLineString> create_ogr_linestring(const osmium::Segment& segment) {
