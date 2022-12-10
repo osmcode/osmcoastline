@@ -64,6 +64,9 @@ class CoastlinePolygons {
      */
     polygon_vector_type m_polygons;
 
+    OGREnvelope m_env_west;
+    OGREnvelope m_env_east;
+
     /**
      * Max depth after recursive splitting.
      */
@@ -118,6 +121,8 @@ public:
 
     /// Write all coastlines to the output database (as lines).
     void output_lines(int max_points) const;
+
+    bool antarctica_bogus(const OGRGeometry* geom) noexcept;
 
 }; // class CoastlinePolygons
 

@@ -293,16 +293,13 @@ void CoastlinePolygons::output_lines(int max_points) const {
     }
 }
 
-OGREnvelope env_west;
-OGREnvelope env_east;
-
 // Without this check there will be a very narrow sliver of water at the
 // antimeridian "cutting" into Antarctica. If this returns true, the geometry
 // is the polygon with this sliver and we don't add it to the output.
-static bool antarctica_bogus(const OGRGeometry* geom) noexcept {
+bool CoastlinePolygons::antarctica_bogus(const OGRGeometry* geom) noexcept {
     OGREnvelope envelope;
     geom->getEnvelope(&envelope);
-    return env_east.Contains(envelope) || env_west.Contains(envelope);
+    return m_env_east.Contains(envelope) || m_env_west.Contains(envelope);
 }
 
 void CoastlinePolygons::split_bbox(const OGREnvelope& envelope, polygon_vector_type&& v) {
@@ -454,25 +451,25 @@ unsigned int CoastlinePolygons::check_polygons() {
 
 void CoastlinePolygons::output_water_polygons() {
     if (srs.is_wgs84()) {
-        env_west.MinX = -180.0;
-        env_west.MinY =  -90.0;
-        env_west.MaxX = -179.9998;
-        env_west.MaxY =  -77.0;
+        m_env_west.MinX = -180.0;
+        m_env_west.MinY =  -90.0;
+        m_env_west.MaxX = -179.9998;
+        m_env_west.MaxY =  -77.0;
 
-        env_east.MinX =  179.9998;
-        env_east.MinY =  -90.0;
-        env_east.MaxX =  180.0;
-        env_east.MaxY =  -77.0;
+        m_env_east.MinX =  179.9998;
+        m_env_east.MinY =  -90.0;
+        m_env_east.MaxX =  180.0;
+        m_env_east.MaxY =  -77.0;
     } else {
-        env_west.MinX = -20037508.342789244;
-        env_west.MinY = -20037508.342789244;
-        env_west.MaxX = -20037499.0;
-        env_west.MaxY =  14230070.0;
+        m_env_west.MinX = -20037508.342789244;
+        m_env_west.MinY = -20037508.342789244;
+        m_env_west.MaxX = -20037499.0;
+        m_env_west.MaxY =  14230070.0;
 
-        env_east.MinX =  20037499.0;
-        env_east.MinY = -20037508.342789244;
-        env_east.MaxX =  20037508.342789244;
-        env_east.MaxY =  14230080.0;
+        m_env_east.MinX =  20037499.0;
+        m_env_east.MinY = -20037508.342789244;
+        m_env_east.MaxX =  20037508.342789244;
+        m_env_east.MaxY =  14230080.0;
     }
 
     split_bbox(srs.max_extent(), std::move(m_polygons));
