@@ -1,5 +1,5 @@
 ---
-Checks: '*,-altera-*,-android-cloexec-*,-cert-err58-cpp,-cert-err60-cpp,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvmlibc-*,-misc-no-recursion,-modernize-avoid-c-arrays,-modernize-make-unique,-modernize-use-trailing-return-type,-readability-implicit-bool-cast,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers'
+Checks: '*,-altera-*,-android-cloexec-*,-bugprone-easily-swappable-parameters,-cert-err58-cpp,-cert-err60-cpp,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvmlibc-*,-misc-no-recursion,-modernize-avoid-c-arrays,-modernize-make-unique,-modernize-use-trailing-return-type,-readability-implicit-bool-cast,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers,-readability-use-anyofallof'
 #
 #  For a list of check options, see:
 #  http://clang.llvm.org/extra/clang-tidy/checks/list.html
@@ -11,6 +11,9 @@ Checks: '*,-altera-*,-android-cloexec-*,-cert-err58-cpp,-cert-err60-cpp,-cppcore
 #
 #  android-cloexec-*
 #    O_CLOEXEC isn't available on Windows making this non-portable.
+#
+#  bugprone-easily-swappable-parameters
+#    When you need them, you need them.
 #
 #  cert-err58-cpp
 #    Rather unlikely that this is a problem.
@@ -74,6 +77,9 @@ Checks: '*,-altera-*,-android-cloexec-*,-cert-err58-cpp,-cert-err60-cpp,-cppcore
 #
 #  readability-implicit-bool-conversion
 #    I don't think this makes the code more readable.
+#
+#  readability-use-anyofallof
+#    Not necessarily more readable.
 #
 WarningsAsErrors: '*'
 ...
