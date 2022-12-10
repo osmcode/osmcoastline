@@ -39,9 +39,7 @@ https://osmcode.org/osmcoastline
     https://gdal.org/
     Debian/Ubuntu: libgdal1-dev
     (Must be built with Spatialite and GEOS support which is true for
-    Debian/Ubuntu packages. You need GDAL 1.7.0 or greater, consider using
-    https://wiki.ubuntu.com/UbuntuGIS when using Ubuntu to get newer
-    versions of GIS libraries.)
+    Debian/Ubuntu packages. You need GDAL 2 or greater.
 
 ### GEOS
 

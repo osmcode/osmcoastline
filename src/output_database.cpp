@@ -176,19 +176,10 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
            hope that it will always be available. We use the GEOSisValidReason()
            function from the GEOS C interface to get to the reason.
         */
-
-#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR <= 10
-        GEOSGeom p{polygon->exportToGEOS()};
-        char* r = GEOSisValidReason(p);
-        std::string reason = r ? r : "";
-        GEOSFree(r);
-        GEOSGeom_destroy(p);
-#else
         GEOSContextHandle_t contextHandle = OGRGeometry::createGEOSContext();
         char* r = GEOSisValidReason(polygon->exportToGEOS(contextHandle));
         std::string reason = r ? r : "";
         OGRGeometry::freeGEOSContext(contextHandle);
-#endif
 
         if (!reason.empty()) {
             const std::size_t left_bracket = reason.find('[');
