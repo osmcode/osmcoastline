@@ -113,7 +113,7 @@ jobs:
             CXXFLAGS: -Wno-stringop-overread
           - name: Fedora-36
             # Uses gcc 12.2.0, clang 14.0.5, cmake 3.24.2
-            image: "fedora:35"
+            image: "fedora:36"
             installer: dnf
             CXXFLAGS: -Wno-stringop-overread
     container:
