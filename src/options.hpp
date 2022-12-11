@@ -96,7 +96,7 @@ struct Options {
     /// Name of optional segment file
     std::string segmentfile;
 
-    Options(int argc, char* argv[]);
+    int parse(int argc, char* argv[]);
 
 }; // struct Options
 

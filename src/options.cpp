@@ -60,6 +60,19 @@ static void print_help() {
               << "\n";
 }
 
+static void print_version() {
+    std::cout << "osmcoastline " << get_osmcoastline_long_version() << "\n"
+              << get_libosmium_version() << '\n'
+              << "Supported PBF compression types:";
+    for (const auto& type : osmium::io::supported_pbf_compression_types()) {
+        std::cout << " " << type;
+    }
+    std::cout << "\n\nCopyright (C) 2012-2022  Jochen Topf <jochen@topf.org>\n"
+              << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
+              << "This is free software: you are free to change and redistribute it.\n"
+              << "There is NO WARRANTY, to the extent permitted by law.\n";
+}
+
 /**
  * Get EPSG code from text. This method knows about a few common cases
  * of specifying WGS84 or the "Web Mercator" SRS. More are currently
@@ -80,7 +93,7 @@ static int get_epsg(const char* text) {
     std::exit(return_code_cmdline);
 }
 
-Options::Options(int argc, char* argv[]) {
+int Options::parse(int argc, char* argv[]) {
     static struct option long_options[] = {
         {"bbox-overlap",    required_argument, nullptr, 'b'},
         {"close-distance",  required_argument, nullptr, 'c'},
@@ -126,7 +139,7 @@ Options::Options(int argc, char* argv[]) {
                 break;
             case 'h':
                 print_help();
-                std::exit(return_code_ok);
+                return return_code_ok;
             case 'g':
                 driver = optarg;
                 break;
@@ -150,7 +163,7 @@ Options::Options(int argc, char* argv[]) {
                     output_polygons = output_polygon_type::both;
                 } else {
                     std::cerr << "Unknown argument '" << optarg << "' for -p/--output-polygon option\n";
-                    std::exit(return_code_cmdline);
+                    return return_code_cmdline;
                 }
                 break;
             case 'o':
@@ -172,35 +185,26 @@ Options::Options(int argc, char* argv[]) {
                 verbose = true;
                 break;
             case 'V':
-                std::cout << "osmcoastline " << get_osmcoastline_long_version() << "\n"
-                          << get_libosmium_version() << '\n'
-                          << "Supported PBF compression types:";
-                for (const auto& type : osmium::io::supported_pbf_compression_types()) {
-                    std::cout << " " << type;
-                }
-                std::cout << "\n\nCopyright (C) 2012-2022  Jochen Topf <jochen@topf.org>\n"
-                          << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
-                          << "This is free software: you are free to change and redistribute it.\n"
-                          << "There is NO WARRANTY, to the extent permitted by law.\n";
-                std::exit(return_code_ok);
+                print_version();
+                return return_code_ok;
             default:
-                std::exit(return_code_cmdline);
+                return return_code_cmdline;
         }
     }
 
     if (!split_large_polygons && (output_polygons == output_polygon_type::water || output_polygons == output_polygon_type::both)) {
         std::cerr << "Can not use -m/--max-points=0 when writing out water polygons\n";
-        std::exit(return_code_cmdline);
+        return return_code_cmdline;
     }
 
     if (optind != argc - 1) {
         std::cerr << "Usage: osmcoastline [OPTIONS] OSMFILE\n";
-        std::exit(return_code_cmdline);
+        return return_code_cmdline;
     }
 
     if (output_database.empty()) {
         std::cerr << "Missing --output-database/-o option.\n";
-        std::exit(return_code_cmdline);
+        return return_code_cmdline;
     }
 
     if (bbox_overlap == -1) {
@@ -212,5 +216,7 @@ Options::Options(int argc, char* argv[]) {
     }
 
     inputfile = argv[optind];
+
+    return -1;
 }
 

@@ -174,7 +174,11 @@ int main(int argc, char *argv[]) {
     unsigned int errors = 0;
 
     // Parse command line and setup 'options' object with them.
-    const Options options{argc, argv};
+    Options options;
+    const int result_code = options.parse(argc, argv);
+    if (result_code >= 0) {
+        return result_code;
+    }
 
     // The vout object is an output stream we can write to instead of
     // std::cerr. Nothing is written if we are not in verbose mode.
