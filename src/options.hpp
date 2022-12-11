@@ -48,9 +48,6 @@ struct Options {
      */
     double close_distance = 1.0;
 
-    /// Attempt to close unclosed rings?
-    bool close_rings = true;
-
     /// Add spatial index to Spatialite database tables?
     bool create_index = true;
 

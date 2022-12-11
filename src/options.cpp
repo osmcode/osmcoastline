@@ -126,9 +126,6 @@ int Options::parse(int argc, char* argv[]) {
                 break;
             case 'c':
                 close_distance = std::atoi(optarg); // NOLINT(cert-err34-c) atoi is good enough for this use case
-                if (close_distance == 0) {
-                    close_rings = false;
-                }
                 break;
             case 'i':
                 create_index = false;

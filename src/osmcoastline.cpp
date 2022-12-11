@@ -321,7 +321,7 @@ int main(int argc, char *argv[]) {
             vout << "  Did not find open Antarctica ring.\n";
         }
 
-        if (options.close_rings) {
+        if (options.close_distance > 0) {
             vout << "Close broken rings... (Use --close-distance/-c 0 if you do not want this.)\n";
             vout << "  Closing if distance between nodes smaller than " << options.close_distance << ". (Set this with --close-distance/-c.)\n";
             coastline_rings.close_rings(*output_database, options.debug, options.close_distance);
