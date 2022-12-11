@@ -154,7 +154,7 @@ std::string memory_usage() {
 /* ================================================== */
 
 std::unique_ptr<OutputDatabase> open_output_database(const std::string& driver, const std::string& name, const bool create_index) try {
-    return std::unique_ptr<OutputDatabase>{new OutputDatabase{driver, name, srs, create_index}};
+    return std::make_unique<OutputDatabase>(driver, name, srs, create_index);
 } catch (const std::exception& e) {
     std::cerr << e.what() << '\n';
     return nullptr;

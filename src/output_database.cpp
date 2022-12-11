@@ -192,7 +192,7 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
             iss >> y;
             reason.resize(left_bracket);
 
-            std::unique_ptr<OGRPoint> point{new OGRPoint()};
+            auto point = std::make_unique<OGRPoint>();
             point->assignSpatialReference(polygon->getSpatialReference());
             point->setX(x);
             point->setY(y);

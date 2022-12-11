@@ -233,7 +233,7 @@ bool y_range_overlap(const osmium::UndirectedSegment& s1, const osmium::Undirect
 }
 
 std::unique_ptr<OGRLineString> create_ogr_linestring(const osmium::Segment& segment) {
-    std::unique_ptr<OGRLineString> line{new OGRLineString};
+    auto line = std::make_unique<OGRLineString>();
     line->setNumPoints(2);
     line->setPoint(0, segment.first().lon(), segment.first().lat());
     line->setPoint(1, segment.second().lon(), segment.second().lat());
@@ -312,7 +312,7 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
     }
 
     for (const auto& intersection : intersections) {
-        std::unique_ptr<OGRPoint> point{new OGRPoint(intersection.lon(), intersection.lat())};
+        auto point = std::make_unique<OGRPoint>(intersection.lon(), intersection.lat());
         output.add_error_point(std::move(point), "intersection");
     }
 
@@ -378,7 +378,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
             output.add_error_point(s->ogr_first_point(), "fixed_end_point", s->first_node_id());
 
             if (e->last_location() != s->first_location()) {
-                std::unique_ptr<OGRLineString> linestring{new OGRLineString};
+                auto linestring = std::make_unique<OGRLineString>();
                 linestring->addPoint(e->last_location().lon(), e->last_location().lat());
                 linestring->addPoint(s->first_location().lon(), s->first_location().lat());
                 output.add_error_line(std::move(linestring), "added_line");

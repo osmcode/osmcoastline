@@ -142,13 +142,13 @@ std::unique_ptr<OGRLineString> CoastlineRing::ogr_linestring(osmium::geom::OGRFa
 std::unique_ptr<OGRPoint> CoastlineRing::ogr_first_point() const {
     assert(!m_way_node_list.empty());
     const osmium::NodeRef& node_ref = m_way_node_list.front();
-    return std::unique_ptr<OGRPoint>{new OGRPoint{node_ref.lon(), node_ref.lat()}};
+    return std::make_unique<OGRPoint>(node_ref.lon(), node_ref.lat());
 }
 
 std::unique_ptr<OGRPoint> CoastlineRing::ogr_last_point() const {
     assert(!m_way_node_list.empty());
     const osmium::NodeRef& node_ref = m_way_node_list.back();
-    return std::unique_ptr<OGRPoint>{new OGRPoint{node_ref.lon(), node_ref.lat()}};
+    return std::make_unique<OGRPoint>(node_ref.lon(), node_ref.lat());
 }
 
 // Pythagoras doesn't work on a round earth but that is ok here, we only need a

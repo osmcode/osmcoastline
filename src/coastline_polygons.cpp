@@ -46,14 +46,14 @@ static std::unique_ptr<OGRPolygon> create_rectangular_polygon(double x1, double 
     // make sure we are inside the bounds for the output SRS
     e.Intersect(srs.max_extent());
 
-    std::unique_ptr<OGRLinearRing> ring{new OGRLinearRing()};
+    auto ring = std::make_unique<OGRLinearRing>();
     ring->addPoint(e.MinX, e.MinY);
     ring->addPoint(e.MinX, e.MaxY);
     ring->addPoint(e.MaxX, e.MaxY);
     ring->addPoint(e.MaxX, e.MinY);
     ring->closeRings();
 
-    std::unique_ptr<OGRPolygon> polygon{new OGRPolygon()};
+    auto polygon = std::make_unique<OGRPolygon>();
     polygon->addRingDirectly(ring.release());
     polygon->assignSpatialReference(srs.out());
 
@@ -256,9 +256,9 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLi
     const int num = ring->getNumPoints();
     assert(num > 2);
 
-    std::unique_ptr<OGRPoint> point1{new OGRPoint};
-    std::unique_ptr<OGRPoint> point2{new OGRPoint};
-    std::unique_ptr<OGRLineString> line{new OGRLineString};
+    auto point1 = std::make_unique<OGRPoint>();
+    auto point2 = std::make_unique<OGRPoint>();
+    auto line = std::make_unique<OGRLineString>();
 
     ring->getPoint(0, point1.get());
     for (int i = 1; i < num; ++i) {
@@ -268,7 +268,7 @@ void CoastlinePolygons::output_polygon_ring_as_lines(int max_points, const OGRLi
 
         if (line->getNumPoints() >= max_points || !added) {
             if (line->getNumPoints() >= 2) {
-                std::unique_ptr<OGRLineString> new_line{new OGRLineString};
+                auto new_line = std::make_unique<OGRLineString>();
                 using std::swap;
                 swap(line, new_line);
                 add_line_to_output(std::move(new_line), ring->getSpatialReference());

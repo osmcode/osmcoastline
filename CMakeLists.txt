@@ -71,12 +71,12 @@ endif()
 
 #-----------------------------------------------------------------------------
 #
-#  Decide which C++ version to use (Minimum/default: C++11).
+#  Decide which C++ version to use (Minimum/default: C++14).
 #
 #-----------------------------------------------------------------------------
 if(NOT MSVC)
     if(NOT USE_CPP_VERSION)
-        set(USE_CPP_VERSION c++11)
+        set(USE_CPP_VERSION c++14)
     endif()
     message(STATUS "Use C++ version: ${USE_CPP_VERSION}")
     # following only available from cmake 2.8.12:
@@ -194,7 +194,7 @@ if(CPPCHECK)
 
     add_custom_target(cppcheck
         ${CPPCHECK}
-        --std=c++11 ${CPPCHECK_OPTIONS}
+        --std=c++14 ${CPPCHECK_OPTIONS}
         ${CPPCHECK_FILES}
     )
 else()

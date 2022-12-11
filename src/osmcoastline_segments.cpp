@@ -83,7 +83,7 @@ void print_help() {
 }
 
 void add_segment(gdalcpp::Layer& layer, int change, const osmium::UndirectedSegment& segment) {
-    auto linestring = std::unique_ptr<OGRLineString>{new OGRLineString()};
+    auto linestring = std::make_unique<OGRLineString>();
     linestring->addPoint(segment.first().lon(), segment.first().lat());
     linestring->addPoint(segment.second().lon(), segment.second().lat());
 

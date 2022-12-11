@@ -1,5 +1,5 @@
 ---
-Checks: '*,-altera-*,-android-cloexec-*,-bugprone-easily-swappable-parameters,-cert-err58-cpp,-cert-err60-cpp,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvmlibc-*,-misc-no-recursion,-modernize-avoid-c-arrays,-modernize-make-unique,-modernize-use-trailing-return-type,-readability-implicit-bool-cast,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers,-readability-use-anyofallof'
+Checks: '*,-altera-*,-android-cloexec-*,-bugprone-easily-swappable-parameters,-cert-err58-cpp,-cert-err60-cpp,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvmlibc-*,-misc-no-recursion,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-cast,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers,-readability-use-anyofallof'
 #
 #  For a list of check options, see:
 #  http://clang.llvm.org/extra/clang-tidy/checks/list.html
@@ -62,9 +62,6 @@ Checks: '*,-altera-*,-android-cloexec-*,-bugprone-easily-swappable-parameters,-c
 #
 #  misc-no-recursion
 #    Nothing wrong about recursion.
-#
-#  modernize-make-unique
-#    This is a C++11 program and C++ doesn't have std::make_unique.
 #
 #  modernize-use-trailing-return-type
 #    I am not quite that modern.

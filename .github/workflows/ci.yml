@@ -11,7 +11,7 @@ jobs:
         name: [Ubuntu-18, Ubuntu-20, Ubuntu-22, Debian-10, Debian-11, Debian-Testing, Debian-Experimental, Fedora-35, Fedora-36]
         build_type: [Dev]
         cpp_compiler: [g++]
-        cpp_version: [c++11]
+        cpp_version: [c++14]
         include:
           - name: Ubuntu-18
             # Uses gcc 7.5.0, clang 6.0.0, cmake 3.10.2
