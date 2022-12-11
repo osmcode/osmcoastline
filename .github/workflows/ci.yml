@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [Ubuntu-18, Ubuntu-20, Ubuntu-22, Debian-9, Debian-10, Debian-11, Debian-Testing, Debian-Experimental, Fedora-35, Fedora-36]
+        name: [Ubuntu-18, Ubuntu-20, Ubuntu-22, Debian-10, Debian-11, Debian-Testing, Debian-Experimental, Fedora-35, Fedora-36]
         build_type: [Dev]
         cpp_compiler: [g++]
         cpp_version: [c++11]
@@ -29,10 +29,6 @@ jobs:
             ubuntu: 22
             installer: apt
             CXXFLAGS: -Wno-stringop-overread
-          - name: Debian-9
-            # Uses gcc 6.3.0, clang 3.8.1, cmake 3.7.2
-            image: "debian:stretch"
-            installer: apt
           - name: Debian-10
             # Uses gcc 8.3.0, clang 7.0.1, cmake 3.13.4
             image: "debian:buster"
