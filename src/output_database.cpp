@@ -107,7 +107,7 @@ void OutputDatabase::set_options(const Options& options) {
     m_dataset.exec(sql.str());
 }
 
-void OutputDatabase::set_meta(int runtime, int memory_usage, const Stats& stats) {
+void OutputDatabase::set_meta(std::time_t runtime, int memory_usage, const Stats& stats) {
     if (m_driver != "SQLite") {
         return;
     }
@@ -158,7 +158,7 @@ void OutputDatabase::add_error_line(std::unique_ptr<OGRLineString>&& linestring,
     feature.add_to_layer();
 }
 
-void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id, unsigned int nways, unsigned int npoints, bool fixed) {
+void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, osmium::object_id_type osm_id, unsigned int nways, unsigned int npoints, bool fixed) {
     m_srs.transform(polygon.get());
 
     const bool land = polygon->getExteriorRing()->isClockwise();
@@ -207,7 +207,7 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id,
     }
 
     gdalcpp::Feature feature{m_layer_rings, std::move(polygon)};
-    feature.set_field("osm_id", osm_id);
+    feature.set_field("osm_id", static_cast<int>(osm_id));
     feature.set_field("nways", static_cast<int>(nways));
     feature.set_field("npoints", static_cast<int>(npoints));
     feature.set_field("fixed", fixed);

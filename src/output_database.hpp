@@ -26,6 +26,7 @@
 
 #include <gdalcpp.hpp>
 
+#include <ctime>
 #include <memory>
 #include <string>
 #include <vector>
@@ -89,13 +90,13 @@ public:
 
     void add_error_point(std::unique_ptr<OGRPoint>&& point, const char* error, osmium::object_id_type id = 0);
     void add_error_line(std::unique_ptr<OGRLineString>&& linestring, const char* error, osmium::object_id_type id = 0);
-    void add_ring(std::unique_ptr<OGRPolygon>&& polygon, int osm_id, unsigned int nways, unsigned int npoints, bool fixed);
+    void add_ring(std::unique_ptr<OGRPolygon>&& polygon, osmium::object_id_type osm_id, unsigned int nways, unsigned int npoints, bool fixed);
     void add_land_polygon(std::unique_ptr<OGRPolygon>&& polygon);
     void add_water_polygon(std::unique_ptr<OGRPolygon>&& polygon);
     void add_line(std::unique_ptr<OGRLineString>&& linestring);
 
     void set_options(const Options& options);
-    void set_meta(int runtime, int memory_usage, const Stats& stats);
+    void set_meta(std::time_t runtime, int memory_usage, const Stats& stats);
 
     void commit();
 
