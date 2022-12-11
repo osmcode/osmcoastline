@@ -290,9 +290,8 @@ int main(int argc, char *argv[]) {
         if (missing_locations) {
             vout << "  There are " << missing_locations << " locations missing. Check that input file contains all nodes needed.\n";
             return return_code_error;
-        } else {
-            vout << "  All locations are there.\n";
         }
+        vout << "  All locations are there.\n";
 
         vout << memory_usage();
 
