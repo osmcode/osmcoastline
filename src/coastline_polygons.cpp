@@ -30,6 +30,7 @@ class OGRSpatialReference;
 
 #include <cassert>
 #include <iostream>
+#include <utility>
 #include <vector>
 
 extern SRS srs;
@@ -133,6 +134,49 @@ void CoastlinePolygons::split_geometry(std::unique_ptr<OGRGeometry>&& geom, int 
     }
 }
 
+std::pair<std::unique_ptr<OGRPolygon>, std::unique_ptr<OGRPolygon>> CoastlinePolygons::split_envelope(const OGREnvelope& envelope, int level, int num_points) const {
+    if (debug) {
+        std::cerr << "DEBUG: split_polygon(): depth="
+                  << level
+                  << " envelope=("
+                  << envelope.MinX << ", " << envelope.MinY
+                  << "),("
+                  << envelope.MaxX << ", " << envelope.MaxY
+                  << ") num_points="
+                  << num_points
+                  << "\n";
+    }
+
+    // These polygons will contain the bounding box of each half of the "polygon" polygon.
+    std::pair<std::unique_ptr<OGRPolygon>, std::unique_ptr<OGRPolygon>> envelopes;
+
+    if (envelope.MaxX - envelope.MinX < envelope.MaxY-envelope.MinY) {
+        if (m_expand >= (envelope.MaxY - envelope.MinY) / 4) {
+            std::cerr << "Not splitting polygon with " << num_points << " points on outer ring. It would not get smaller because --bbox-overlap/-b is set to high.\n";
+            return envelopes;
+        }
+
+        // split vertically
+        const double MidY = (envelope.MaxY + envelope.MinY) / 2;
+
+        envelopes.first = create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, MidY, m_expand);
+        envelopes.second = create_rectangular_polygon(envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, m_expand);
+    } else {
+        if (m_expand >= (envelope.MaxX - envelope.MinX) / 4) {
+            std::cerr << "Not splitting polygon with " << num_points << " points on outer ring. It would not get smaller because --bbox-overlap/-b is set to high.\n";
+            return envelopes;
+        }
+
+        // split horizontally
+        const double MidX = (envelope.MaxX + envelope.MinX) / 2;
+
+        envelopes.first = create_rectangular_polygon(envelope.MinX, envelope.MinY, MidX, envelope.MaxY, m_expand);
+        envelopes.second = create_rectangular_polygon(MidX, envelope.MinY, envelope.MaxX, envelope.MaxY, m_expand);
+    }
+
+    return envelopes;
+}
+
 void CoastlinePolygons::split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int level) {
     if (level > m_max_split_depth) {
         m_max_split_depth = level;
@@ -142,78 +186,45 @@ void CoastlinePolygons::split_polygon(std::unique_ptr<OGRPolygon>&& polygon, int
     if (num_points <= m_max_points_in_polygon) {
         // do not split the polygon if it is small enough
         m_polygons.push_back(std::move(polygon));
-    } else {
-        OGREnvelope envelope;
-        polygon->getEnvelope(&envelope);
-        if (debug) {
-            std::cerr << "DEBUG: split_polygon(): depth="
-                      << level
-                      << " envelope=("
-                      << envelope.MinX << ", " << envelope.MinY
-                      << "),("
-                      << envelope.MaxX << ", " << envelope.MaxY
-                      << ") num_points="
-                      << num_points
-                      << "\n";
-        }
+        return;
+    }
 
-        // These polygons will contain the bounding box of each half of the "polygon" polygon.
-        std::unique_ptr<OGRPolygon> b1;
-        std::unique_ptr<OGRPolygon> b2;
+    OGREnvelope envelope;
+    polygon->getEnvelope(&envelope);
 
-        if (envelope.MaxX - envelope.MinX < envelope.MaxY-envelope.MinY) {
-            if (m_expand >= (envelope.MaxY - envelope.MinY) / 4) {
-                std::cerr << "Not splitting polygon with " << num_points << " points on outer ring. It would not get smaller because --bbox-overlap/-b is set to high.\n";
-                m_polygons.push_back(std::move(polygon));
-                return;
+    auto const split_envelopes = split_envelope(envelope, level, num_points);
+    if (!split_envelopes.first) {
+        m_polygons.push_back(std::move(polygon));
+        return;
+    }
+
+    // Use intersection with bbox polygons to split polygon into two halfes
+    std::unique_ptr<OGRGeometry> geom1{polygon->Intersection(split_envelopes.first.get())};
+    std::unique_ptr<OGRGeometry> geom2{polygon->Intersection(split_envelopes.second.get())};
+
+    if (geom1 && (geom1->getGeometryType() == wkbPolygon || geom1->getGeometryType() == wkbMultiPolygon) &&
+        geom2 && (geom2->getGeometryType() == wkbPolygon || geom2->getGeometryType() == wkbMultiPolygon)) {
+        // split was successful, go on recursively
+        split_geometry(std::move(geom1), level + 1);
+        split_geometry(std::move(geom2), level + 1);
+        return;
+    }
+
+    // split was not successful, output some debugging info and keep polygon before split
+    std::cerr << "Polygon split at depth " << level << " was not successful. Keeping un-split polygon.\n";
+    m_polygons.push_back(std::move(polygon));
+    if (debug) {
+        std::cerr << "DEBUG geom1=" << geom1.get() << " geom2=" << geom2.get() << "\n";
+        if (geom1) {
+            std::cerr << "DEBUG geom1 type=" << geom1->getGeometryName() << "\n";
+            if (geom1->getGeometryType() == wkbGeometryCollection) {
+                std::cerr << "DEBUG   numGeometries=" << static_cast<OGRGeometryCollection*>(geom1.get())->getNumGeometries() << "\n";
             }
-
-            // split vertically
-            const double MidY = (envelope.MaxY + envelope.MinY) / 2;
-
-            b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, envelope.MaxX, MidY, m_expand);
-            b2 = create_rectangular_polygon(envelope.MinX, MidY, envelope.MaxX, envelope.MaxY, m_expand);
-        } else {
-            if (m_expand >= (envelope.MaxX - envelope.MinX) / 4) {
-                std::cerr << "Not splitting polygon with " << num_points << " points on outer ring. It would not get smaller because --bbox-overlap/-b is set to high.\n";
-                m_polygons.push_back(std::move(polygon));
-                return;
-            }
-
-            // split horizontally
-            const double MidX = (envelope.MaxX + envelope.MinX) / 2;
-
-            b1 = create_rectangular_polygon(envelope.MinX, envelope.MinY, MidX, envelope.MaxY, m_expand);
-            b2 = create_rectangular_polygon(MidX, envelope.MinY, envelope.MaxX, envelope.MaxY, m_expand);
         }
-
-        // Use intersection with bbox polygons to split polygon into two halfes
-        std::unique_ptr<OGRGeometry> geom1{polygon->Intersection(b1.get())};
-        std::unique_ptr<OGRGeometry> geom2{polygon->Intersection(b2.get())};
-
-        if (geom1 && (geom1->getGeometryType() == wkbPolygon || geom1->getGeometryType() == wkbMultiPolygon) &&
-            geom2 && (geom2->getGeometryType() == wkbPolygon || geom2->getGeometryType() == wkbMultiPolygon)) {
-            // split was successful, go on recursively
-            split_geometry(std::move(geom1), level + 1);
-            split_geometry(std::move(geom2), level + 1);
-        } else {
-            // split was not successful, output some debugging info and keep polygon before split
-            std::cerr << "Polygon split at depth " << level << " was not successful. Keeping un-split polygon.\n";
-            m_polygons.push_back(std::move(polygon));
-            if (debug) {
-                std::cerr << "DEBUG geom1=" << geom1.get() << " geom2=" << geom2.get() << "\n";
-                if (geom1) {
-                    std::cerr << "DEBUG geom1 type=" << geom1->getGeometryName() << "\n";
-                    if (geom1->getGeometryType() == wkbGeometryCollection) {
-                        std::cerr << "DEBUG   numGeometries=" << static_cast<OGRGeometryCollection*>(geom1.get())->getNumGeometries() << "\n";
-                    }
-                }
-                if (geom2) {
-                    std::cerr << "DEBUG geom2 type=" << geom2->getGeometryName() << "\n";
-                    if (geom2->getGeometryType() == wkbGeometryCollection) {
-                        std::cerr << "DEBUG   numGeometries=" << static_cast<OGRGeometryCollection*>(geom2.get())->getNumGeometries() << "\n";
-                    }
-                }
+        if (geom2) {
+            std::cerr << "DEBUG geom2 type=" << geom2->getGeometryName() << "\n";
+            if (geom2->getGeometryType() == wkbGeometryCollection) {
+                std::cerr << "DEBUG   numGeometries=" << static_cast<OGRGeometryCollection*>(geom2.get())->getNumGeometries() << "\n";
             }
         }
     }

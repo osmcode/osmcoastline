@@ -69,6 +69,42 @@ const unsigned int max_warnings = 500;
 
 /* ================================================== */
 
+void add_polygons_in_multi_to(polygon_vector_type *polygons,
+                              std::unique_ptr<OGRGeometry> mega_geometry,
+                              OutputDatabase& output,
+                              unsigned int* warnings, unsigned int* errors) {
+    // This isn't an owning pointer on purpose. We are going to "steal" parts
+    // of the geometry a few lines below but only mark them as unowned farther
+    // below when we are calling removeGeometry() on it. If this was an
+    // owning pointer we'd get a double free if there is an error.
+    auto* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.release());
+
+    polygons->reserve(mega_multipolygon->getNumGeometries());
+    for (int i = 0; i < mega_multipolygon->getNumGeometries(); ++i) {
+        OGRGeometry* geom = mega_multipolygon->getGeometryRef(i);
+        assert(geom);
+        assert(geom->getGeometryType() == wkbPolygon);
+        std::unique_ptr<OGRPolygon> p{static_cast<OGRPolygon*>(geom)};
+        if (p->IsValid()) {
+            polygons->push_back(std::move(p));
+        } else {
+            output.add_error_line(make_unique_ptr_clone<OGRLineString>(p->getExteriorRing()), "invalid");
+            std::unique_ptr<OGRGeometry> buf0{p->Buffer(0)};
+            if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
+                buf0->assignSpatialReference(srs.wgs84());
+                polygons->push_back(static_cast_unique_ptr<OGRPolygon>(std::move(buf0)));
+                (*warnings)++;
+            } else {
+                std::cerr << "Ignoring invalid polygon geometry.\n";
+                (*errors)++;
+            }
+        }
+    }
+
+    mega_multipolygon->removeGeometry(-1, FALSE);
+    delete mega_multipolygon; // NOLINT(cppcoreguidelines-owning-memory)
+}
+
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
@@ -105,37 +141,7 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     } else if (mega_geometry->getGeometryType() != wkbMultiPolygon) {
         throw std::runtime_error{"mega geometry isn't a (multi)polygon. Something is very wrong!"};
     } else {
-
-        // This isn't an owning pointer on purpose. We are going to "steal" parts
-        // of the geometry a few lines below but only mark them as unowned farther
-        // below when we are calling removeGeometry() on it. If this was an
-        // owning pointer we'd get a double free if there is an error.
-        auto* mega_multipolygon = static_cast<OGRMultiPolygon*>(mega_geometry.release());
-
-        polygons.reserve(mega_multipolygon->getNumGeometries());
-        for (int i = 0; i < mega_multipolygon->getNumGeometries(); ++i) {
-            OGRGeometry* geom = mega_multipolygon->getGeometryRef(i);
-            assert(geom);
-            assert(geom->getGeometryType() == wkbPolygon);
-            std::unique_ptr<OGRPolygon> p{static_cast<OGRPolygon*>(geom)};
-            if (p->IsValid()) {
-                polygons.push_back(std::move(p));
-            } else {
-                output.add_error_line(make_unique_ptr_clone<OGRLineString>(p->getExteriorRing()), "invalid");
-                std::unique_ptr<OGRGeometry> buf0{p->Buffer(0)};
-                if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
-                    buf0->assignSpatialReference(srs.wgs84());
-                    polygons.push_back(static_cast_unique_ptr<OGRPolygon>(std::move(buf0)));
-                    (*warnings)++;
-                } else {
-                    std::cerr << "Ignoring invalid polygon geometry.\n";
-                    (*errors)++;
-                }
-            }
-        }
-
-        mega_multipolygon->removeGeometry(-1, FALSE);
-        delete mega_multipolygon; // NOLINT(cppcoreguidelines-owning-memory)
+        add_polygons_in_multi_to(&polygons, std::move(mega_geometry), output, warnings, errors);
     }
 
     return polygons;
