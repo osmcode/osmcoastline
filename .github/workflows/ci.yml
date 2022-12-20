@@ -129,7 +129,8 @@ jobs:
       - name: Prepare container (apt)
         run: |
           apt-get update -qq
-          apt-get install -y clang \
+          apt-get install -yq \
+            clang \
             cmake \
             g++ \
             git \
@@ -145,7 +146,7 @@ jobs:
         if: matrix.installer == 'apt'
       - name: Install compiler
         shell: bash
-        run: apt-get install -y clang-14
+        run: apt-get install -yq clang-14
         if: matrix.cpp_compiler == 'clang++-14'
       - name: Prepare container (dnf)
         run: |
@@ -171,18 +172,18 @@ jobs:
       - uses: ./.github/actions/ctest
 
   ubuntu-latest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
-      CC: clang-13
-      CXX: clang++-13
+      CC: clang-15
+      CXX: clang++-15
       BUILD_TYPE: Dev
     steps:
       - name: Install new clang
         run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main'
-          sudo apt-get update -q
-          sudo apt-get install -yq clang-13
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/llvm-snapshot.asc
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main'
+          sudo apt-get update -qq
+          sudo apt-get install -yq clang-15
         shell: bash
       - uses: actions/checkout@v3
       - uses: ./.github/actions/install-ubuntu
@@ -191,7 +192,7 @@ jobs:
       - uses: ./.github/actions/ctest
 
   macos11-dev:
-    runs-on: macos-11.0
+    runs-on: macos-11
     env:
       CC: clang
       CXX: clang++
@@ -204,7 +205,7 @@ jobs:
       - uses: ./.github/actions/ctest
 
   macos11-release:
-    runs-on: macos-11.0
+    runs-on: macos-11
     env:
       CC: clang
       CXX: clang++
