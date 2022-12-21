@@ -17,65 +17,53 @@ jobs:
             # Uses gcc 7.5.0, clang 6.0.0, cmake 3.10.2
             image: "ubuntu:18.04"
             ubuntu: 18
-            installer: apt
           - name: Ubuntu-20
             # Uses gcc 9.3.0, clang 10.0.0, cmake 3.16.3
             image: "ubuntu:20.04"
             ubuntu: 20
-            installer: apt
           - name: Ubuntu-22
             # Uses gcc 12.2.0, clang 15.0.2, cmake 3.24.2
             image: "ubuntu:22.04"
             ubuntu: 22
-            installer: apt
             CXXFLAGS: -Wno-stringop-overread
           - name: Debian-10
             # Uses gcc 8.3.0, clang 7.0.1, cmake 3.13.4
             image: "debian:buster"
-            installer: apt
           - name: Debian-11
             # Uses gcc 10.2.1, clang 11.0.1, cmake 3.18.4
             image: "debian:bullseye"
-            installer: apt
           - name: Debian-11
             # Uses gcc 10.2.1, clang 11.0.1, cmake 3.18.4
             image: "debian:bullseye"
-            installer: apt
             cpp_version: c++17
           - name: Debian-11
             # Uses gcc 10.2.1, clang 11.0.1, cmake 3.18.4
             image: "debian:bullseye"
-            installer: apt
             cpp_version: c++20
           - name: Debian-11
             # Uses gcc 10.2.1, clang 11.0.1, cmake 3.18.4
             image: "debian:bullseye"
-            installer: apt
             c_compiler: clang
             cpp_compiler: clang++
             cpp_version: c++17
           - name: Debian-11
             # Uses gcc 10.2.1, clang 11.0.1, cmake 3.18.4
             image: "debian:bullseye"
-            installer: apt
             c_compiler: clang
             cpp_compiler: clang++
             cpp_version: c++20
           - name: Debian-11
             # Uses gcc 10.2.1, clang 11.0.1, cmake 3.18.4
             image: "debian:bullseye"
-            installer: apt
             build_type: RelWithDebInfo
           - name: Debian-11
             # Uses gcc 10.2.1, clang 11.0.1, cmake 3.18.4
             image: "debian:bullseye"
-            installer: apt
             c_compiler: clang
             cpp_compiler: clang++
           - name: Debian-11
             # Uses gcc 10.2.1, clang 11.0.1, cmake 3.18.4
             image: "debian:bullseye"
-            installer: apt
             c_compiler: clang
             cpp_compiler: clang++
             CXXFLAGS: -fsanitize=address,undefined,integer -fno-sanitize-recover=all -fno-omit-frame-pointer
@@ -83,50 +71,46 @@ jobs:
           - name: Debian-Testing
             # Uses gcc 10.3.0, clang 11.1.0, cmake 3.21.3
             image: "debian:testing"
-            installer: apt
             CXXFLAGS: -Wno-stringop-overread
           - name: Debian-Testing
             # Uses gcc 10.3.0, clang 11.1.0, cmake 3.21.3
             image: "debian:testing"
-            installer: apt
             c_compiler: clang
             cpp_compiler: clang++
           - name: Debian-Experimental
             # Uses gcc 11, clang 14, cmake 3.21.3
             image: "debian:experimental"
-            installer: apt
             CXXFLAGS: -Wno-stringop-overread
           - name: Debian-Experimental
             # Uses gcc 11, clang 14, cmake 3.21.3
             image: "debian:experimental"
-            installer: apt
             c_compiler: clang-14
             cpp_compiler: clang++-14
           - name: Fedora-35
             # Uses gcc 11.2.1, clang 12.0.1, cmake 3.20.5
             image: "fedora:35"
-            installer: dnf
             CXXFLAGS: -Wno-stringop-overread
           - name: Fedora-36
             # Uses gcc 12.2.0, clang 14.0.5, cmake 3.24.2
             image: "fedora:36"
-            installer: dnf
             CXXFLAGS: -Wno-stringop-overread
     container:
       image: ${{ matrix.image }}
       env:
         LANG: en_US.UTF-8
         BUILD_TYPE: ${{ matrix.build_type }}
-        CXXFLAGS: ${{ matrix.CXXFLAGS }}
-        LDFLAGS: ${{ matrix.LDFLAGS }}
         CC: ${{ matrix.c_compiler }}
         CXX: ${{ matrix.cpp_compiler }}
+        CXXFLAGS: ${{ matrix.CXXFLAGS }}
+        LDFLAGS: ${{ matrix.LDFLAGS }}
         CPP_VERSION: ${{ matrix.cpp_version }}
         WITH_PROJ: ON
         APT_LISTCHANGES_FRONTEND: none
         DEBIAN_FRONTEND: noninteractive
     steps:
       - name: Prepare container (apt)
+        shell: bash
+        if: startsWith(matrix.image, 'debian:') || startsWith(matrix.image, 'ubuntu:')
         run: |
           apt-get update -qq
           apt-get install -yq \
@@ -142,13 +126,13 @@ jobs:
             make \
             spatialite-bin \
             zlib1g-dev
-        shell: bash
-        if: matrix.installer == 'apt'
       - name: Install compiler
         shell: bash
-        run: apt-get install -yq clang-14
         if: matrix.cpp_compiler == 'clang++-14'
+        run: apt-get install -yq clang-14
       - name: Prepare container (dnf)
+        shell: bash
+        if: startsWith(matrix.image, 'fedora:')
         run: |
           dnf install --quiet --assumeyes \
               bzip2-devel \
@@ -163,8 +147,6 @@ jobs:
               proj-devel \
               spatialite-tools \
               zlib-devel
-        shell: bash
-        if: matrix.installer == 'dnf'
       - uses: actions/checkout@v3
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
@@ -191,25 +173,21 @@ jobs:
       - uses: ./.github/actions/build
       - uses: ./.github/actions/ctest
 
-  macos11-dev:
-    runs-on: macos-11
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - "macos-11"
+        build_type: [Dev]
+        include:
+          - os: "macos-11"
+            build_type: Release
+    runs-on: ${{ matrix.os }}
     env:
       CC: clang
       CXX: clang++
-      BUILD_TYPE: Dev
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/install-macos
-      - uses: ./.github/actions/cmake
-      - uses: ./.github/actions/build
-      - uses: ./.github/actions/ctest
-
-  macos11-release:
-    runs-on: macos-11
-    env:
-      CC: clang
-      CXX: clang++
-      BUILD_TYPE: Release
+      BUILD_TYPE: ${{ matrix.build_type }}
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/install-macos
