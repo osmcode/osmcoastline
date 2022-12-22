@@ -8,6 +8,15 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+
+## [2.4.0] - 2022-12-22
+
+### Added
+
 - `--format` option to `osmcoastline_filter` to set output file format.
 
 ### Changed
@@ -206,7 +215,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Added man pages
 
 
-[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.3.1...HEAD
+[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/osmcode/osmium-tool/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/osmcode/osmium-tool/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/osmcode/osmium-tool/compare/v2.2.4...v2.3.0
 [2.2.4]: https://github.com/osmcode/osmium-tool/compare/v2.2.3...v2.2.4
