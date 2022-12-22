@@ -8,9 +8,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `--format` option to `osmcoastline_filter` to set output file format.
+
 ### Changed
 
+- Now needs at least C++14 and CMake 3.10.
+- Various small code cleanups.
+
 ### Fixed
+
+- Do not create empty polygons in water output.
 
 
 ## [2.3.1] - 2021-09-02
