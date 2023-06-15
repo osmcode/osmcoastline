@@ -78,7 +78,11 @@ class CoastlinePolygons {
 
     std::pair<std::unique_ptr<OGRPolygon>, std::unique_ptr<OGRPolygon>> split_envelope(const OGREnvelope& envelope, int level, int num_points) const;
 
+#if (GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,7,0))
+    void add_line_to_output(std::unique_ptr<OGRLineString> line, const OGRSpatialReference* srs) const;
+#else
     void add_line_to_output(std::unique_ptr<OGRLineString> line, OGRSpatialReference* srs) const;
+#endif
     void output_polygon_ring_as_lines(int max_points, const OGRLinearRing* ring) const;
 
 public:

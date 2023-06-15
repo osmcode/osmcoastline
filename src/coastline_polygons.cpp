@@ -254,7 +254,11 @@ void CoastlinePolygons::output_land_polygons(bool make_copy) {
     }
 }
 
+#if (GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,7,0))
+void CoastlinePolygons::add_line_to_output(std::unique_ptr<OGRLineString> line, const OGRSpatialReference* srs) const {
+#else
 void CoastlinePolygons::add_line_to_output(std::unique_ptr<OGRLineString> line, OGRSpatialReference* srs) const {
+#endif
     line->setCoordinateDimension(2);
     line->assignSpatialReference(srs);
     m_output.add_line(std::move(line));
