@@ -90,6 +90,9 @@ struct Options {
     /// Verbose output?
     bool verbose = false;
 
+    /// Exit program with code 0 even if there are warnings?
+    bool exit_ignore_warnings = false;
+
     /// Name of optional segment file
     std::string segmentfile;
 

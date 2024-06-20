@@ -426,7 +426,7 @@ int main(int argc, char *argv[]) {
         return return_code_error;
     }
 
-    if (warnings) {
+    if (warnings && !options.exit_ignore_warnings) {
         return return_code_warning;
     }
 

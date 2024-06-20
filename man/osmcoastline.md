@@ -46,6 +46,9 @@ description of the options below and the README.md for details.
 -d, \--debug
 :   Enable debugging output.
 
+-e, \--exit-ignore-warnings
+:   Return with exit code 0 even if there are warnings.
+
 -f, \--overwrite
 :   Overwrite output file if it already exists.
 
@@ -114,7 +117,7 @@ program first. See its man page for details.
   ~ if everything was okay
 
 1
-  ~ if there were warnings while processing the coastline
+  ~ if there were warnings while processing the coastline (unless -e is set)
 
 2
   ~ if there were errors while processing the coastline

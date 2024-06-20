@@ -44,6 +44,7 @@ static void print_help() {
               << "  -b, --bbox-overlap=OVERLAP - Set overlap when splitting polygons\n"
               << "  -i, --no-index             - Do not create spatial indexes in output db\n"
               << "  -d, --debug                - Enable debugging output\n"
+              << "  -e, --exit-ignore-warnings - Exit with code 0 even if there are warnings\n"
               << "  -f, --overwrite            - Overwrite output file if it already exists\n"
               << "  -g, --gdal-driver=DRIVER   - GDAL driver (SQLite or ESRI Shapefile)\n"
               << "  -l, --output-lines         - Output coastlines as lines to database file\n"
@@ -99,6 +100,7 @@ int Options::parse(int argc, char* argv[]) {
         {"close-distance",  required_argument, nullptr, 'c'},
         {"no-index",              no_argument, nullptr, 'i'},
         {"debug",                 no_argument, nullptr, 'd'},
+        {"exit-ignore-warnings",  no_argument, nullptr, 'e'},
         {"gdal-driver",     required_argument, nullptr, 'g'},
         {"help",                  no_argument, nullptr, 'h'},
         {"output-lines",          no_argument, nullptr, 'l'},
@@ -115,7 +117,7 @@ int Options::parse(int argc, char* argv[]) {
     };
 
     while (true) {
-        const int c = getopt_long(argc, argv, "b:c:idg:hlm:o:p:rfs:S:vV", long_options, nullptr);
+        const int c = getopt_long(argc, argv, "b:c:ideg:hlm:o:p:rfs:S:vV", long_options, nullptr);
         if (c == -1) {
             break;
         }
@@ -133,6 +135,9 @@ int Options::parse(int argc, char* argv[]) {
             case 'd':
                 debug = true;
                 std::cerr << "Enabled debug option\n";
+                break;
+            case 'e':
+                exit_ignore_warnings = true;
                 break;
             case 'h':
                 print_help();
