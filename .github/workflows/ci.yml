@@ -180,7 +180,7 @@ jobs:
               proj-devel \
               spatialite-tools \
               zlib-devel
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
@@ -200,7 +200,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -yq clang-15
         shell: bash
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/install-ubuntu
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
@@ -224,7 +224,7 @@ jobs:
       CXX: clang++
       BUILD_TYPE: ${{ matrix.build_type }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/install-macos
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
