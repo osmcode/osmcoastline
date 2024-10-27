@@ -185,19 +185,12 @@ jobs:
       - uses: ./.github/actions/ctest
 
   ubuntu-latest:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
-      CC: clang-15
-      CXX: clang++-15
+      CC: clang-18
+      CXX: clang++-18
       BUILD_TYPE: Dev
     steps:
-      - name: Install new clang
-        run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/llvm-snapshot.asc
-          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main'
-          sudo apt-get update -qq
-          sudo apt-get install -yq clang-15
-        shell: bash
       - uses: actions/checkout@v4
       - uses: ./.github/actions/install-ubuntu
       - uses: ./.github/actions/cmake
@@ -209,11 +202,11 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - "macos-12"
-          - "macos-13"
+          - "macos-14"
+          - "macos-15"
         build_type: [Dev]
         include:
-          - os: "macos-12"
+          - os: "macos-14"
             build_type: Release
     runs-on: ${{ matrix.os }}
     env:
