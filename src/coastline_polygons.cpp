@@ -93,13 +93,13 @@ unsigned int CoastlinePolygons::fix_direction() {
         OGRLinearRing* er = polygon->getExteriorRing();
         assert(er);
         if (!er->isClockwise()) {
-            er->reverseWindingOrder();
+            er->reversePoints();
             // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
             er->setCoordinateDimension(2);
             for (int i = 0; i < polygon->getNumInteriorRings(); ++i) {
                 OGRLinearRing* ir = polygon->getInteriorRing(i);
                 assert(ir);
-                ir->reverseWindingOrder();
+                ir->reversePoints();
                 // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
                 ir->setCoordinateDimension(2);
             }
