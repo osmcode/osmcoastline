@@ -193,6 +193,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/install-ubuntu
+      - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
       - uses: ./.github/actions/ctest
@@ -216,6 +217,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/install-macos
+      - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
       - uses: ./.github/actions/ctest

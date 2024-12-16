@@ -1,4 +1,4 @@
-name: Install Prerequisites on Ubuntu
+name: Install apt packages on Ubuntu/Debian
 
 runs:
   using: composite
@@ -12,10 +12,5 @@ runs:
              libgeos-dev \
              pandoc \
              spatialite-bin
-      shell: bash
-    - name: Install from git
-      run: |
-        git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git ../libosmium
-        git clone --quiet --depth 1 https://github.com/mapbox/protozero.git ../protozero
       shell: bash
 

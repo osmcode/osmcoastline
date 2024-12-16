@@ -6,7 +6,7 @@ all the pieces into polygons for use in map renderers etc.
 
 https://osmcode.org/osmcoastline
 
-[![Build Status](https://github.com/osmcode/osmcoastline/workflows/CI/badge.svg?branch=master)](https://github.com/osmcode/osmcoastline/actions)
+[![Build Status](https://github.com/osmcode/osmcoastline/actions/workflows/ci.yml/badge.svg)](https://github.com/osmcode/osmcoastline/actions)
 
 ## Prerequisites
 
