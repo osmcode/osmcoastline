@@ -94,14 +94,10 @@ unsigned int CoastlinePolygons::fix_direction() {
         assert(er);
         if (!er->isClockwise()) {
             er->reversePoints();
-            // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
-            er->setCoordinateDimension(2);
             for (int i = 0; i < polygon->getNumInteriorRings(); ++i) {
                 OGRLinearRing* ir = polygon->getInteriorRing(i);
                 assert(ir);
                 ir->reversePoints();
-                // Workaround for bug in OGR: reverseWindingOrder sets dimensions to 3
-                ir->setCoordinateDimension(2);
             }
             m_output.add_error_line(make_unique_ptr_clone<OGRLineString>(er), "direction");
             warnings++;
