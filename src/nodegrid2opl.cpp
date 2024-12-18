@@ -92,7 +92,7 @@ int main() {
     for (std::string line; std::getline(std::cin, line);) {
         for (const auto c : line) {
             if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')) {
-                if (!add_node(nodes, c, offset + x * scale, offset + y * scale)) {
+                if (!add_node(nodes, c, offset + (x * scale), offset + (y * scale))) {
                     return 1;
                 }
             }

@@ -216,8 +216,8 @@ osmium::Location intersection(const osmium::Segment& s1, const osmium::Segment&s
         if ((denom > 0 && nume_a >= 0 && nume_a <= denom && nume_b >= 0 && nume_b <= denom) ||
             (denom < 0 && nume_a <= 0 && nume_a >= denom && nume_b <= 0 && nume_b >= denom)) {
             const double ua = nume_a / denom;
-            const double ix = s1.first().lon() + ua*(s1.second().lon() - s1.first().lon());
-            const double iy = s1.first().lat() + ua*(s1.second().lat() - s1.first().lat());
+            const double ix = s1.first().lon() + (ua * (s1.second().lon() - s1.first().lon()));
+            const double iy = s1.first().lat() + (ua * (s1.second().lat() - s1.first().lat()));
             return {ix, iy};
         }
     }

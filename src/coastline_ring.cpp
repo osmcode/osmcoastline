@@ -156,8 +156,8 @@ std::unique_ptr<OGRPoint> CoastlineRing::ogr_last_point() const {
 double CoastlineRing::distance_to_start_location(osmium::Location pos) const {
     assert(!m_way_node_list.empty());
     const osmium::Location p = m_way_node_list.front().location();
-    return (pos.lon() - p.lon()) * (pos.lon() - p.lon()) +
-           (pos.lat() - p.lat()) * (pos.lat() - p.lat());
+    return ((pos.lon() - p.lon()) * (pos.lon() - p.lon())) +
+           ((pos.lat() - p.lat()) * (pos.lat() - p.lat()));
 }
 
 void CoastlineRing::add_segments_to_vector(std::vector<osmium::UndirectedSegment>& segments) const {
