@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: ./.github/actions/install-protozero
+      - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
       - name: Run clang-tidy
         run: make clang-tidy | tee osmcoastline-${{ github.sha }}-clang-tidy-${{ matrix.clang }}.log
