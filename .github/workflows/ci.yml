@@ -132,7 +132,7 @@ jobs:
         BUILD_TYPE: ${{ matrix.build_type }}
         CC: ${{ matrix.c_compiler }}
         CXX: ${{ matrix.cpp_compiler }}
-        CXXFLAGS: ${{ matrix.CXXFLAGS }}
+        CXXFLAGS: -Werror ${{ matrix.CXXFLAGS }}
         LDFLAGS: ${{ matrix.LDFLAGS }}
         CPP_VERSION: ${{ matrix.cpp_version }}
         WITH_PROJ: ON
