@@ -64,6 +64,8 @@ SRS srs;
 // Global debug marker
 bool debug;
 
+namespace {
+
 // If there are more than this many warnings, the program exit code will indicate an error.
 const unsigned int max_warnings = 500;
 
@@ -165,6 +167,8 @@ std::unique_ptr<OutputDatabase> open_output_database(const std::string& driver, 
     std::cerr << e.what() << '\n';
     return nullptr;
 }
+
+} // anonymous namespace
 
 /* ================================================== */
 

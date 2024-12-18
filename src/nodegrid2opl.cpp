@@ -56,7 +56,9 @@
 
 const int id_offset = 100;
 
-static bool add_node(std::vector<std::string>& nodes, char c, double x, double y) {
+namespace {
+
+bool add_node(std::vector<std::string>& nodes, char c, double x, double y) {
     static std::set<int> ids;
     int id = id_offset;
 
@@ -75,6 +77,8 @@ static bool add_node(std::vector<std::string>& nodes, char c, double x, double y
     nodes.push_back("n" + std::to_string(id) + " v1 x" + std::to_string(x) + " y" + std::to_string(y) + "\n");
     return true;
 }
+
+} // anonymous namespace
 
 int main() {
     const double scale = 0.01;

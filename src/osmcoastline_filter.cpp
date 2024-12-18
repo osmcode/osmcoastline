@@ -46,6 +46,8 @@
 #include <string>
 #include <vector>
 
+namespace {
+
 void print_help() {
     std::cout << "Usage: osmcoastline_filter [OPTIONS] OSMFILE\n"
               << "\nOptions:\n"
@@ -56,6 +58,8 @@ void print_help() {
               << "  -V, --version        - Show version and exit\n"
               << "\n";
 }
+
+} // anonymous namespace
 
 int main(int argc, char* argv[]) {
     std::string output_filename;

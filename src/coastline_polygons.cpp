@@ -36,7 +36,9 @@ class OGRSpatialReference;
 extern SRS srs;
 extern bool debug;
 
-static std::unique_ptr<OGRPolygon> create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand) {
+namespace {
+
+std::unique_ptr<OGRPolygon> create_rectangular_polygon(double x1, double y1, double x2, double y2, double expand) {
     OGREnvelope e;
 
     e.MinX = x1 - expand;
@@ -61,7 +63,7 @@ static std::unique_ptr<OGRPolygon> create_rectangular_polygon(double x1, double 
     return polygon;
 }
 
-static bool add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2) {
+bool add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint* point2) {
     // segments along southern edge of the map are not added to line output
     if (point1->getY() < srs.min_y() && point2->getY() < srs.min_y()) {
         if (debug) {
@@ -85,6 +87,8 @@ static bool add_segment_to_line(OGRLineString* line, OGRPoint* point1, OGRPoint*
     line->addPoint(point2);
     return true;
 }
+
+} // anonymous namespace
 
 unsigned int CoastlinePolygons::fix_direction() {
     unsigned int warnings = 0;

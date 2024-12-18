@@ -35,7 +35,9 @@
 
 #include <osmium/io/pbf.hpp>
 
-static void print_help() {
+namespace {
+
+void print_help() {
     std::cout << "Usage: osmcoastline [OPTIONS] OSMFILE\n"
               << "\nOptions:\n"
               << "  -h, --help                 - This help message\n"
@@ -61,7 +63,7 @@ static void print_help() {
               << "\n";
 }
 
-static void print_version() {
+void print_version() {
     std::cout << "osmcoastline " << get_osmcoastline_long_version() << "\n"
               << get_libosmium_version() << '\n'
               << "Supported PBF compression types:";
@@ -79,7 +81,7 @@ static void print_version() {
  * of specifying WGS84 or the "Web Mercator" SRS. More are currently
  * not supported.
  */
-static int get_epsg(const char* text) {
+int get_epsg(const char* text) {
     if (!strcasecmp(text, "WGS84") || !std::strcmp(text, "4326")) {
         return 4326;
     }
@@ -93,6 +95,8 @@ static int get_epsg(const char* text) {
     std::cerr << "Unknown SRS '" << text << "'. Currently only 4326 (WGS84) and 3857 ('Web Mercator') are supported.\n";
     std::exit(return_code_cmdline);
 }
+
+} // anonymous namespace
 
 int Options::parse(int argc, char* argv[]) {
     static struct option long_options[] = {

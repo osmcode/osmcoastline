@@ -79,6 +79,8 @@ public:
 
 }; // class InputFile
 
+namespace {
+
 void print_help() {
 }
 
@@ -109,6 +111,8 @@ void output_ogr(const std::string& filename, const std::string& driver_name, con
 
     layer.commit_transaction();
 }
+
+} // anonymous namespace
 
 int main(int argc, char *argv[]) {
     bool dump = false;

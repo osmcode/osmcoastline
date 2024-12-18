@@ -129,6 +129,8 @@ unsigned int CoastlineRingCollection::check_locations(bool output_missing) {
     return missing_locations;
 }
 
+namespace {
+
 bool is_valid_polygon(const OGRGeometry* geometry) {
     if (geometry && geometry->getGeometryType() == wkbPolygon && !geometry->IsEmpty()) {
         const auto *const polygon = static_cast<const OGRPolygon*>(geometry);
@@ -136,6 +138,8 @@ bool is_valid_polygon(const OGRGeometry* geometry) {
     }
     return false;
 }
+
+} // anonymous namespace
 
 std::vector<OGRGeometry*> CoastlineRingCollection::add_polygons_to_vector() {
     std::vector<OGRGeometry*> vector;
@@ -189,6 +193,8 @@ unsigned int CoastlineRingCollection::output_rings(OutputDatabase& output) {
     return warnings;
 }
 
+namespace {
+
 osmium::Location intersection(const osmium::Segment& s1, const osmium::Segment&s2) {
     if (s1.first()  == s2.first()  ||
         s1.first()  == s2.second() ||
@@ -241,6 +247,8 @@ std::unique_ptr<OGRLineString> create_ogr_linestring(const osmium::Segment& segm
 
     return line;
 }
+
+} // anonymous namespace
 
 /**
  * Checks if there are intersections between any coastline segments.
