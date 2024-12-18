@@ -9,4 +9,3 @@ runs:
           gdal \
           spatialite-tools
       shell: bash
-

@@ -221,4 +221,3 @@ jobs:
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
       - uses: ./.github/actions/ctest
-

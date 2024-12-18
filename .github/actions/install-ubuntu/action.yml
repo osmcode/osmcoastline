@@ -13,4 +13,3 @@ runs:
              pandoc \
              spatialite-bin
       shell: bash
-

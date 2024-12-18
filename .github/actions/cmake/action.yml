@@ -12,4 +12,3 @@ runs:
               -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
       shell: bash
       working-directory: build
-
