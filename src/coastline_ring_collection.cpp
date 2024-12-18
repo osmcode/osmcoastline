@@ -26,8 +26,12 @@
 
 #include <ogr_geometry.h>
 
+#include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <memory>
+#include <utility>
+#include <vector>
 
 #ifdef _MSC_VER
 #include <io.h>

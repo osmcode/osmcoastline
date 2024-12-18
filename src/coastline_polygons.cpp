@@ -30,6 +30,7 @@ class OGRSpatialReference;
 
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include <utility>
 #include <vector>
 

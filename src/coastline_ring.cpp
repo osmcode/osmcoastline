@@ -27,8 +27,11 @@
 #include <ogr_geometry.h>
 
 #include <cassert>
+#include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <utility>
+#include <vector>
 
 void CoastlineRing::setup_locations(locmap_type& locmap) {
     for (auto& wn : m_way_node_list) {

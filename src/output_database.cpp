@@ -30,9 +30,13 @@
 #include <ogr_geometry.h>
 
 #include <cstddef>
+#include <ctime>
 #include <iostream>
+#include <memory>
 #include <sstream>
+#include <string>
 #include <utility>
+#include <vector>
 
 OutputDatabase::OutputDatabase(const std::string& driver, const std::string& outdb, SRS& srs, bool with_index) :
     m_driver(driver),

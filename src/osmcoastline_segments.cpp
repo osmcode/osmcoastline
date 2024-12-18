@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstdlib>
+#include <exception>
 #include <fcntl.h>
 #include <getopt.h>
 #include <iostream>

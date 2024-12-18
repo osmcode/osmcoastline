@@ -34,7 +34,6 @@
 #include <osmium/osm/entity_bits.hpp>
 #include <osmium/util/memory.hpp>
 #include <osmium/util/verbose_output.hpp>
-#include <osmium/visitor.hpp>
 
 #include <ogr_core.h>
 #include <ogr_geometry.h>
@@ -43,6 +42,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <iostream>
 #include <memory>
 #include <sstream>
