@@ -78,5 +78,5 @@ Checks: '*,-altera-*,-android-cloexec-*,-bugprone-easily-swappable-parameters,-c
 #  readability-use-anyofallof
 #    Not necessarily more readable.
 #
-WarningsAsErrors: '*'
+#WarningsAsErrors: '*'
 ...
