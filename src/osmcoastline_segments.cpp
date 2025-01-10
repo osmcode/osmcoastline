@@ -36,11 +36,11 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
-#include <stdexcept>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <system_error>
+#include <utility>
 #include <vector>
 
 #ifndef _MSC_VER

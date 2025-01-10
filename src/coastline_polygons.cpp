@@ -32,7 +32,6 @@ class OGRSpatialReference;
 #include <iostream>
 #include <memory>
 #include <utility>
-#include <vector>
 
 extern SRS srs;
 extern bool debug;

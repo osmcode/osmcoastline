@@ -41,10 +41,10 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <getopt.h>
 #include <iostream>
 #include <string>
-#include <vector>
 
 namespace {
 

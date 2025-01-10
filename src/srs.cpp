@@ -24,6 +24,8 @@
 #include <ogr_core.h>
 #include <ogr_geometry.h>
 
+#include <memory>
+
 bool SRS::set_output(int epsg) {
     auto const result = m_srs_out.importFromEPSG(epsg);
     if (result != OGRERR_NONE) {
