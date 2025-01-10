@@ -7,23 +7,12 @@
 #-----------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+
+project(osmcoastline VERSION 2.4.0 LANGUAGES CXX C)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-
 #-----------------------------------------------------------------------------
-#
-#  Project version
-#
-#-----------------------------------------------------------------------------
-
-project(osmcoastline)
-
-set(OSMCOASTLINE_VERSION_MAJOR 2)
-set(OSMCOASTLINE_VERSION_MINOR 4)
-set(OSMCOASTLINE_VERSION_PATCH 0)
-
-set(OSMCOASTLINE_VERSION
-    ${OSMCOASTLINE_VERSION_MAJOR}.${OSMCOASTLINE_VERSION_MINOR}.${OSMCOASTLINE_VERSION_PATCH})
 
 set(AUTHOR "Jochen Topf <jochen@topf.org>")
 
@@ -256,8 +245,8 @@ if(PANDOC)
         -s
         -t man
         --template ${CMAKE_CURRENT_SOURCE_DIR}/man/manpage.template
-        --variable "description=osmcoastline/${OSMCOASTLINE_VERSION}"
-        --variable "version=${OSMCOASTLINE_VERSION}"
+        --variable "description=osmcoastline/${PROJECT_VERSION}"
+        --variable "version=${PROJECT_VERSION}"
         --variable "author=${AUTHOR}"
     )
     set(PANDOC_HTML_OPTIONS -s -t html)
@@ -357,10 +346,6 @@ add_subdirectory(test)
 #  Packaging
 #
 #-----------------------------------------------------------------------------
-
-set(CPACK_PACKAGE_VERSION_MAJOR ${OSMCOASTLINE_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${OSMCOASTLINE_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${OSMCOASTLINE_VERSION_PATCH})
 
 if(WIN32)
     set(CPACK_GENERATOR ZIP)
