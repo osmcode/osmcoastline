@@ -8,6 +8,15 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+
+## [2.4.1] - 2025-01-14
+
+### Added
+
 - Add option `-e, --exit-ignore-warnings`: Return with exit code 0 even if
   there are warnings.
 
@@ -15,8 +24,6 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 - Modernized code and CMake config, updates for new versions of libraries
   used.
-
-### Fixed
 
 
 ## [2.4.0] - 2022-12-22
