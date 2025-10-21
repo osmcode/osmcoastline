@@ -50,13 +50,13 @@ OutputDatabase::OutputDatabase(const std::string& driver, const std::string& out
     m_layer_water_polygons(m_dataset, "water_polygons", wkbPolygon, layer_options()),
     m_layer_lines(m_dataset, "lines", wkbLineString, layer_options()) {
 
-    m_layer_error_points.add_field("osm_id", OFTString, 10);
+    m_layer_error_points.add_field("osm_id", OFTString, 11);
     m_layer_error_points.add_field("error", OFTString, 16);
 
-    m_layer_error_lines.add_field("osm_id", OFTString, 10);
+    m_layer_error_lines.add_field("osm_id", OFTString, 11);
     m_layer_error_lines.add_field("error", OFTString, 16);
 
-    m_layer_rings.add_field("osm_id",  OFTString, 10);
+    m_layer_rings.add_field("osm_id",  OFTString, 11);
     m_layer_rings.add_field("nways",   OFTInteger, 6);
     m_layer_rings.add_field("npoints", OFTInteger, 8);
     m_layer_rings.add_field("fixed",   OFTInteger, 1);
