@@ -103,7 +103,9 @@ unsigned int CoastlinePolygons::fix_direction() {
                 assert(ir);
                 ir->reversePoints();
             }
-            m_output.add_error_line(make_unique_ptr_clone<OGRLineString>(er), "direction");
+            auto* ring = polygon->getExteriorRing()->clone();
+            auto ls = std::unique_ptr<OGRLineString>(OGRGeometryFactory::forceToLineString(ring)->toLineString());
+            m_output.add_error_line(std::move(ls), "direction");
             warnings++;
         }
     }

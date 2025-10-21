@@ -90,7 +90,9 @@ void add_polygons_in_multi_to(polygon_vector_type *polygons,
         if (p->IsValid()) {
             polygons->push_back(std::move(p));
         } else {
-            output.add_error_line(make_unique_ptr_clone<OGRLineString>(p->getExteriorRing()), "invalid");
+            auto* ring = p->getExteriorRing()->clone();
+            auto ls = std::unique_ptr<OGRLineString>(OGRGeometryFactory::forceToLineString(ring)->toLineString());
+            output.add_error_line(std::move(ls), "invalid");
             std::unique_ptr<OGRGeometry> buf0{p->Buffer(0)};
             if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
                 buf0->assignSpatialReference(srs.wgs84());
