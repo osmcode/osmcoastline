@@ -50,13 +50,13 @@ OutputDatabase::OutputDatabase(const std::string& driver, const std::string& out
     m_layer_water_polygons(m_dataset, "water_polygons", wkbPolygon, layer_options()),
     m_layer_lines(m_dataset, "lines", wkbLineString, layer_options()) {
 
-    m_layer_error_points.add_field("osm_id", OFTString, 11);
+    m_layer_error_points.add_field("osm_id", OFTInteger64, 1);
     m_layer_error_points.add_field("error", OFTString, 16);
 
-    m_layer_error_lines.add_field("osm_id", OFTString, 11);
+    m_layer_error_lines.add_field("osm_id", OFTInteger64, 1);
     m_layer_error_lines.add_field("error", OFTString, 16);
 
-    m_layer_rings.add_field("osm_id",  OFTString, 11);
+    m_layer_rings.add_field("osm_id",  OFTInteger64, 1);
     m_layer_rings.add_field("nways",   OFTInteger, 6);
     m_layer_rings.add_field("npoints", OFTInteger, 8);
     m_layer_rings.add_field("fixed",   OFTInteger, 1);
@@ -149,7 +149,7 @@ void OutputDatabase::commit() {
 void OutputDatabase::add_error_point(std::unique_ptr<OGRPoint>&& point, const char* error, osmium::object_id_type id) {
     m_srs.transform(point.get());
     gdalcpp::Feature feature{m_layer_error_points, std::move(point)};
-    feature.set_field("osm_id", std::to_string(id).c_str());
+    feature.set_field("osm_id", static_cast<GIntBig>(id));
     feature.set_field("error", error);
     feature.add_to_layer();
 }
@@ -157,7 +157,7 @@ void OutputDatabase::add_error_point(std::unique_ptr<OGRPoint>&& point, const ch
 void OutputDatabase::add_error_line(std::unique_ptr<OGRLineString>&& linestring, const char* error, osmium::object_id_type id) {
     m_srs.transform(linestring.get());
     gdalcpp::Feature feature{m_layer_error_lines, std::move(linestring)};
-    feature.set_field("osm_id", std::to_string(id).c_str());
+    feature.set_field("osm_id", static_cast<GIntBig>(id));
     feature.set_field("error", error);
     feature.add_to_layer();
 }
@@ -211,7 +211,7 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, osmium::obj
     }
 
     gdalcpp::Feature feature{m_layer_rings, std::move(polygon)};
-    feature.set_field("osm_id", static_cast<int>(osm_id));
+    feature.set_field("osm_id", static_cast<GIntBig>(osm_id));
     feature.set_field("nways", static_cast<int>(nways));
     feature.set_field("npoints", static_cast<int>(npoints));
     feature.set_field("fixed", fixed);
