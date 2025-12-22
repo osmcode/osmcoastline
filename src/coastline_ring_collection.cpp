@@ -384,7 +384,7 @@ void CoastlineRingCollection::close_rings(OutputDatabase& output, bool debug, do
             m_fixed_rings++;
 
             CoastlineRing* e = eit->second->get();
-            CoastlineRing* s = sit->second->get();
+            const CoastlineRing* s = sit->second->get();
 
             output.add_error_point(e->ogr_last_point(), "fixed_end_point", e->last_node_id());
             output.add_error_point(s->ogr_first_point(), "fixed_end_point", s->first_node_id());

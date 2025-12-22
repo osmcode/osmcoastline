@@ -181,7 +181,7 @@ void OutputDatabase::add_ring(std::unique_ptr<OGRPolygon>&& polygon, osmium::obj
            function from the GEOS C interface to get to the reason.
         */
         GEOSContextHandle_t contextHandle = OGRGeometry::createGEOSContext();
-        char* r = GEOSisValidReason(polygon->exportToGEOS(contextHandle));
+        const char* const r = GEOSisValidReason(polygon->exportToGEOS(contextHandle));
         std::string reason = r ? r : "";
         OGRGeometry::freeGEOSContext(contextHandle);
 
