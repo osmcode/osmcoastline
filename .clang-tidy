@@ -1,5 +1,5 @@
 ---
-Checks: '*,-altera-*,-android-cloexec-*,-boost-use-ranges,-bugprone-easily-swappable-parameters,-cert-err58-cpp,-cert-err60-cpp,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-prefer-static-over-anonymous-namespace,-llvmlibc-*,-misc-include-cleaner,-misc-no-recursion,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-cast,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers,-readability-use-anyofallof'
+Checks: '*,-altera-*,-android-cloexec-*,-boost-use-ranges,-bugprone-easily-swappable-parameters,-cert-err58-cpp,-cert-err60-cpp,-concurrency-mt-unsafe,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-prefer-static-over-anonymous-namespace,-llvmlibc-*,-misc-include-cleaner,-misc-no-recursion,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-cast,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers,-readability-use-anyofallof'
 #
 #  For a list of check options, see:
 #  http://clang.llvm.org/extra/clang-tidy/checks/list.html
@@ -23,6 +23,9 @@ Checks: '*,-altera-*,-android-cloexec-*,-boost-use-ranges,-bugprone-easily-swapp
 #
 #  cert-err60-cpp
 #    Reports exceptions from standard library as broken.
+#
+#  concurrency-mt-unsafe
+#    All the code is single-threaded.
 #
 #  cppcoreguidelines-avoid-c-arrays
 #  hicpp-avoid-c-arrays
