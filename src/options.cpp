@@ -1,6 +1,6 @@
 /*
 
-  Copyright 2012-2025 Jochen Topf <jochen@topf.org>.
+  Copyright 2012-2026 Jochen Topf <jochen@topf.org>.
 
   This file is part of OSMCoastline.
 
@@ -70,7 +70,7 @@ void print_version() {
     for (const auto& type : osmium::io::supported_pbf_compression_types()) {
         std::cout << " " << type;
     }
-    std::cout << "\n\nCopyright (C) 2012-2025  Jochen Topf <jochen@topf.org>\n"
+    std::cout << "\n\nCopyright (C) 2012-2026  Jochen Topf <jochen@topf.org>\n"
               << "License: GNU GENERAL PUBLIC LICENSE Version 3 <https://gnu.org/licenses/gpl.html>.\n"
               << "This is free software: you are free to change and redistribute it.\n"
               << "There is NO WARRANTY, to the extent permitted by law.\n";
