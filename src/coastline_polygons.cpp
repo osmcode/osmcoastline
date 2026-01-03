@@ -126,7 +126,7 @@ void CoastlinePolygons::split_geometry(std::unique_ptr<OGRGeometry>&& geom, int 
     } else if (geom->getGeometryType() == wkbMultiPolygon) {
         const auto mp = static_cast_unique_ptr<OGRMultiPolygon>(std::move(geom));
         while (mp->getNumGeometries() > 0) {
-            std::unique_ptr<OGRPolygon> polygon{static_cast<OGRPolygon*>(mp->getGeometryRef(0))};
+            std::unique_ptr<OGRPolygon> polygon{mp->getGeometryRef(0)};
             mp->removeGeometry(0, false);
             polygon->assignSpatialReference(srs.out());
             split_polygon(std::move(polygon), level);
@@ -347,7 +347,7 @@ void CoastlinePolygons::split_bbox(const OGREnvelope& envelope, polygon_vector_t
                     case wkbMultiPolygon: {
                             auto mp = static_cast_unique_ptr<OGRMultiPolygon>(std::move(geom));
                             for (int i = mp->getNumGeometries() - 1; i >= 0; --i) {
-                                auto p = std::unique_ptr<OGRPolygon>(static_cast<OGRPolygon*>(mp->getGeometryRef(i)));
+                                auto p = std::unique_ptr<OGRPolygon>(mp->getGeometryRef(i));
                                 assert(p);
                                 mp->removeGeometry(i, FALSE);
                                 p->assignSpatialReference(mp->getSpatialReference());
@@ -428,7 +428,7 @@ void CoastlinePolygons::split_bbox(const OGREnvelope& envelope, polygon_vector_t
             const bool e2_intersects_e = e2.Intersects(polygon_envelope);
 
             if (e1_intersects_e && e2_intersects_e) {
-                v1.emplace_back(static_cast<OGRPolygon*>(polygon->clone()));
+                v1.emplace_back(polygon->clone());
                 v2.push_back(std::move(polygon));
             } else if (e1_intersects_e) {
                 v1.push_back(std::move(polygon));
