@@ -6,7 +6,7 @@
 #
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10)
 
 project(osmcoastline VERSION 2.4.1 LANGUAGES CXX C)
 
@@ -16,9 +16,22 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set(AUTHOR "Jochen Topf <jochen@topf.org>")
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+#-----------------------------------------------------------------------------
+#
+#  Decide which C++ version to use (Minimum/default: C++14)
+#
+#-----------------------------------------------------------------------------
 
-option(WITH_LZ4 "Build with lz4 support for PBF files" ON)
+if(NOT USE_CPP_VERSION)
+    set(USE_CPP_VERSION 14)
+endif()
+message(STATUS "Use C++ version: ${USE_CPP_VERSION}")
+
+set(CMAKE_CXX_STANDARD ${USE_CPP_VERSION})
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 #-----------------------------------------------------------------------------
@@ -26,6 +39,8 @@ option(WITH_LZ4 "Build with lz4 support for PBF files" ON)
 #  Find external dependencies
 #
 #-----------------------------------------------------------------------------
+
+option(WITH_LZ4 "Build with lz4 support for PBF files" ON)
 
 include_directories(include)
 
@@ -55,23 +70,6 @@ if(MSVC)
     else()
         set(GETOPT_MISSING 1)
     endif()
-endif()
-
-
-#-----------------------------------------------------------------------------
-#
-#  Decide which C++ version to use (Minimum/default: C++14).
-#
-#-----------------------------------------------------------------------------
-if(NOT MSVC)
-    if(NOT USE_CPP_VERSION)
-        set(USE_CPP_VERSION c++14)
-    endif()
-    message(STATUS "Use C++ version: ${USE_CPP_VERSION}")
-    # following only available from cmake 2.8.12:
-    #   add_compile_options(-std=${USE_CPP_VERSION})
-    # so using this instead:
-    add_definitions(-std=${USE_CPP_VERSION})
 endif()
 
 
