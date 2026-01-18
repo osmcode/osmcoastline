@@ -10,6 +10,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+### Fixed
+
+
+## [2.5.0] - 2026-01-18
+
+### Changed
+
 - Switch from using text ids to 64bit integer ids.
 - Various small code cleanups.
 
@@ -233,7 +240,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Added man pages
 
 
-[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.4.0...HEAD
+[unreleased]: https://github.com/osmcode/osmium-tool/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/osmcode/osmium-tool/compare/v2.4.1...v2.5.0
+[2.4.1]: https://github.com/osmcode/osmium-tool/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/osmcode/osmium-tool/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/osmcode/osmium-tool/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/osmcode/osmium-tool/compare/v2.2.4...v2.3.0
