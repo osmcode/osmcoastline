@@ -181,7 +181,7 @@ if(CPPCHECK)
 
     add_custom_target(cppcheck
         ${CPPCHECK}
-        --std=c++14 ${CPPCHECK_OPTIONS}
+        --std=c++${USE_CPP_VERSION} ${CPPCHECK_OPTIONS}
         ${CPPCHECK_FILES}
     )
 else()
