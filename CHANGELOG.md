@@ -10,11 +10,12 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Switch from using text ids to 64bit integer ids
+- Switch from using text ids to 64bit integer ids.
+- Various small code cleanups.
 
 ### Fixed
 
-- Fix: Conversion of LinearRings into LineStrings
+- Fix: Conversion of LinearRings into LineStrings.
 
 
 ## [2.4.1] - 2025-01-14
