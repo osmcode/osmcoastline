@@ -118,7 +118,7 @@ jobs:
             proj-devel \
             spatialite-tools \
             zlib-devel
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
@@ -133,7 +133,7 @@ jobs:
       CXXFLAGS: -Werror
       BUILD_TYPE: Dev
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/install-ubuntu
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
@@ -159,7 +159,7 @@ jobs:
       CXXFLAGS: -Werror
       BUILD_TYPE: ${{ matrix.build_type }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/install-macos
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake

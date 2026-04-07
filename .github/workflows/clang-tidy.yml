@@ -42,7 +42,7 @@ jobs:
             make \
             zlib1g-dev
         shell: bash
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
       - uses: ./.github/actions/install-from-git
@@ -52,7 +52,7 @@ jobs:
         shell: bash
         working-directory: build
       - name: Upload clang-tidy log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: osmcoastline-${{ github.sha }}-clang-tidy-${{ matrix.clang }}-log
