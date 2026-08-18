@@ -38,8 +38,10 @@
 #include <ogr_core.h>
 #include <ogr_geometry.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cerrno>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <exception>
@@ -71,10 +73,166 @@ const unsigned int max_warnings = 500;
 
 /* ================================================== */
 
+/**
+ * Is the point inside the ring? The envelope of the ring has to be given,
+ * because calculating it is expensive and we need it several times.
+ *
+ * This uses the simple point-in-ring test instead of a GEOS operation,
+ * because it has to work on invalid geometries, too.
+ */
+[[nodiscard]] bool point_in_ring(const OGRLinearRing* ring, const OGREnvelope& envelope, const OGRPoint& point) {
+    if (point.getX() < envelope.MinX || point.getX() > envelope.MaxX ||
+        point.getY() < envelope.MinY || point.getY() > envelope.MaxY) {
+        return false;
+    }
+
+    return ring->isPointInRing(&point, FALSE) != FALSE;
+}
+
+/**
+ * Find the interior rings of the polygon that can not be holes of that
+ * polygon, because they are outside the exterior ring or inside another
+ * hole. Only the first point of each interior ring is looked at, so rings
+ * that are only partly outside are not detected. Those cases show up as
+ * intersections and are reported elsewhere.
+ */
+[[nodiscard]] std::vector<bool> find_misplaced_holes(const OGRPolygon& polygon) {
+    const auto num_rings = static_cast<std::size_t>(polygon.getNumInteriorRings());
+
+    std::vector<OGREnvelope> envelopes(num_rings);
+    std::vector<OGRPoint> first_points(num_rings);
+    for (std::size_t i = 0; i < num_rings; ++i) {
+        const OGRLinearRing* ring = polygon.getInteriorRing(static_cast<int>(i));
+        assert(ring);
+        ring->getEnvelope(&envelopes[i]);
+        ring->getPoint(0, &first_points[i]);
+    }
+
+    const OGRLinearRing* exterior_ring = polygon.getExteriorRing();
+    assert(exterior_ring);
+    OGREnvelope exterior_envelope;
+    exterior_ring->getEnvelope(&exterior_envelope);
+
+    // rings outside the exterior ring ("Hole lies outside shell")
+    std::vector<bool> outside(num_rings, false);
+    for (std::size_t i = 0; i < num_rings; ++i) {
+        outside[i] = !point_in_ring(exterior_ring, exterior_envelope, first_points[i]);
+    }
+
+    // rings inside another hole ("Holes are nested"). Rings that are outside
+    // the exterior ring are no holes at all, so they are not considered as
+    // the containing ring here.
+    std::vector<bool> misplaced{outside};
+    for (std::size_t i = 0; i < num_rings; ++i) {
+        if (misplaced[i]) {
+            continue;
+        }
+        for (std::size_t j = 0; j < num_rings; ++j) {
+            if (i != j && !outside[j] && envelopes[j].Contains(envelopes[i]) &&
+                point_in_ring(polygon.getInteriorRing(static_cast<int>(j)), envelopes[j], first_points[i])) {
+                misplaced[i] = true;
+                break;
+            }
+        }
+    }
+
+    return misplaced;
+}
+
+/**
+ * organizePolygons() decides which rings are holes based on their direction
+ * and only checks the bounding box when assigning a hole to a polygon. So a
+ * ring whose coastline was mapped the wrong way round can end up as a hole
+ * of a polygon it isn't inside of or as a hole inside another hole. GEOS
+ * then reports "Hole lies outside shell" or "Holes are nested" and the whole
+ * polygon (possibly a whole continent) is invalid.
+ *
+ * Those rings are not holes but land mapped the wrong way round. Take them
+ * out of the polygon, report them, and turn them around into land polygons
+ * of their own.
+ */
+[[nodiscard]] std::unique_ptr<OGRPolygon> fix_misplaced_holes(std::unique_ptr<OGRPolygon> polygon,
+                                                              polygon_vector_type* polygons,
+                                                              OutputDatabase& output,
+                                                              unsigned int* turned_around) {
+    const std::vector<bool> misplaced = find_misplaced_holes(*polygon);
+
+    if (std::find(misplaced.cbegin(), misplaced.cend(), true) == misplaced.cend()) {
+        return polygon;
+    }
+
+    auto fixed_polygon = std::make_unique<OGRPolygon>();
+    fixed_polygon->addRingDirectly(polygon->getExteriorRing()->clone());
+
+    for (int i = 0; i < polygon->getNumInteriorRings(); ++i) {
+        const OGRLinearRing* interior_ring = polygon->getInteriorRing(i);
+        assert(interior_ring);
+
+        if (!misplaced[static_cast<std::size_t>(i)]) {
+            fixed_polygon->addRingDirectly(interior_ring->clone());
+            continue;
+        }
+
+        auto ring = std::unique_ptr<OGRLinearRing>(interior_ring->clone());
+        ring->reversePoints();
+
+        auto ls = std::unique_ptr<OGRLineString>(OGRGeometryFactory::forceToLineString(ring->clone())->toLineString());
+        output.add_error_line(std::move(ls), "direction");
+
+        auto island = std::make_unique<OGRPolygon>();
+        island->addRingDirectly(ring.release());
+        island->assignSpatialReference(srs.wgs84());
+        polygons->push_back(std::move(island));
+
+        ++(*turned_around);
+    }
+
+    fixed_polygon->assignSpatialReference(srs.wgs84());
+    return fixed_polygon;
+}
+
+/**
+ * Add the polygon to the list of polygons, trying to fix it if it isn't
+ * valid.
+ */
+void add_polygon_to(polygon_vector_type* polygons,
+                    std::unique_ptr<OGRPolygon> polygon,
+                    OutputDatabase& output,
+                    unsigned int* warnings, unsigned int* errors,
+                    unsigned int* turned_around) {
+    if (polygon->IsValid()) {
+        polygons->push_back(std::move(polygon));
+        return;
+    }
+
+    if (polygon->getNumInteriorRings() > 0) {
+        polygon = fix_misplaced_holes(std::move(polygon), polygons, output, turned_around);
+        if (polygon->IsValid()) {
+            polygons->push_back(std::move(polygon));
+            return;
+        }
+    }
+
+    auto* ring = polygon->getExteriorRing()->clone();
+    auto ls = std::unique_ptr<OGRLineString>(OGRGeometryFactory::forceToLineString(ring)->toLineString());
+    output.add_error_line(std::move(ls), "invalid");
+
+    std::unique_ptr<OGRGeometry> buf0{polygon->Buffer(0)};
+    if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
+        buf0->assignSpatialReference(srs.wgs84());
+        polygons->push_back(static_cast_unique_ptr<OGRPolygon>(std::move(buf0)));
+        (*warnings)++;
+    } else {
+        std::cerr << "Ignoring invalid polygon geometry.\n";
+        (*errors)++;
+    }
+}
+
 void add_polygons_in_multi_to(polygon_vector_type *polygons,
                               std::unique_ptr<OGRGeometry> mega_geometry,
                               OutputDatabase& output,
-                              unsigned int* warnings, unsigned int* errors) {
+                              unsigned int* warnings, unsigned int* errors,
+                              unsigned int* turned_around) {
     // This isn't an owning pointer on purpose. We are going to "steal" parts
     // of the geometry a few lines below but only mark them as unowned farther
     // below when we are calling removeGeometry() on it. If this was an
@@ -87,22 +245,7 @@ void add_polygons_in_multi_to(polygon_vector_type *polygons,
         assert(geom);
         assert(geom->getGeometryType() == wkbPolygon);
         std::unique_ptr<OGRPolygon> p{static_cast<OGRPolygon*>(geom)};
-        if (p->IsValid()) {
-            polygons->push_back(std::move(p));
-        } else {
-            auto* ring = p->getExteriorRing()->clone();
-            auto ls = std::unique_ptr<OGRLineString>(OGRGeometryFactory::forceToLineString(ring)->toLineString());
-            output.add_error_line(std::move(ls), "invalid");
-            std::unique_ptr<OGRGeometry> buf0{p->Buffer(0)};
-            if (buf0 && buf0->getGeometryType() == wkbPolygon && buf0->IsValid()) {
-                buf0->assignSpatialReference(srs.wgs84());
-                polygons->push_back(static_cast_unique_ptr<OGRPolygon>(std::move(buf0)));
-                (*warnings)++;
-            } else {
-                std::cerr << "Ignoring invalid polygon geometry.\n";
-                (*errors)++;
-            }
-        }
+        add_polygon_to(polygons, std::move(p), output, warnings, errors, turned_around);
     }
 
     mega_multipolygon->removeGeometry(-1, FALSE);
@@ -112,7 +255,7 @@ void add_polygons_in_multi_to(polygon_vector_type *polygons,
 /**
  * This function assembles all the coastline rings into one huge multipolygon.
  */
-polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, OutputDatabase& output, unsigned int* warnings, unsigned int* errors) {
+polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, OutputDatabase& output, unsigned int* warnings, unsigned int* errors, unsigned int* turned_around) {
     std::vector<OGRGeometry*> all_polygons = coastline_rings.add_polygons_to_vector();
 
     if (all_polygons.empty()) {
@@ -136,16 +279,11 @@ polygon_vector_type create_polygons(CoastlineRingCollection& coastline_rings, Ou
     polygon_vector_type polygons;
 
     if (mega_geometry->getGeometryType() == wkbPolygon) {
-        if (mega_geometry->IsValid()) {
-            polygons.push_back(static_cast_unique_ptr<OGRPolygon>(std::move(mega_geometry)));
-        } else {
-            std::cerr << "Ignoring invalid polygon geometry.\n";
-            (*errors)++;
-        }
+        add_polygon_to(&polygons, static_cast_unique_ptr<OGRPolygon>(std::move(mega_geometry)), output, warnings, errors, turned_around);
     } else if (mega_geometry->getGeometryType() != wkbMultiPolygon) {
         throw std::runtime_error{"mega geometry isn't a (multi)polygon. Something is very wrong!"};
     } else {
-        add_polygons_in_multi_to(&polygons, std::move(mega_geometry), output, warnings, errors);
+        add_polygons_in_multi_to(&polygons, std::move(mega_geometry), output, warnings, errors, turned_around);
     }
 
     return polygons;
@@ -354,7 +492,8 @@ int main(int argc, char *argv[]) {
     if (options.output_polygons != output_polygon_type::none || options.output_lines) {
         try {
             vout << "Create polygons...\n";
-            CoastlinePolygons coastline_polygons{create_polygons(coastline_rings, *output_database, &warnings, &errors), \
+            unsigned int turned_around = 0;
+            CoastlinePolygons coastline_polygons{create_polygons(coastline_rings, *output_database, &warnings, &errors, &turned_around), \
                                                  *output_database, \
                                                  options.bbox_overlap, \
                                                  options.max_points_in_polygon};
@@ -362,7 +501,7 @@ int main(int argc, char *argv[]) {
             stats.land_polygons_before_split = coastline_polygons.num_polygons();
 
             vout << "Fixing coastlines going the wrong way...\n";
-            stats.rings_turned_around = coastline_polygons.fix_direction();
+            stats.rings_turned_around = turned_around + coastline_polygons.fix_direction();
             vout << "  Turned " << stats.rings_turned_around << " polygons around.\n";
             warnings += stats.rings_turned_around;
 
