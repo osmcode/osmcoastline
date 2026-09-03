@@ -18,12 +18,12 @@ set(AUTHOR "Jochen Topf <jochen@topf.org>")
 
 #-----------------------------------------------------------------------------
 #
-#  Decide which C++ version to use (Minimum/default: C++14)
+#  Decide which C++ version to use (Minimum/default: C++17)
 #
 #-----------------------------------------------------------------------------
 
 if(NOT USE_CPP_VERSION)
-    set(USE_CPP_VERSION 14)
+    set(USE_CPP_VERSION 17)
 endif()
 message(STATUS "Use C++ version: ${USE_CPP_VERSION}")
 
@@ -146,7 +146,7 @@ set(CMAKE_BUILD_TYPE ${build_type}
 #
 #-----------------------------------------------------------------------------
 message(STATUS "Looking for clang-tidy")
-find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-22 clang-tidy-21 clang-tidy-20 clang-tidy-19 clang-tidy-18 clang-tidy-17 clang-tidy-16 clang-tidy-15)
+find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-23 clang-tidy-22 clang-tidy-21 clang-tidy-20 clang-tidy-19)
 
 if(CLANG_TIDY)
     message(STATUS "Looking for clang-tidy - found ${CLANG_TIDY}")

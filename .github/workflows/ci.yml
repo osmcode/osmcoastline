@@ -22,7 +22,7 @@ jobs:
           - "fedora:43"
         build_type: [Dev]
         cpp_compiler: [g++]
-        cpp_version: [14]
+        cpp_version: [17]
         include:
           - image: "debian:bookworm"
             c_compiler: clang
