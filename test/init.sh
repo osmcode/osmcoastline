@@ -10,7 +10,7 @@ readonly INPUT=${BIN_DIR}/test/${TEST_ID}-${SRID}.opl
 readonly LOG=${BIN_DIR}/test/${TEST_ID}-${SRID}.log
 readonly DB=${BIN_DIR}/test/${TEST_ID}-${SRID}.db
 readonly DUMP=${BIN_DIR}/test/${TEST_ID}-${SRID}.dump
-readonly SQL="spatialite -bail -batch $DB"
+readonly SQL="spatialite -bail -batch -init /dev/null $DB"
 
 check_count_with_op() {
     test "$(echo "SELECT count(*) FROM $1;" | $SQL)" "$2" "$3"
