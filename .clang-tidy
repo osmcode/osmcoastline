@@ -1,94 +1,34 @@
 ---
-Checks: '*,-altera-*,-android-cloexec-*,-boost-use-ranges,-bugprone-easily-swappable-parameters,-cert-err58-cpp,-cert-err60-cpp,-concurrency-mt-unsafe,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-hicpp-vararg,-llvm-prefer-static-over-anonymous-namespace,-llvmlibc-*,-misc-include-cleaner,-misc-no-recursion,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-cast,-readability-identifier-length,-readability-implicit-bool-conversion,-readability-magic-numbers,-readability-use-anyofallof'
-#
-#  For a list of check options, see:
-#  http://clang.llvm.org/extra/clang-tidy/checks/list.html
-#
-#  Disabled checks:
-#
-#  altera-*
-#    Not applicable.
-#
-#  android-cloexec-*
-#    O_CLOEXEC isn't available on Windows making this non-portable.
-#
-#  boost-use-ranges
-#    Would introduce extra dependency on boost.
-#
-#  bugprone-easily-swappable-parameters
-#    When you need them, you need them.
-#
-#  cert-err58-cpp
-#    Rather unlikely that this is a problem.
-#
-#  cert-err60-cpp
-#    Reports exceptions from standard library as broken.
-#
-#  concurrency-mt-unsafe
-#    All the code is single-threaded.
-#
-#  cppcoreguidelines-avoid-c-arrays
-#  hicpp-avoid-c-arrays
-#  modernize-avoid-c-arrays
-#    Makes sense for some array, but especially for char arrays using
-#    std::array isn't a good solution.
-#
-#  cppcoreguidelines-avoid-magic-numbers
-#  readability-magic-numbers
-#    Generally good advice, but there are too many places where this is
-#    useful, for instance in tests.
-#
-#  cppcoreguidelines-pro-bounds-array-to-pointer-decay
-#    Limited use and many false positives including for all asserts.
-#
-#  cppcoreguidelines-pro-bounds-pointer-arithmetic
-#    Difficult to get by without it...
-#
-#  cppcoreguidelines-pro-type-static-cast-downcast
-#    This is needed and totally okay if we are sure about the types.
-#
-#  cppcoreguidelines-pro-type-vararg
-#    We need some of these functions at least and for some functions it isn't
-#    even clear that those are vararg functions.
-#
-#  fuchsia-*
-#    Much too strict.
-#
-#  google-runtime-references
-#    This is just a matter of preference.
-#
-#  hicpp-no-array-decay
-#    Alias for cppcoreguidelines-pro-bounds-array-to-pointer-decay.
-#
-#  hicpp-vararg
-#    Too strict, sometimes calling vararg functions is necessary.
-#
-#  llvm-prefer-static-over-anonymous-namespace
-#    Matter of taste and we are not following this one.
-#
-#  llvmlibc-*
-#    Not applicable.
-#
-#  misc-include-cleaner
-#    Too many reports. Disabled for now.
-#
-#  misc-no-recursion
-#    Nothing wrong about recursion.
-#
-#  modernize-use-trailing-return-type
-#    I am not quite that modern.
-#
-#  readability-identifier-length
-#    Sometimes short variable names are okay.
-#
-#  readability-implicit-bool-cast
-#    Old name for readability-implicit-bool-conversion.
-#
-#  readability-implicit-bool-conversion
-#    I don't think this makes the code more readable.
-#
-#  readability-use-anyofallof
-#    Not necessarily more readable.
-#
-#WarningsAsErrors: '*'
+Checks:
+  #  For a list of checks, see:
+  #  https://clang.llvm.org/extra/clang-tidy/checks/list.html
+  - '*'
+  - '-altera-*'  # Not applicable.
+  - '-android-cloexec-*'  # O_CLOEXEC not available on Windows, is non-portable.
+  - '-boost-use-ranges'  # Would introduce extra dependency on boost.
+  - '-bugprone-easily-swappable-parameters'  # When you need them, you need them.
+  - '-cert-err58-cpp'  # Rather unlikely that this is a problem.
+  - '-concurrency-mt-unsafe'  # All the code is single-threaded.
+  - '-cppcoreguidelines-avoid-c-arrays'  # Makes sense for some array, but especially for char arrays using std::array isn't a good solution.
+  - '-cppcoreguidelines-avoid-magic-numbers'  # Generally good advice, but there are too many places where this is useful, for instance in tests.
+  - '-cppcoreguidelines-pro-bounds-array-to-pointer-decay'  # When it is needed, it is needed.
+  - '-cppcoreguidelines-pro-bounds-pointer-arithmetic'  # Difficult to get by without it...
+  - '-cppcoreguidelines-pro-type-static-cast-downcast'  # This is needed and totally okay if we are sure about the types.
+  - '-cppcoreguidelines-pro-type-vararg'  # Too strict, sometimes calling vararg functions is necessary.
+  - '-fuchsia-*'  # Much too strict.
+  - '-google-runtime-references'  # This is just a matter of preference.
+  - '-hicpp-avoid-c-arrays'  # Makes sense for some array, but especially for char arrays using std::array isn't a good solution.
+  - '-hicpp-no-array-decay'
+  - '-hicpp-vararg'  # Too strict, sometimes calling vararg functions is necessary.
+  - '-llvm-prefer-static-over-anonymous-namespace'  # Matter of taste and we are not following this one.
+  - '-llvmlibc-*'  # Not applicable.
+  - '-misc-include-cleaner'  # Too many reports. Disabled for now.
+  - '-misc-no-recursion'  # Nothing wrong about recursion.
+  - '-modernize-avoid-c-arrays'  # Makes sense for some array, but especially for char arrays using std::array isn't a good solution.
+  - '-modernize-use-trailing-return-type'  # I am not quite that modern.
+  - '-readability-identifier-length'  # Sometimes short variable names are okay.
+  - '-readability-implicit-bool-conversion'  # I don't think this makes the code more readable.
+  - '-readability-magic-numbers'  # Generally good advice, but there are too many places where this is useful, for instance in tests.
+  - '-readability-use-anyofallof'  # Not necessarily more readable.
+# WarningsAsErrors: '*'
 ...
