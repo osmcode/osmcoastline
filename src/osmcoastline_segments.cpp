@@ -66,11 +66,11 @@ public:
         }
     }
 
-    int fd() const noexcept {
+    [[nodiscard]] int fd() const noexcept {
         return m_fd;
     }
 
-    std::size_t size() const {
+    [[nodiscard]] std::size_t size() const {
         struct stat s; // NOLINT(cppcoreguidelines-pro-type-member-init, hicpp-member-init)
         if (::fstat(m_fd, &s) != 0) {
             throw std::system_error{errno, std::system_category(), std::string{"Can't get file size for '"} + m_filename + "'"};

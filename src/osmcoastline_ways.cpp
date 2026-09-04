@@ -100,7 +100,7 @@ public:
         }
     }
 
-    double sum_length() const noexcept {
+    [[nodiscard]] double sum_length() const noexcept {
         return m_length;
     }
 
