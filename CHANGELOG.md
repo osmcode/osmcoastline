@@ -12,6 +12,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Coastlines mapped the wrong way round can end up as holes of a land polygon
+  they are not inside of ("Hole lies outside shell") or as holes inside
+  another hole ("Holes are nested"). This made the (possibly very large) land
+  polygon invalid. Those rings are now turned around into land polygons of
+  their own and reported in the `error_lines` table with the error
+  `direction` (#41).
+- Land polygons that are a single (invalid) polygon are now repaired in the
+  same way as polygons that are part of a multipolygon instead of being
+  dropped.
+
 
 ## [2.5.0] - 2026-01-18
 
