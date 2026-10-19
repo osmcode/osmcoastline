@@ -43,7 +43,7 @@ unsigned int CoastlineRing::check_locations(bool output_missing) {
     unsigned int missing_locations = 0;
 
     for (const auto& wn : m_way_node_list) {
-        if (!wn.location()) {
+        if (wn.location().is_undefined()) {
             ++missing_locations;
             if (output_missing) {
                 std::cerr << "Missing location of node " << wn.ref() << "\n";

@@ -314,9 +314,9 @@ unsigned int CoastlineRingCollection::check_for_intersections(OutputDatabase& ou
                     break;
                 }
                 if (y_range_overlap(s1, s2)) {
-                    const auto i = intersection(s1, s2);
-                    if (i) {
-                        intersections.push_back(i);
+                    const auto location_of_intersection = intersection(s1, s2);
+                    if (location_of_intersection.is_defined()) {
+                        intersections.push_back(location_of_intersection);
                     }
                 }
             }
